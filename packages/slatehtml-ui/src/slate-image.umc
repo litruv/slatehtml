@@ -1,0 +1,136 @@
+--- html ---
+<sizebox class="slate-image-box" fill>
+  <image class="slate-image-face"></image>
+</sizebox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok — painted media host */
+  overflow: hidden;
+}
+
+.slate-image-face {
+  display: block; /* umc-layout-ok */
+  --widget-background: var(--slate-image-placeholder, transparent);
+  background-size: var(--slate-image-fit, contain);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+self[failed] .slate-image-face {
+  --widget-background: #1e1f22;
+}
+
+--- script ---
+/**
+ * Image leaf with optional mxc resolve via globalThis.slateMediaResolve.
+ * Pass https/blob/data directly, or mxc:// when the host app provides a resolver.
+ */
+function parseSize(raw) {
+  const n = Number.parseFloat(raw);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+}
+
+function clearBrush(img) {
+  if (!img) return;
+  img.removeAttribute("brush");
+  img.style.removeProperty("--widget-brush");
+}
+
+async function resolveBrush(src, opts) {
+  const raw = String(src || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("blob:") || raw.startsWith("data:")) return raw;
+  if (/^https?:\/\//i.test(raw) && !raw.includes("/_matrix/")) return raw;
+  if (!raw.startsWith("mxc://")) return raw;
+  const resolve = globalThis.slateMediaResolve;
+  if (typeof resolve === "function") return (await resolve(raw, opts)) || "";
+  return "";
+}
+
+export default defineUmc({
+  tag: "slate-image",
+  attrs: {
+    src: "",
+    width: "",
+    height: "",
+    /** cover | contain */
+    fit: "contain",
+    /** crop | scale — thumbnail method when requesting mxc */
+    resize: "scale",
+    /** Download full media (no thumbnail) */
+    full: "",
+    alt: "",
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const img = el.querySelector(".slate-image-face");
+    const src = (attr("src", "") || "").trim();
+    const fit = attr("fit", "contain") === "cover" ? "cover" : "contain";
+    const resize = attr("resize", "scale") === "crop" ? "crop" : "scale";
+    const full = el.hasAttribute("full");
+    const w = parseSize(attr("width", ""));
+    const h = parseSize(attr("height", ""));
+    const loadKey = `${src}\0${w}\0${h}\0${fit}\0${resize}\0${full ? 1 : 0}`;
+    if (loadKey === el._loadKey) return;
+    el._loadKey = loadKey;
+
+    const gen = (el._loadGen = (el._loadGen || 0) + 1);
+
+    el.style.setProperty("--slate-image-fit", fit);
+    el.removeAttribute("failed");
+    el.toggleAttribute("empty", !src);
+    if (attr("alt", "")) el.setAttribute("aria-label", attr("alt", ""));
+
+    if (w) el.setAttribute("width", String(w));
+    if (h) el.setAttribute("height", String(h));
+    if (w && img) img.setAttribute("width", String(w));
+    if (h && img) img.setAttribute("height", String(h));
+
+    if (!src) {
+      clearBrush(img);
+      return;
+    }
+
+    if (!src.startsWith("mxc://")) {
+      img?.setAttribute("brush", src);
+      return;
+    }
+
+    const thumbOpts = full
+      ? {}
+      : {
+          width: w ? Math.min(w * 2, 800) : 800,
+          height: h ? Math.min(h * 2, 800) : 800,
+          resize,
+        };
+
+    clearBrush(img);
+    resolveBrush(src, thumbOpts)
+      .then((brush) => {
+        if (gen !== el._loadGen) return;
+        if (!brush) {
+          el.setAttribute("failed", "");
+          clearBrush(img);
+          return;
+        }
+        img?.setAttribute("brush", brush);
+      })
+      .catch((err) => {
+        console.warn("[slate-image]", src, err);
+        if (gen !== el._loadGen) return;
+        el.setAttribute("failed", "");
+        clearBrush(img);
+      });
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="12">
+  <slate-image
+    width="240"
+    height="160"
+    fit="contain"
+    src="https://i.pravatar.cc/400?img=15"
+  ></slate-image>
+</verticalbox>

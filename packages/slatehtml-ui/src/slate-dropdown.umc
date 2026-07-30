@@ -1,0 +1,331 @@
+--- html ---
+<canvaspanel clip="false" class="dropdown-root" min-width="180">
+  <horizontalbox class="dropdown-face" anchors="top-left top-right" valign="center" gap="8" padding="6 10">
+    <textblock class="dropdown-label" fill></textblock>
+    <textblock class="dropdown-chevron" text="▾"></textblock>
+  </horizontalbox>
+  <scrollbox class="dropdown-menu" data-content anchors="top-left top-right" top="0" gap="2" padding="4" max-height="220" hidden></scrollbox>
+</canvaspanel>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dropdown-root {
+  min-width: var(--dropdown-min-width, 180px);
+}
+
+slate-dropdown:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+slate-dropdown[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.dropdown-face {
+  box-sizing: border-box;
+  padding: var(--widget-padding, 6px 10px);
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  border-radius: var(--widget-radius, 4px);
+}
+
+self:hover:not([disabled]) .dropdown-face {
+  filter: brightness(1.08);
+}
+
+slate-dropdown .dropdown-label,
+slate-dropdown .dropdown-chevron {
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+slate-dropdown.is-placeholder .dropdown-label {
+  opacity: 0.6;
+}
+
+slate-dropdown .dropdown-chevron {
+  transition: transform 120ms ease;
+}
+
+slate-dropdown[open]:not([disabled]) .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  box-sizing: border-box;
+  max-height: var(--dropdown-max-height, 220px);
+  background: var(--dropdown-background, var(--widget-background, #1e1f22));
+  border: var(--dropdown-border, var(--widget-border, 1px solid currentColor));
+  border-radius: var(--widget-radius, 4px);
+  box-shadow: var(--dropdown-shadow, 0 8px 24px rgba(0, 0, 0, 0.35));
+}
+
+slate-dropdown .dropdown-option {
+  padding: 6px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+slate-dropdown .dropdown-option:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+slate-dropdown .dropdown-option.selected {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+slate-dropdown .dropdown-empty {
+  padding: 6px 10px;
+  opacity: 0.6;
+}
+
+--- script ---
+/**
+ * UMG-style ComboBox.
+ *
+ *   <slate-dropdown options="general, random, dev" selected="random"></slate-dropdown>
+ *   <slate-dropdown options="text:Text Channel, voice:Voice Channel"></slate-dropdown>
+ *   <slate-dropdown options="dms|Direct messages, !id:server|Space"></slate-dropdown>
+ *
+ * Public events (listen with a reference):
+ *   selectionchanged  detail { value, label, index }
+ *   opened / closed   detail { value }
+ *   clicked           native click, re-emitted
+ *
+ *   const dd = el.querySelector("slate-dropdown");
+ *   dd.addEventListener("selectionchanged", (e) => console.log(e.detail.value));
+ *
+ * Hyperscript:
+ *   tags["slate-dropdown"]({ options: "a, b", onSelectionchanged: (e) => … })
+ *
+ * Keyboard: Enter / Space toggle, ArrowUp / ArrowDown step, Escape closes.
+ */
+
+/** "a, b" → [{value,label}], "value|Label" or "value:Label" sets a distinct value.
+ * Prefer `|` when values may contain `:` (e.g. Matrix room ids). */
+function parseOptions(spec) {
+  return String(spec ?? "")
+    .split(/[,\n]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const pipe = entry.indexOf("|");
+      if (pipe >= 0) {
+        const value = entry.slice(0, pipe).trim();
+        const label = entry.slice(pipe + 1).trim();
+        return { value, label: label || value };
+      }
+      const split = entry.indexOf(":");
+      if (split < 0) return { value: entry, label: entry };
+      const value = entry.slice(0, split).trim();
+      const label = entry.slice(split + 1).trim();
+      return { value, label: label || value };
+    });
+}
+
+function optionRow(option) {
+  return {
+    tag: "textblock",
+    class: "dropdown-option",
+    "data-value": option.value,
+    role: "option",
+    text: option.label,
+  };
+}
+
+function paintSelection(el, value) {
+  for (const row of el.querySelectorAll(".dropdown-option")) {
+    const on = row.getAttribute("data-value") === value;
+    row.classList.toggle("selected", on);
+    row.setAttribute("aria-selected", on ? "true" : "false");
+  }
+}
+
+const MENU_GAP = 4;
+
+function syncDropdownLayout(el) {
+  const root = el.querySelector(".dropdown-root");
+  const face = el.querySelector(".dropdown-face");
+  const menu = el.querySelector(".dropdown-menu");
+  if (!root || !face) return;
+  const faceH = face.offsetHeight;
+  if (faceH > 0) root.setAttribute("height", String(faceH));
+  if (menu) menu.setAttribute("top", String(faceH + MENU_GAP));
+}
+
+function closeMenu(el, api) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  el.querySelector(".dropdown-menu")?.setAttribute("hidden", "");
+  if (el._onOutside) {
+    document.removeEventListener("pointerdown", el._onOutside, true);
+    el._onOutside = null;
+  }
+  syncDropdownLayout(el);
+  api.emit("closed", { value: api.attr("selected", "") });
+}
+
+function openMenu(el, api) {
+  if (el.hasAttribute("open") || el.hasAttribute("disabled")) return;
+  syncDropdownLayout(el);
+  el.setAttribute("open", "");
+  el.querySelector(".dropdown-menu")?.removeAttribute("hidden");
+  // Registered during the click that opened us; pointerdown already fired.
+  el._onOutside = (event) => {
+    if (!el.contains(event.target)) closeMenu(el, api);
+  };
+  document.addEventListener("pointerdown", el._onOutside, true);
+  api.emit("opened", { value: api.attr("selected", "") });
+}
+
+function select(el, api, value) {
+  const options = parseOptions(api.attr("options", ""));
+  const index = options.findIndex((o) => o.value === value);
+  if (index < 0 || value === api.attr("selected", "")) return;
+  el.setAttribute("selected", value);
+  api.emit("selectionchanged", { value, label: options[index].label, index });
+}
+
+function step(el, api, delta) {
+  const options = parseOptions(api.attr("options", ""));
+  if (!options.length) return;
+  const current = options.findIndex((o) => o.value === api.attr("selected", ""));
+  const next = current < 0 ? (delta > 0 ? 0 : options.length - 1) : current + delta;
+  const clamped = Math.min(options.length - 1, Math.max(0, next));
+  select(el, api, options[clamped].value);
+}
+
+export default defineUmc({
+  tag: "slate-dropdown",
+  attrs: {
+    options: "",
+    selected: "",
+    placeholder: "Select…",
+    empty: "No options",
+    open: "",
+    disabled: "",
+  },
+
+  events: { click: "clicked" },
+
+  PreConstruct(el) {
+    // Reconnecting re-stamps the template, so the built rows are gone.
+    el._optionsKey = null;
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "combobox");
+    el.setAttribute("aria-haspopup", "listbox");
+    el.querySelector(".dropdown-menu")?.setAttribute("role", "listbox");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (!el._layoutObs) {
+      const face = el.querySelector(".dropdown-face");
+      if (face) {
+        el._layoutObs = new ResizeObserver(() => syncDropdownLayout(el));
+        el._layoutObs.observe(face);
+      }
+    }
+
+    if (el._keysBound) return;
+    el._keysBound = true;
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      switch (event.key) {
+        case " ":
+        case "Enter":
+          event.preventDefault();
+          if (el.hasAttribute("open")) closeMenu(el, api);
+          else openMenu(el, api);
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          step(el, api, 1);
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          step(el, api, -1);
+          break;
+        case "Escape":
+          if (el.hasAttribute("open")) {
+            event.preventDefault();
+            closeMenu(el, api);
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  },
+
+  OnClicked(el, api, event) {
+    // installEvents passes the native click; fall back if called with the wrapper.
+    const native = event?.detail?.originalEvent ?? event;
+    const target = native?.target instanceof Element ? native.target : null;
+    const row = target?.closest?.(".dropdown-option");
+    if (row && el.contains(row)) {
+      select(el, api, row.getAttribute("data-value"));
+      closeMenu(el, api);
+      return;
+    }
+    if (el.hasAttribute("open")) closeMenu(el, api);
+    else openMenu(el, api);
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const options = parseOptions(attr("options", ""));
+
+    // Rows are keyed so selection/open changes don't rebuild the list.
+    const key = options.map((o) => `${o.value}\u0000${o.label}`).join("\u0001");
+    if (el._optionsKey !== key) {
+      el._optionsKey = key;
+      if (options.length) el.set(...options.map(optionRow));
+      else el.set({ tag: "textblock", class: "dropdown-empty", text: attr("empty", "No options") });
+    }
+
+    const current = options.find((o) => o.value === attr("selected", ""));
+    el.classList.toggle("is-placeholder", !current);
+    el.querySelector(".dropdown-label")?.setAttribute(
+      "text",
+      current ? current.label : attr("placeholder", "Select…")
+    );
+    paintSelection(el, current?.value ?? "");
+
+    const disabled = el.hasAttribute("disabled");
+    el.setAttribute("aria-expanded", el.hasAttribute("open") && !disabled ? "true" : "false");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.tabIndex = disabled ? -1 : 0;
+    syncDropdownLayout(el);
+  },
+
+  Destruct(el, api) {
+    closeMenu(el, api);
+    el._layoutObs?.disconnect();
+    el._layoutObs = null;
+    el._optionsKey = null;
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="420">
+  <slate-dropdown options="general, random, dev-log" selected="random"></slate-dropdown>
+  <slate-dropdown options="text:Text Channel, voice:Voice Channel"></slate-dropdown>
+  <slate-dropdown options="online, idle, dnd" selected="online" disabled></slate-dropdown>
+  <slate-dropdown></slate-dropdown>
+  <textblock kind="hint" text="Listen: dropdown.addEventListener('selectionchanged', …)"></textblock>
+</verticalbox>

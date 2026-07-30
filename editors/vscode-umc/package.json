@@ -1,0 +1,101 @@
+{
+  "name": "slatehtml-umc",
+  "displayName": "SlateHTML .umc",
+  "description": "Priority autocomplete, syntax highlighting, and live preview for SlateHTML .umc components.",
+  "version": "1.5.2",
+  "publisher": "slatehtml",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Programming Languages"],
+  "main": "./extension.js",
+  "activationEvents": ["onLanguage:umc"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "umc",
+        "aliases": ["SlateHTML UMC", "umc"],
+        "extensions": [".umc"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/umc.svg",
+          "dark": "./icons/umc.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "umc",
+        "scopeName": "source.umc",
+        "path": "./syntaxes/umc.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.html": "html",
+          "meta.embedded.block.css": "css",
+          "meta.embedded.block.js": "javascript"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "umc.showPreview",
+        "title": "Open Preview to the Side",
+        "category": "UMC",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "umc.openComponent",
+        "title": "Open UMC Component",
+        "category": "UMC"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "umc.showPreview",
+          "when": "resourceExtname == .umc",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "umc.showPreview",
+          "when": "resourceExtname == .umc",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "umc.showPreview",
+          "when": "resourceExtname == .umc"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "umc.showPreview",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "resourceExtname == .umc"
+      }
+    ],
+    "configuration": {
+      "title": "SlateHTML .umc",
+      "properties": {
+        "umc.preview.stylesheets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "markdownDescription": "Extra stylesheets to load in the `.umc` preview, resolved against the workspace folder (then the component folder). Useful for app themes, e.g. `example/discord.css`.",
+          "scope": "resource"
+        },
+        "umc.preview.imports": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "markdownDescription": "JS modules loaded before the components in the `.umc` preview. Use this for widgets still defined in plain `.js`. The preview follows `.umc` HTML tags and `{ tag: \"…\" }` script specs automatically.",
+          "scope": "resource"
+        }
+      }
+    }
+  }
+}

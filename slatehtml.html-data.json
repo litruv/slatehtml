@@ -1,0 +1,462 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode-html-languageservice/main/docs/customData.schema.json",
+  "version": 1.1,
+  "valueSets": [
+    {
+      "name": "halign",
+      "values": [
+        { "name": "left", "description": "Align / justify toward start" },
+        { "name": "center" },
+        { "name": "right", "description": "Align / justify toward end" },
+        { "name": "fill", "description": "Stretch (or space-between on horizontal justify)" }
+      ]
+    },
+    {
+      "name": "valign",
+      "values": [
+        { "name": "top" },
+        { "name": "center" },
+        { "name": "bottom" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "anchors",
+      "values": [
+        { "name": "top-left" },
+        { "name": "top" },
+        { "name": "top-right" },
+        { "name": "left" },
+        { "name": "center" },
+        { "name": "right" },
+        { "name": "bottom-left" },
+        { "name": "bottom" },
+        { "name": "bottom-right" },
+        { "name": "h-fill", "description": "Stretch horizontally, centered vertically" },
+        { "name": "v-fill", "description": "Stretch vertically, centered horizontally" },
+        { "name": "fill", "description": "Stretch to all edges (0,0,1,1)" },
+        { "name": "stretch", "description": "Alias of fill" }
+      ]
+    },
+    {
+      "name": "orientation",
+      "values": [
+        { "name": "vertical" },
+        { "name": "horizontal" }
+      ]
+    },
+    {
+      "name": "stretch",
+      "values": [
+        { "name": "fit", "description": "Scale uniformly to fit (default)" },
+        { "name": "fill", "description": "Scale uniformly to cover" },
+        { "name": "stretch", "description": "Non-uniform scale to fill" }
+      ]
+    },
+    {
+      "name": "border-kind",
+      "values": [
+        { "name": "panel" },
+        { "name": "chip" },
+        { "name": "hud" },
+        { "name": "slot" }
+      ]
+    },
+    {
+      "name": "text-kind",
+      "values": [
+        { "name": "title" },
+        { "name": "subtitle" },
+        { "name": "label" },
+        { "name": "hint" },
+        { "name": "hud" },
+        { "name": "mono" }
+      ]
+    }
+  ],
+  "globalAttributes": [
+    {
+      "name": "fill",
+      "description": "Flex fill weight in a box slot. Bare `fill` = 1; `fill=\"2\"` grows twice as much.",
+      "values": [
+        { "name": "1" },
+        { "name": "2" },
+        { "name": "3" }
+      ]
+    },
+    {
+      "name": "padding",
+      "description": "Widget padding (px if unitless). Sets `--widget-padding`."
+    },
+    {
+      "name": "gap",
+      "description": "Gap between children (px if unitless). Sets `--widget-gap`."
+    },
+    {
+      "name": "width",
+      "description": "Width (px if unitless)."
+    },
+    {
+      "name": "height",
+      "description": "Height (px if unitless)."
+    },
+    {
+      "name": "min-width",
+      "description": "Min width (px if unitless)."
+    },
+    {
+      "name": "max-width",
+      "description": "Max width (px if unitless)."
+    },
+    {
+      "name": "min-height",
+      "description": "Min height (px if unitless)."
+    },
+    {
+      "name": "max-height",
+      "description": "Max height (px if unitless)."
+    },
+    {
+      "name": "halign",
+      "description": "Horizontal alignment (box justify/align, or overlay child).",
+      "valueSet": "halign"
+    },
+    {
+      "name": "valign",
+      "description": "Vertical alignment (box justify/align, or overlay child).",
+      "valueSet": "valign"
+    },
+    {
+      "name": "anchors",
+      "description": "Canvaspanel child anchors (UE-style). Named presets or `minX,minY,maxX,maxY` in 0–1.",
+      "valueSet": "anchors"
+    },
+    {
+      "name": "top",
+      "description": "Canvas offset from top (px if unitless)."
+    },
+    {
+      "name": "left",
+      "description": "Canvas offset from left (px if unitless)."
+    },
+    {
+      "name": "right",
+      "description": "Canvas offset from right (px if unitless)."
+    },
+    {
+      "name": "bottom",
+      "description": "Canvas offset from bottom (px if unitless)."
+    },
+    {
+      "name": "background",
+      "description": "Sets `--widget-background` (colors, etc.)."
+    },
+    {
+      "name": "border-color",
+      "description": "Sets `--widget-border` to `1px solid <color>`."
+    },
+    {
+      "name": "kind",
+      "description": "Optional style variant hook used by demo / theme CSS."
+    }
+  ],
+  "tags": [
+    {
+      "name": "horizontalbox",
+      "description": "UMG Horizontal Box — lays out children in a row (flex).",
+      "attributes": [
+        { "name": "halign", "valueSet": "halign" },
+        { "name": "valign", "valueSet": "valign" },
+        { "name": "gap" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ],
+      "references": [
+        {
+          "name": "UE Horizontal Box",
+          "url": "https://dev.epicgames.com/documentation/en-us/unreal-engine/widget-type-reference-in-unreal-engine"
+        }
+      ]
+    },
+    {
+      "name": "verticalbox",
+      "description": "UMG Vertical Box — lays out children in a column (flex).",
+      "attributes": [
+        { "name": "halign", "valueSet": "halign" },
+        { "name": "valign", "valueSet": "valign" },
+        { "name": "gap" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "wrapbox",
+      "description": "UMG Wrap Box — horizontal flow that wraps to the next line.",
+      "attributes": [
+        { "name": "halign", "valueSet": "halign" },
+        { "name": "valign", "valueSet": "valign" },
+        { "name": "gap" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "overlay",
+      "description": "UMG Overlay — stacks children in one cell. Use child `halign` / `valign`. Last child paints on top.",
+      "attributes": [
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "canvaspanel",
+      "description": "UMG Canvas Panel — absolute children with `anchors` and `top`/`left`/`right`/`bottom` offsets. (`<canvas>` is reserved by HTML.)",
+      "attributes": [
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "scrollbox",
+      "description": "UMG Scroll Box — clips to allocated size and scrolls overflow. Needs `height` or a `fill` slot.",
+      "attributes": [
+        { "name": "orientation", "valueSet": "orientation" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "sizebox",
+      "description": "UMG Size Box — forces child to the box size.",
+      "attributes": [
+        { "name": "width" },
+        { "name": "height" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "scalebox",
+      "description": "UMG Scale Box — scales the first child to fit the box.",
+      "attributes": [
+        { "name": "stretch", "valueSet": "stretch" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "gridpanel",
+      "description": "UMG Grid Panel — CSS grid of evenly divided cells.",
+      "attributes": [
+        {
+          "name": "columns",
+          "description": "Number of columns (sets `--widget-columns`)."
+        },
+        {
+          "name": "rows",
+          "description": "Optional number of equal rows."
+        },
+        { "name": "gap" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "uniformgridpanel",
+      "description": "UMG Uniform Grid Panel — equal `1fr` columns and rows.",
+      "attributes": [
+        {
+          "name": "columns",
+          "description": "Number of equal columns (default 2)."
+        },
+        {
+          "name": "rows",
+          "description": "Number of equal rows (default 2)."
+        },
+        { "name": "gap" },
+        { "name": "padding" },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "spacer",
+      "description": "UMG Spacer — flexible empty space that absorbs leftover room in a box.",
+      "attributes": []
+    },
+    {
+      "name": "border",
+      "description": "UMG Border — chrome + padding around content. Flex column so a `[fill]` child can take remaining height.",
+      "attributes": [
+        { "name": "padding" },
+        { "name": "fill" },
+        { "name": "background" },
+        { "name": "border-color" },
+        { "name": "kind", "valueSet": "border-kind" }
+      ]
+    },
+    {
+      "name": "safezone",
+      "description": "UMG Safe Zone — pads with `env(safe-area-inset-*)` for notches / home indicators.",
+      "attributes": [
+        {
+          "name": "pad",
+          "description": "Multiplier for safe-area insets (default 1)."
+        },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "widgetswitcher",
+      "description": "UMG Widget Switcher — shows the child whose `page` (or `data-page`) matches `active`.",
+      "attributes": [
+        {
+          "name": "active",
+          "description": "Id of the visible child page."
+        },
+        { "name": "fill" }
+      ]
+    },
+    {
+      "name": "namedslot",
+      "description": "UMG Named Slot — light-DOM placeholder for injected content. Use `name` to identify the slot.",
+      "attributes": [
+        {
+          "name": "name",
+          "description": "Slot name for content targeting."
+        }
+      ]
+    },
+    {
+      "name": "retainerbox",
+      "description": "UMG Retainer Box — API-parity passthrough (no offscreen render cache in the browser).",
+      "attributes": [{ "name": "fill" }]
+    },
+    {
+      "name": "invalidationbox",
+      "description": "UMG Invalidation Box — API-parity passthrough (no layout/paint cache in the browser).",
+      "attributes": [{ "name": "fill" }]
+    },
+    {
+      "name": "backgroundblur",
+      "description": "UMG Background Blur — empty (or sparse) layer that blurs content behind it via `backdrop-filter`. Stack under chrome in an `overlay`; do not wrap the modal content.",
+      "attributes": [
+        {
+          "name": "blur",
+          "description": "Blur radius (unitless → px), sets `--widget-blur`."
+        },
+        { "name": "padding" },
+        { "name": "fill" },
+        { "name": "background" },
+        { "name": "border-color" },
+        { "name": "kind", "valueSet": "border-kind" }
+      ]
+    },
+    {
+      "name": "textblock",
+      "description": "UMG Text Block — static text. Prefer `text=\"...\"` attribute.",
+      "attributes": [
+        {
+          "name": "text",
+          "description": "Text content (applied by widget.js)."
+        },
+        { "name": "kind", "valueSet": "text-kind" }
+      ]
+    },
+    {
+      "name": "image",
+      "description": "UMG Image — brush / tint rectangle.",
+      "attributes": [
+        {
+          "name": "brush",
+          "description": "Image URL or CSS image value (`url(...)`, gradients)."
+        },
+        {
+          "name": "tint",
+          "description": "Background / tint color."
+        },
+        { "name": "width" },
+        { "name": "height" }
+      ]
+    },
+    {
+      "name": "progressbar",
+      "description": "UMG Progress Bar — display-only bar driven by `percent` (0–100).",
+      "attributes": [
+        {
+          "name": "percent",
+          "description": "Fill amount 0–100."
+        },
+        { "name": "width" },
+        { "name": "height" }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "description": "UMG Check Box — click / Space / Enter toggles `checked`. Fires `changed`.",
+      "attributes": [
+        {
+          "name": "checked",
+          "description": "Boolean attribute — present when checked.",
+          "valueSet": "v"
+        },
+        {
+          "name": "disabled",
+          "description": "Disables interaction.",
+          "valueSet": "v"
+        }
+      ]
+    },
+    {
+      "name": "slider",
+      "description": "UMG Slider — drag or arrows to set `percent` (0–100). Fires `percentchanged`.",
+      "attributes": [
+        {
+          "name": "percent",
+          "description": "Value 0–100."
+        },
+        {
+          "name": "disabled",
+          "valueSet": "v"
+        },
+        { "name": "width" }
+      ]
+    },
+    {
+      "name": "editabletext",
+      "description": "UMG Editable Text — contenteditable. Syncs `text`. Enter commits (unless `multiline`).",
+      "attributes": [
+        {
+          "name": "text",
+          "description": "Current text value."
+        },
+        {
+          "name": "readonly",
+          "valueSet": "v"
+        },
+        {
+          "name": "multiline",
+          "description": "Allow newlines; Enter does not commit.",
+          "valueSet": "v"
+        },
+        { "name": "width" }
+      ]
+    },
+    {
+      "name": "button",
+      "description": "Native button. Add the `widget` attribute for UMG-style chrome from widget.css.",
+      "attributes": [
+        {
+          "name": "widget",
+          "description": "Enable SlateHTML button styling.",
+          "valueSet": "v"
+        },
+        {
+          "name": "type",
+          "values": [
+            { "name": "button" },
+            { "name": "submit" },
+            { "name": "reset" }
+          ]
+        }
+      ]
+    }
+  ]
+}

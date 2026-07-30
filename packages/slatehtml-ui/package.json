@@ -1,0 +1,52 @@
+{
+  "name": "slatehtml-ui",
+  "version": "1.0.0",
+  "description": "Reusable SlateHTML UI widgets (button, dropdown, pickers, …)",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./button": "./src/slate-button.umc",
+    "./dropdown": "./src/slate-dropdown.umc",
+    "./combobox": "./src/slate-combobox.umc",
+    "./icon": "./src/slate-icon.umc",
+    "./image": "./src/slate-image.umc",
+    "./media": "./src/slate-media.umc",
+    "./shadowbox": "./src/slate-shadowbox.umc",
+    "./avatar-tile": "./src/slate-avatar-tile.umc",
+    "./popup-anchor": "./src/popup-anchor.umc",
+    "./scope-picker": "./src/slate-scope-picker.umc",
+    "./scope-picker-option": "./src/scope-picker-option.umc",
+    "./server-picker": "./src/slate-server-picker.umc",
+    "./accent": "./src/accent.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "sideEffects": [
+    "./src/index.js",
+    "**/*.umc",
+    "**/*.css",
+    "**/*.js"
+  ],
+  "peerDependencies": {
+    "slatehtml": "*"
+  },
+  "devDependencies": {
+    "slatehtml": "file:../.."
+  },
+  "dependencies": {
+    "lucide": "^1.27.0"
+  },
+  "keywords": [
+    "slatehtml",
+    "umc",
+    "widgets",
+    "ui",
+    "components"
+  ],
+  "license": "MIT"
+}

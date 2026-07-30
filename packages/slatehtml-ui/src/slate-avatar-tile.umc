@@ -1,0 +1,185 @@
+--- html ---
+<border class="avatar-tile" width="28" height="28">
+  <overlay fill>
+    <slate-image class="avatar-tile-image" fit="cover" resize="crop" halign="fill" valign="fill" hidden></slate-image>
+    <textblock class="avatar-tile-icon" halign="center" valign="center"></textblock>
+  </overlay>
+</border>
+
+--- style ---
+.avatar-tile {
+  --widget-border: none;
+  --widget-padding: 0;
+  --avatar-radius: 4px;
+  border-radius: var(--avatar-radius);
+  overflow: hidden;
+  background: transparent;
+}
+
+self[shape="circle"] {
+  --avatar-radius: 50%;
+}
+
+self[show-bg] .avatar-tile {
+  background: var(--avatar-accent, var(--blurple, #5865f2));
+}
+
+.avatar-tile-image {
+  border-radius: inherit;
+  --slate-image-placeholder: transparent;
+}
+
+.avatar-tile-image[hidden] {
+  display: none;
+}
+
+.avatar-tile-icon {
+  font-size: max(10px, calc(var(--avatar-size, 28) * 0.38px));
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+self[show-bg] .avatar-tile-icon[hidden] {
+  display: none;
+}
+
+--- script ---
+import { scopeAccent } from "./accent.js";
+
+const DEFAULT_SIZE = 28;
+const PRESET_ICONS = {
+  dms: "@",
+  rooms: "·",
+};
+
+function tileImageBrush(el) {
+  return el.querySelector(".avatar-tile-image .slate-image-face")?.getAttribute("brush") || "";
+}
+
+function fallbackIcon(icon, label, value) {
+  const explicit = (icon || "").trim();
+  if (explicit) return explicit;
+  if (value && PRESET_ICONS[value]) return PRESET_ICONS[value];
+  const text = String(label || value || "").trim();
+  if (!text) return "?";
+  return text.slice(0, 1).toUpperCase();
+}
+
+function paintTileChrome(el) {
+  const tile = el.querySelector(".avatar-tile");
+  const iconNode = el.querySelector(".avatar-tile-icon");
+  const imageHost = el.querySelector(".avatar-tile-image");
+  const avatar = (el.getAttribute("avatar") || "").trim();
+  const value = el.getAttribute("value") || "";
+  const label = el.getAttribute("label") || "";
+  const accent =
+    (el.getAttribute("accent") || "").trim() || scopeAccent(value, label);
+
+  tile?.style.setProperty("--avatar-accent", accent);
+
+  const hasPicture = Boolean(tileImageBrush(el));
+  const failed = imageHost?.hasAttribute("failed");
+  const showFallbackChrome = !avatar || failed;
+
+  el.toggleAttribute("show-bg", showFallbackChrome);
+  if (showFallbackChrome) iconNode?.removeAttribute("hidden");
+  else iconNode?.setAttribute("hidden", "");
+}
+
+function watchTileImage(el) {
+  const imageHost = el.querySelector(".avatar-tile-image");
+  if (!imageHost || el._tileObs) return;
+
+  const paint = () => paintTileChrome(el);
+  el._tileObs = new MutationObserver(paint);
+  el._tileObs.observe(imageHost, {
+    attributes: true,
+    attributeFilter: ["failed", "empty", "hidden"],
+  });
+  const inner = imageHost.querySelector(".slate-image-face");
+  if (inner) {
+    el._tileObs.observe(inner, { attributes: true, attributeFilter: ["brush"] });
+  }
+}
+
+export default defineUmc({
+  tag: "slate-avatar-tile",
+  attrs: {
+    shape: "square",
+    size: "28",
+    avatar: "",
+    icon: "",
+    label: "",
+    value: "",
+    accent: "",
+  },
+
+  Construct(el) {
+    watchTileImage(el);
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const shape = attr("shape", "square") === "circle" ? "circle" : "square";
+    const label = attr("label", "");
+    const value = attr("value", "");
+    const icon = attr("icon", "");
+    const avatar = (attr("avatar", "") || "").trim();
+    const accent = (attr("accent", "") || "").trim();
+    const size = Math.round(Number.parseFloat(attr("size", "28")) || DEFAULT_SIZE);
+
+    el.setAttribute("shape", shape);
+    if (accent) el.setAttribute("accent", accent);
+    else el.removeAttribute("accent");
+    if (value) el.setAttribute("value", value);
+    else el.removeAttribute("value");
+
+    const tile = el.querySelector(".avatar-tile");
+    tile?.style.setProperty("--avatar-size", String(size));
+    tile?.setAttribute("width", String(size));
+    tile?.setAttribute("height", String(size));
+
+    el.querySelector(".avatar-tile-icon")?.setAttribute(
+      "text",
+      fallbackIcon(icon, label, value)
+    );
+
+    const image = el.querySelector(".avatar-tile-image");
+    if (avatar && image) {
+      image.setAttribute("width", String(size));
+      image.setAttribute("height", String(size));
+      image.setAttribute("src", avatar);
+      image.removeAttribute("hidden");
+    } else if (image) {
+      image.removeAttribute("src");
+      image.setAttribute("empty", "");
+      image.setAttribute("hidden", "");
+    }
+
+    watchTileImage(el);
+    paintTileChrome(el);
+  },
+
+  Destruct(el) {
+    el._tileObs?.disconnect();
+    el._tileObs = null;
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="280">
+  <horizontalbox gap="10" valign="center">
+    <slate-avatar-tile shape="square" size="32" icon="@" label="Direct messages" accent="hsl(145 45% 38%)"></slate-avatar-tile>
+    <slate-avatar-tile shape="square" size="32" icon="·" label="Rooms" accent="hsl(235 35% 45%)"></slate-avatar-tile>
+    <slate-avatar-tile shape="square" size="32" label="General" accent="#5865f2"></slate-avatar-tile>
+  </horizontalbox>
+  <horizontalbox gap="10" valign="center">
+    <slate-avatar-tile
+      shape="square"
+      size="40"
+      label="Photo"
+      avatar="https://matrix.org/favicon.ico"
+    ></slate-avatar-tile>
+    <slate-avatar-tile shape="circle" size="40" label="Round" accent="#57f287"></slate-avatar-tile>
+  </horizontalbox>
+</verticalbox>

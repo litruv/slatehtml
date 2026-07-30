@@ -1,0 +1,451 @@
+--- html ---
+<overlay class="media-stage" fill>
+  <video class="media-video" halign="fill" valign="fill" playsinline preload="auto"></video>
+  <img class="media-image" halign="fill" valign="fill" alt="" hidden />
+  <verticalbox class="media-bar-wrap" halign="fill" valign="bottom">
+    <horizontalbox class="media-bar" gap="8" padding="8 10" valign="center" halign="fill">
+      <slate-icon class="media-play" name="play" size="16"></slate-icon>
+      <textblock class="media-time" data-time text="0:00 / 0:00"></textblock>
+      <border class="media-scrub" fill padding="0" valign="center">
+        <input class="media-range" type="range" min="0" max="1000" value="0" step="1" />
+      </border>
+      <slate-icon class="media-fs" name="maximize" size="16"></slate-icon>
+    </horizontalbox>
+  </verticalbox>
+</overlay>
+
+--- style ---
+self {
+  overflow: hidden;
+  background: transparent;
+  border-radius: var(--widget-radius, 8px);
+  color: #fff;
+}
+
+.media-stage {
+  --widget-padding: 0;
+}
+
+.media-image[hidden],
+.media-video[hidden] {
+  display: none !important;
+}
+
+.media-bar-wrap {
+  opacity: 0;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+}
+
+.media-bar {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+}
+
+self:hover .media-bar-wrap,
+self:focus-within .media-bar-wrap,
+self[paused] .media-bar-wrap,
+self[kind="image"] .media-bar-wrap {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+self[kind="image"] .media-play,
+self[kind="image"] .media-scrub,
+self[kind="image"] .media-time {
+  display: none !important;
+}
+
+.media-play,
+.media-fs {
+  padding: 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: pointer;
+}
+
+.media-time {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.media-scrub {
+  --widget-background: transparent;
+  --widget-border: none;
+}
+
+.media-range {
+  display: block;
+  accent-color: var(--blurple, #5865f2);
+  cursor: pointer;
+}
+
+self:fullscreen,
+self:-webkit-full-screen {
+  background: #000;
+}
+
+self:fullscreen .media-video,
+self:-webkit-full-screen .media-video {
+  background: #000;
+}
+
+--- script ---
+/**
+ * Inline media player with mxc → blob resolve (same path as matrix-image).
+ *
+ *   <slate-media src="mxc://…" kind="video"></slate-media>
+ *   <slate-media src="https://…" kind="image"></slate-media>
+ *
+ * Events: play, pause, timeupdate, ended, expandrequested { src, kind },
+ *         aspectchange { width, height }
+ *
+ * Silent clips under 10MB (bytes attr or blob size) muted-autoplay when no audio track.
+ */
+function formatTime(sec) {
+  if (!Number.isFinite(sec) || sec < 0) return "0:00";
+  const s = Math.floor(sec % 60);
+  const m = Math.floor(sec / 60) % 60;
+  const h = Math.floor(sec / 3600);
+  const pad = (n) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+function videoEl(el) {
+  return el.querySelector("video.media-video");
+}
+
+function imageEl(el) {
+  return el.querySelector("img.media-image");
+}
+
+function paintPlaying(el) {
+  const video = videoEl(el);
+  const paused = !video || video.paused;
+  el.toggleAttribute("paused", paused);
+  el.querySelector(".media-play")?.setAttribute("name", paused ? "play" : "pause");
+}
+
+function paintTime(el) {
+  const video = videoEl(el);
+  const cur = video?.currentTime || 0;
+  const dur = video?.duration;
+  const label = el.querySelector("[data-time]");
+  const range = el.querySelector(".media-range");
+  const durText = Number.isFinite(dur) ? formatTime(dur) : "0:00";
+  label?.setAttribute("text", `${formatTime(cur)} / ${durText}`);
+  if (range && Number.isFinite(dur) && dur > 0 && !el._scrubbing) {
+    range.value = String(Math.round((cur / dur) * 1000));
+  }
+}
+
+function paintAspect(el, video, api) {
+  const w = video?.videoWidth || 0;
+  const h = video?.videoHeight || 0;
+  if (w > 0 && h > 0) {
+    const stage = el.querySelector(".media-stage");
+    if (stage) {
+      stage.setAttribute("width", String(w));
+      stage.setAttribute("height", String(h));
+    }
+    api?.emit?.("aspectchange", { width: w, height: h });
+  }
+}
+
+const SILENT_AUTOPLAY_MAX_BYTES = 10 * 1024 * 1024;
+
+/** True when the file clearly has an audio track. Unknown → assume yes (no autoplay). */
+function videoHasAudio(video) {
+  if (!video) return true;
+  if (typeof video.mozHasAudio === "boolean") return video.mozHasAudio;
+  if (video.audioTracks && typeof video.audioTracks.length === "number") {
+    return video.audioTracks.length > 0;
+  }
+  try {
+    if (typeof video.captureStream === "function") {
+      const stream = video.captureStream();
+      const n = stream.getAudioTracks?.().length ?? 0;
+      for (const t of stream.getTracks?.() || []) t.stop?.();
+      return n > 0;
+    }
+  } catch {
+    /* captureStream unavailable until enough data */
+  }
+  return true;
+}
+
+async function resolveByteLength(video, reported) {
+  const n = Number(reported) || 0;
+  if (n > 0) return n;
+  const src = video?.currentSrc || video?.src || "";
+  if (!src || (!src.startsWith("blob:") && !src.startsWith("http"))) return 0;
+  try {
+    const blob = await fetch(src).then((r) => r.blob());
+    return blob.size || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Muted autoplay for silent clips under 10MB (browser autoplay policy). */
+async function maybeAutoplaySilent(el, video) {
+  if (!video || el.getAttribute("kind") === "image") return;
+  if (el._silentAutoTried) return;
+  const gen = el._loadGen || 0;
+  const bytes = await resolveByteLength(video, el.getAttribute("bytes"));
+  if (gen !== el._loadGen) return;
+  if (bytes <= 0 || bytes > SILENT_AUTOPLAY_MAX_BYTES) return;
+  if (videoHasAudio(video)) return;
+  el._silentAutoTried = true;
+  el.setAttribute("muted", "");
+  el.setAttribute("autoplay", "");
+  el.setAttribute("loop", "");
+  video.muted = true;
+  video.autoplay = true;
+  video.loop = true;
+  try {
+    await video.play();
+  } catch {
+    /* autoplay blocked — leave muted attrs for a later gesture */
+  }
+}
+
+/** Seek a hair forward so browsers paint frame 0 while paused. */
+function showFirstFrame(video) {
+  if (!video || !video.paused) return;
+  if (video.readyState < 2) return;
+  try {
+    if (video.currentTime < 0.05) {
+      const onSeek = () => {
+        video.removeEventListener("seeked", onSeek);
+        if (video.paused && video.currentTime > 0) {
+          // Stay on the decoded frame; no need to rewind to exact 0.
+        }
+      };
+      video.addEventListener("seeked", onSeek, { once: true });
+      video.currentTime = 0.001;
+    }
+  } catch {
+    /* ignore seek errors on some codecs */
+  }
+}
+
+async function resolveSrc(url, opts = {}) {
+  const raw = String(url || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("blob:") || raw.startsWith("data:")) return raw;
+  if (/^https?:\/\//i.test(raw) && !raw.includes("/_matrix/")) return raw;
+  if (!raw.startsWith("mxc://")) return raw;
+  const resolve = globalThis.slateMediaResolve;
+  if (typeof resolve === "function") return (await resolve(raw, opts)) || "";
+  return "";
+}
+
+function isFullscreen(el) {
+  return document.fullscreenElement === el || document.webkitFullscreenElement === el;
+}
+
+async function toggleFullscreen(el, api) {
+  try {
+    if (isFullscreen(el)) {
+      await (document.exitFullscreen?.() || document.webkitExitFullscreen?.());
+    } else {
+      await (el.requestFullscreen?.() || el.webkitRequestFullscreen?.());
+    }
+  } catch (err) {
+    console.warn("[slate-media] fullscreen failed", err);
+    api.emit("expandrequested", {
+      src: el.getAttribute("src") || "",
+      kind: el.getAttribute("kind") || "video",
+    });
+  }
+  el.querySelector(".media-fs")?.setAttribute(
+    "name",
+    isFullscreen(el) ? "minimize" : "maximize"
+  );
+}
+
+export default defineUmc({
+  tag: "slate-media",
+  attrs: {
+    src: "",
+    poster: "",
+    kind: "video",
+    autoplay: "",
+    muted: "",
+    loop: "",
+    bytes: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    const video = videoEl(el);
+    video?.addEventListener("play", () => {
+      paintPlaying(el);
+      api.emit("play", {});
+    });
+    video?.addEventListener("pause", () => {
+      paintPlaying(el);
+      api.emit("pause", {});
+    });
+    video?.addEventListener("timeupdate", () => {
+      paintTime(el);
+      api.emit("timeupdate", {
+        currentTime: video.currentTime,
+        duration: video.duration,
+      });
+    });
+    video?.addEventListener("loadedmetadata", () => {
+      paintAspect(el, video, api);
+      paintTime(el);
+      showFirstFrame(video);
+      maybeAutoplaySilent(el, video);
+    });
+    video?.addEventListener("loadeddata", () => {
+      paintAspect(el, video, api);
+      showFirstFrame(video);
+      maybeAutoplaySilent(el, video);
+    });
+    video?.addEventListener("ended", () => {
+      paintPlaying(el);
+      api.emit("ended", {});
+    });
+
+    el.addEventListener("click", (event) => {
+      if (el.getAttribute("kind") === "image") return;
+      const fs = event.target?.closest?.(".media-fs");
+      if (fs && el.contains(fs)) {
+        event.preventDefault();
+        toggleFullscreen(el, api);
+        return;
+      }
+      // Scrubber / range — don't steal seeking clicks.
+      if (event.target?.closest?.(".media-scrub, .media-range")) return;
+      event.preventDefault();
+      if (!video) return;
+      if (video.paused) video.play()?.catch(() => {});
+      else video.pause();
+    });
+
+    const range = el.querySelector(".media-range");
+    range?.addEventListener("pointerdown", () => {
+      el._scrubbing = true;
+    });
+    range?.addEventListener("pointerup", () => {
+      el._scrubbing = false;
+    });
+    range?.addEventListener("input", () => {
+      if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+      video.currentTime = (Number(range.value) / 1000) * video.duration;
+      paintTime(el);
+    });
+
+    const onFs = () => {
+      el.querySelector(".media-fs")?.setAttribute(
+        "name",
+        isFullscreen(el) ? "minimize" : "maximize"
+      );
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("webkitfullscreenchange", onFs);
+    el._onFs = onFs;
+
+    paintPlaying(el);
+  },
+
+  Destroyed(el) {
+    if (el._onFs) {
+      document.removeEventListener("fullscreenchange", el._onFs);
+      document.removeEventListener("webkitfullscreenchange", el._onFs);
+      el._onFs = null;
+    }
+    el._bound = false;
+  },
+
+  async SynchronizeProperties(el, { attr }) {
+    const kind = attr("kind", "video") === "image" ? "image" : "video";
+    const src = (attr("src", "") || "").trim();
+    const poster = (attr("poster", "") || "").trim();
+    const video = videoEl(el);
+    const image = imageEl(el);
+    const gen = (el._loadGen = (el._loadGen || 0) + 1);
+
+    el.toggleAttribute("empty", !src);
+    el.setAttribute("kind", kind);
+    video?.toggleAttribute("hidden", kind !== "video");
+    image?.toggleAttribute("hidden", kind !== "image");
+    if (video) {
+      video.autoplay = el.hasAttribute("autoplay");
+      video.muted = el.hasAttribute("muted");
+      video.loop = el.hasAttribute("loop");
+      video.controls = false;
+      video.preload = "auto";
+    }
+
+    if (!src) {
+      el._silentAutoTried = false;
+      if (video) {
+        video.removeAttribute("src");
+        video.removeAttribute("poster");
+        video.load?.();
+      }
+      if (image) image.removeAttribute("src");
+      return;
+    }
+
+    try {
+      const resolved = await resolveSrc(
+        src,
+        kind === "image" ? { width: 1200, height: 1200, resize: "scale" } : {}
+      );
+      if (gen !== el._loadGen) return;
+      if (!resolved) {
+        el.setAttribute("failed", "");
+        return;
+      }
+      el.removeAttribute("failed");
+      if (kind === "image") {
+        if (image) image.src = resolved;
+      } else if (video) {
+        if (poster) {
+          const posterUrl = await resolveSrc(poster, {
+            width: 640,
+            height: 360,
+            resize: "scale",
+          });
+          if (gen !== el._loadGen) return;
+          if (posterUrl) video.poster = posterUrl;
+        } else {
+          video.removeAttribute("poster");
+        }
+        if (video.getAttribute("src") !== resolved) {
+          el._silentAutoTried = false;
+          video.src = resolved;
+          video.load();
+        } else {
+          maybeAutoplaySilent(el, video);
+        }
+        showFirstFrame(video);
+      }
+      paintPlaying(el);
+      paintTime(el);
+    } catch (err) {
+      console.warn("[slate-media] resolve failed", src, err);
+      if (gen !== el._loadGen) return;
+      el.setAttribute("failed", "");
+    }
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="420">
+  <slate-media
+    kind="video"
+    src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+  ></slate-media>
+  <textblock kind="hint" text="Play / scrub / fullscreen. mxc:// resolves to blob."></textblock>
+</verticalbox>

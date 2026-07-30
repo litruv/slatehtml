@@ -1,0 +1,58 @@
+{
+  "name": "slatehtml",
+  "version": "1.0.0",
+  "description": "UMG-style layout panels and .umc UserWidgets for plain HTML",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "main": "./index.js",
+  "module": "./index.js",
+  "style": "./widget.css",
+  "exports": {
+    ".": "./index.js",
+    "./css": "./widget.css",
+    "./slate.css": "./widget.css",
+    "./slate.js": "./widget.js",
+    "./widget.css": "./widget.css",
+    "./widget.js": "./widget.js",
+    "./umc": "./umc/index.js",
+    "./umc/vite": "./umc/vite.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "inject-styles.js",
+    "widget.js",
+    "widget.css",
+    "umc",
+    "README.md",
+    "docs"
+  ],
+  "sideEffects": [
+    "./index.js",
+    "./inject-styles.js",
+    "./widget.js",
+    "./widget.css",
+    "**/*.umc",
+    "**/*.css"
+  ],
+  "scripts": {
+    "demo": "npx --yes serve .",
+    "umc:link-vscode": "node editors/vscode-umc/link.mjs",
+    "umc:unlink-vscode": "node editors/vscode-umc/link.mjs --unlink",
+    "test": "node --import ./test/dom-shim.mjs test/parse.test.mjs && node test/lint-style.test.mjs && node test/preview-inspect.test.mjs && node test/widget-layout.test.mjs && node --import ./test/dom-shim.mjs test/reactivity.test.mjs"
+  },
+  "keywords": [
+    "css",
+    "layout",
+    "umg",
+    "html",
+    "widgets",
+    "panels"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.62.0"
+  }
+}

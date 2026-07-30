@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode-css-languageservice/main/docs/customData.schema.json",
+  "version": 1.1,
+  "properties": [
+    {
+      "name": "--widget-padding",
+      "description": "Padding applied by panel/border widgets (from `padding` attr)."
+    },
+    {
+      "name": "--widget-gap",
+      "description": "Gap between box/grid children (from `gap` attr)."
+    },
+    {
+      "name": "--widget-columns",
+      "description": "Column count for `gridpanel` (from `columns` attr)."
+    },
+    {
+      "name": "--widget-border",
+      "description": "Border shorthand for `border` / leaf chrome."
+    },
+    {
+      "name": "--widget-background",
+      "description": "Background for `border`, `image`, and other chrome widgets."
+    },
+    {
+      "name": "--widget-radius",
+      "description": "Border radius for chrome widgets."
+    },
+    {
+      "name": "--widget-brush",
+      "description": "Background-image brush for `image` (from `brush` attr)."
+    },
+    {
+      "name": "--widget-percent",
+      "description": "0–100 value used by `progressbar` and `slider`."
+    },
+    {
+      "name": "--widget-fill",
+      "description": "Fill color for `progressbar`."
+    },
+    {
+      "name": "--widget-height",
+      "description": "Default height token for widgets like `progressbar`."
+    }
+  ],
+  "atDirectives": [],
+  "pseudoClasses": [],
+  "pseudoElements": []
+}

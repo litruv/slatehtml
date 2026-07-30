@@ -1,0 +1,15 @@
+{
+  "html.customData": ["./slatehtml.html-data.json"],
+  "css.customData": ["./slatehtml.css-data.json"],
+  "files.associations": {
+    "*.umc": "umc"
+  },
+  "emmet.includeLanguages": {
+    "umc": "html"
+  },
+  "[umc]": {
+    "editor.tabSize": 2
+  },
+  "umc.preview.stylesheets": [],
+  "umc.preview.imports": []
+}

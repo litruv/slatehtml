@@ -1,0 +1,344 @@
+--- html ---
+<span class="popup-anchor-trigger" data-trigger></span>
+<border class="popup-anchor-panel" data-popup-root hidden></border>
+
+--- style ---
+/* Own the layout box (not contents) so the trigger sizes the host. */
+self {
+  position: relative; /* umc-layout-ok — popup stacking context */
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+}
+
+.popup-anchor-trigger {
+  display: contents;
+}
+
+/* Fixed so menus escape scrollbox / overflow ancestors (avatars in chat). */
+.popup-anchor-panel {
+  display: none;
+  position: fixed; /* umc-layout-ok — floating menu */
+  top: 0; /* umc-layout-ok */
+  left: 0; /* umc-layout-ok */
+  z-index: var(--popup-z, 60); /* umc-layout-ok */
+  box-sizing: border-box;
+  color: var(--ink, #f2f3f5);
+  --widget-background: var(--bg-channels, #2b2d31);
+  --widget-border: 1px solid var(--line, #1f2023);
+  --widget-radius: var(--radius-md, 8px);
+  --widget-padding: 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+}
+
+self[open] > .popup-anchor-panel {
+  display: block;
+}
+
+.popup-anchor-panel[hidden] {
+  display: none;
+}
+
+.demo-panel {
+  color: var(--ink, #f2f3f5);
+  background: var(--bg-channels, #2b2d31);
+  border: 1px solid var(--line, #1f2023);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+}
+
+--- script ---
+/**
+ * Anchored popup that stays on-screen.
+ *
+ *   <popup-anchor placement="bottom-start">
+ *     <slate-button text="Open"></slate-button>
+ *     <verticalbox data-popup width="240" padding="12">…</verticalbox>
+ *   </popup-anchor>
+ *
+ * Children without `data-popup` are the trigger. Mark the floating content
+ * with `data-popup`. Prefers the requested placement, then flips / clamps
+ * to keep the panel inside the viewport.
+ *
+ * The panel uses position:fixed so it is not clipped by ancestor scrollboxes.
+ *
+ * Attrs: open, placement, gap, pad, disabled
+ * Events: clicked, opened, closed
+ */
+
+const PLACEMENTS = new Set([
+  "bottom-start",
+  "bottom-end",
+  "top-start",
+  "top-end",
+  "bottom",
+  "top",
+]);
+
+function parseLength(value, fallback) {
+  const n = Number.parseFloat(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Walk through display:contents hosts to a box that has a real layout rect. */
+function layoutRect(el) {
+  if (!(el instanceof Element)) return null;
+  try {
+    if (getComputedStyle(el).display === "contents") {
+      for (const child of el.children) {
+        const nested = layoutRect(child);
+        if (nested && (nested.width > 0 || nested.height > 0)) return nested;
+      }
+      return null;
+    }
+  } catch {
+    /* ignore */
+  }
+  return el.getBoundingClientRect();
+}
+
+function anchorRect(trigger, host) {
+  const face = trigger?.firstElementChild ?? null;
+  const fromFace = face ? layoutRect(face) : null;
+  if (fromFace && (fromFace.width > 0 || fromFace.height > 0)) return fromFace;
+  const fromHost = layoutRect(host) || host.getBoundingClientRect();
+  if (fromHost.width > 0 || fromHost.height > 0) return fromHost;
+  return fromFace || fromHost;
+}
+
+function scoopSlots(el) {
+  const trigger = [];
+  const popup = [];
+  for (const child of [...el.childNodes]) {
+    if (child.nodeType === 1 && child.hasAttribute("data-popup")) {
+      popup.push(child);
+    } else if (child.nodeType === 1) {
+      trigger.push(child);
+    } else if (child.nodeType === 3 && child.textContent.trim()) {
+      trigger.push(child);
+    }
+  }
+  return { trigger, popup };
+}
+
+function placePanel(el, api) {
+  const trigger = el.querySelector("[data-trigger]");
+  const panel = el.querySelector("[data-popup-root]");
+  if (!trigger || !panel || !el.hasAttribute("open")) return;
+
+  const gap = parseLength(api.attr("gap", "8"), 8);
+  const pad = parseLength(api.attr("pad", "8"), 8);
+  let placement = api.attr("placement", "bottom-start");
+  if (!PLACEMENTS.has(placement)) placement = "bottom-start";
+
+  const anchor = anchorRect(trigger, el);
+  // Measure in place — never park at 0,0 first (that flashes every popup
+  // to the viewport top-left and can stick there if layout is interrupted).
+  const cardW = panel.offsetWidth || panel.getBoundingClientRect().width;
+  const cardH = panel.offsetHeight || panel.getBoundingClientRect().height;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // If we still have no trigger box, don't guess top-left — keep current pos.
+  if (!(anchor.width > 0 || anchor.height > 0)) return;
+
+  const preferBottom = placement.startsWith("bottom");
+  const preferEnd = placement.endsWith("end");
+  const preferCenter = placement === "bottom" || placement === "top";
+
+  const spaceBelow = vh - anchor.bottom - pad;
+  const spaceAbove = anchor.top - pad;
+  const placeBottom =
+    preferBottom
+      ? spaceBelow >= cardH + gap || spaceBelow >= spaceAbove
+      : !(spaceAbove >= cardH + gap || spaceAbove >= spaceBelow);
+
+  let top = placeBottom
+    ? anchor.bottom + gap
+    : anchor.top - cardH - gap;
+
+  let left;
+  if (preferCenter) {
+    left = anchor.left + (anchor.width - cardW) / 2;
+  } else if (preferEnd) {
+    left = anchor.right - cardW;
+  } else {
+    left = anchor.left;
+  }
+
+  if (left + cardW > vw - pad) {
+    left = Math.max(pad, vw - pad - cardW);
+  }
+  if (left < pad) left = pad;
+
+  const maxTop = Math.max(pad, vh - pad - cardH);
+  top = Math.min(Math.max(pad, top), maxTop);
+
+  panel.style.top = `${Math.round(top)}px`;
+  panel.style.left = `${Math.round(left)}px`;
+}
+
+function removeOutsideListener(el) {
+  if (!el._onPopupOutside) return;
+  document.removeEventListener("pointerdown", el._onPopupOutside, true);
+  el._onPopupOutside = null;
+}
+
+function removePlaceListeners(el) {
+  if (!el._onPopupPlace) return;
+  window.removeEventListener("resize", el._onPopupPlace);
+  window.removeEventListener("scroll", el._onPopupPlace, true);
+  el._onPopupPlace = null;
+}
+
+function addOutsideListener(el, api) {
+  if (el._onPopupOutside) return;
+  el._onPopupOutside = (event) => {
+    if (!el.contains(event.target)) closePopup(el, api);
+  };
+  document.addEventListener("pointerdown", el._onPopupOutside, true);
+}
+
+function addPlaceListeners(el, api) {
+  if (el._onPopupPlace) return;
+  el._onPopupPlace = () => placePanel(el, api);
+  window.addEventListener("resize", el._onPopupPlace);
+  window.addEventListener("scroll", el._onPopupPlace, true);
+}
+
+function openPopup(el, api) {
+  if (el.hasAttribute("disabled")) return;
+  const already = el.hasAttribute("open");
+  if (!already) el.setAttribute("open", "");
+  const panel = el.querySelector("[data-popup-root]");
+  panel?.removeAttribute("hidden");
+  addOutsideListener(el, api);
+  addPlaceListeners(el, api);
+  requestAnimationFrame(() => placePanel(el, api));
+  if (!already) api.emit("opened", { open: true });
+}
+
+function closePopup(el, api) {
+  const wasOpen = el.hasAttribute("open");
+  if (wasOpen) el.removeAttribute("open");
+  el.querySelector("[data-popup-root]")?.setAttribute("hidden", "");
+  removeOutsideListener(el);
+  removePlaceListeners(el);
+  if (wasOpen) api.emit("closed", { open: false });
+}
+
+function mountSlots(el) {
+  const slots = el._popupSlots;
+  if (!slots) return;
+  const trigger = el.querySelector("[data-trigger]");
+  const panel = el.querySelector("[data-popup-root]");
+  trigger?.replaceChildren(...slots.trigger);
+  panel?.replaceChildren(...slots.popup);
+  el._popupSlots = null;
+}
+
+export default defineUmc({
+  tag: "popup-anchor",
+  attrs: {
+    open: "",
+    placement: "bottom-start",
+    gap: "8",
+    pad: "8",
+    disabled: "",
+  },
+
+  events: { click: "clicked" },
+
+  PreConstruct(el) {
+    if (!el._popupSlots) el._popupSlots = scoopSlots(el);
+  },
+
+  Construct(el, api) {
+    mountSlots(el);
+
+    const trigger = el.querySelector("[data-trigger]");
+    if (trigger && !trigger.hasAttribute("tabindex")) {
+      const focusable = trigger.querySelector(
+        'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"]),[role="button"]'
+      );
+      if (!focusable && !el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    }
+
+    if (el._popupKeysBound) return;
+    el._popupKeysBound = true;
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const inPanel = target?.closest("[data-popup-root]");
+      if ((event.key === " " || event.key === "Enter") && !inPanel) {
+        const tag = target?.localName ?? "";
+        if (tag === "input" || tag === "textarea" || tag === "select") return;
+        if (target?.isContentEditable) return;
+        event.preventDefault();
+        if (el.hasAttribute("open")) closePopup(el, api);
+        else openPopup(el, api);
+      } else if (event.key === "Escape" && el.hasAttribute("open")) {
+        event.preventDefault();
+        closePopup(el, api);
+      }
+    });
+  },
+
+  OnClicked(el, api, event) {
+    if (el.hasAttribute("disabled")) return;
+    const native = event?.detail?.originalEvent ?? event;
+    const target = native?.target instanceof Element ? native.target : null;
+    if (target?.closest("[data-popup-root]")) return;
+    if (el.hasAttribute("open")) closePopup(el, api);
+    else openPopup(el, api);
+  },
+
+  SynchronizeProperties(el, api) {
+    const panel = el.querySelector("[data-popup-root]");
+    const disabled = el.hasAttribute("disabled");
+    const open = el.hasAttribute("open") && !disabled;
+
+    el.setAttribute("aria-expanded", open ? "true" : "false");
+    el.setAttribute("aria-haspopup", "dialog");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    panel?.setAttribute("aria-hidden", open ? "false" : "true");
+
+    if (open) {
+      panel?.removeAttribute("hidden");
+      addOutsideListener(el, api);
+      addPlaceListeners(el, api);
+      requestAnimationFrame(() => placePanel(el, api));
+    } else {
+      panel?.setAttribute("hidden", "");
+      removeOutsideListener(el);
+      removePlaceListeners(el);
+    }
+  },
+
+  Destruct(el, api) {
+    closePopup(el, api);
+    el._popupKeysBound = false;
+  },
+});
+
+--- preview ---
+<canvaspanel width="420" height="320" kind="stage">
+  <popup-anchor anchors="top-left" top="12" left="12" placement="bottom-start">
+    <border kind="chip" padding="8 12">
+      <textblock text="Top-left"></textblock>
+    </border>
+    <verticalbox data-popup width="220" padding="12" gap="6" class="demo-panel">
+      <textblock text="Anchored popup"></textblock>
+      <textblock text="Flips / clamps to stay on screen."></textblock>
+    </verticalbox>
+  </popup-anchor>
+  <popup-anchor anchors="bottom-right" bottom="12" right="12" placement="top-end">
+    <border kind="chip" padding="8 12">
+      <textblock text="Bottom-right"></textblock>
+    </border>
+    <verticalbox data-popup width="220" padding="12" gap="6" class="demo-panel">
+      <textblock text="Near the edge"></textblock>
+      <textblock text="Opens above and clamps left."></textblock>
+    </verticalbox>
+  </popup-anchor>
+</canvaspanel>

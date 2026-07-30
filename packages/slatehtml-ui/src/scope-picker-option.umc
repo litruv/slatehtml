@@ -1,0 +1,59 @@
+--- html ---
+<horizontalbox class="scope-picker-option" gap="10" valign="center" padding="6 10" role="option">
+  <slate-avatar-tile></slate-avatar-tile>
+  <textblock class="scope-picker-option-label" data-umc="label" fill></textblock>
+</horizontalbox>
+
+--- style ---
+self {
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+self:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+self[selected] {
+  background: color-mix(in srgb, var(--blurple, #5865f2) 28%, transparent);
+}
+
+.scope-picker-option-label {
+  font-size: 13px;
+  min-width: 0;
+}
+
+--- script ---
+export default defineUmc({
+  tag: "scope-picker-option",
+  attrs: {
+    value: "",
+    label: "",
+    avatar: "",
+    selected: "",
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+
+    const value = attr("value", "");
+    const label = attr("label", "");
+    const avatar = (attr("avatar", "") || "").trim();
+    const selected = el.hasAttribute("selected");
+
+    el.setAttribute("aria-selected", selected ? "true" : "false");
+
+    const tile = el.querySelector("slate-avatar-tile");
+    tile?.setAttribute("value", value);
+    tile?.setAttribute("label", label);
+    if (avatar) tile?.setAttribute("avatar", avatar);
+    else tile?.removeAttribute("avatar");
+  },
+});
+
+--- preview ---
+<verticalbox gap="4" padding="12" width="240">
+  <scope-picker-option value="dms" label="Direct messages" selected></scope-picker-option>
+  <scope-picker-option value="rooms" label="Rooms"></scope-picker-option>
+  <scope-picker-option value="!s:matrix.org" label="Preview Space" avatar="https://matrix.org/favicon.ico"></scope-picker-option>
+</verticalbox>

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SlateHTML UMC",
+  "scopeName": "source.umc",
+  "patterns": [
+    { "include": "#html-section" },
+    { "include": "#preview-section" },
+    { "include": "#style-section" },
+    { "include": "#script-section" },
+    { "include": "#section-header" }
+  ],
+  "repository": {
+    "section-header": {
+      "match": "^---\\s*(html|template|style|css|script|js|preview|demo)\\s*---\\s*$",
+      "name": "keyword.control.section.umc",
+      "captures": {
+        "1": { "name": "entity.name.section.umc" }
+      }
+    },
+    "file-link": {
+      "match": "\\A(@)\\s+(.+?)\\s*$",
+      "captures": {
+        "1": { "name": "keyword.control.import.umc" },
+        "2": { "name": "string.unquoted.path.umc" }
+      }
+    },
+    "html-section": {
+      "begin": "^---\\s*(?:html|template)\\s*---\\s*$",
+      "end": "^(?=---\\s*(?:html|template|style|css|script|js|preview|demo)\\s*---\\s*$)",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.section.umc" }
+      },
+      "contentName": "meta.embedded.block.html",
+      "patterns": [{ "include": "text.html.basic" }]
+    },
+    "preview-section": {
+      "begin": "^---\\s*(?:preview|demo)\\s*---\\s*$",
+      "end": "^(?=---\\s*(?:html|template|style|css|script|js|preview|demo)\\s*---\\s*$)",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.section.umc" }
+      },
+      "contentName": "meta.embedded.block.html",
+      "patterns": [{ "include": "text.html.basic" }]
+    },
+    "style-section": {
+      "begin": "^---\\s*(?:style|css)\\s*---\\s*$",
+      "end": "^(?=---\\s*(?:html|template|style|css|script|js|preview|demo)\\s*---\\s*$)",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.section.umc" }
+      },
+      "contentName": "meta.embedded.block.css",
+      "patterns": [{ "include": "source.css" }]
+    },
+    "script-section": {
+      "begin": "^---\\s*(?:script|js)\\s*---\\s*$",
+      "end": "^(?=---\\s*(?:html|template|style|css|script|js|preview|demo)\\s*---\\s*$)",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.section.umc" }
+      },
+      "contentName": "meta.embedded.block.js",
+      "patterns": [{ "include": "source.js" }]
+    }
+  }
+}

@@ -1,0 +1,488 @@
+--- html ---
+<overlay class="shadowbox-root">
+  <backgroundblur
+    class="shadowbox-backdrop"
+    blur="18"
+    halign="fill"
+    valign="fill"
+  ></backgroundblur>
+  <verticalbox
+    class="shadowbox-stage"
+    gap="10"
+    padding="16"
+    halign="center"
+    valign="center"
+    max-width="min(96vw, 1100px)"
+    max-height="min(92vh, 900px)"
+  >
+    <horizontalbox class="shadowbox-chrome" gap="8" valign="center" halign="fill">
+      <textblock class="shadowbox-title" data-title text="" fill></textblock>
+      <slate-icon class="shadowbox-close" name="x" size="18"></slate-icon>
+    </horizontalbox>
+    <border class="shadowbox-image-frame" padding="0" max-width="min(96vw, 1100px)" max-height="min(80vh, 820px)" hidden>
+      <img class="shadowbox-image" alt="" draggable="false" />
+    </border>
+    <slate-media class="shadowbox-video" kind="video" max-width="min(96vw, 1100px)" max-height="min(80vh, 820px)" hidden></slate-media>
+  </verticalbox>
+</overlay>
+
+--- style ---
+/* Host stays display:contents — hide stamped overlay when closed. */
+self:not([open]) > .shadowbox-root {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.shadowbox-root[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.shadowbox-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.72);
+  --widget-radius: 0;
+  --widget-border: none;
+  cursor: zoom-out;
+}
+
+.shadowbox-stage {
+  pointer-events: none;
+}
+
+.shadowbox-chrome,
+.shadowbox-image-frame,
+.shadowbox-video {
+  pointer-events: auto;
+}
+
+.shadowbox-chrome {
+  color: #fff;
+}
+
+.shadowbox-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shadowbox-close {
+  padding: 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  cursor: pointer;
+}
+
+.shadowbox-image-frame {
+  --widget-background: transparent;
+  --widget-border: none;
+  cursor: zoom-in;
+  touch-action: none;
+}
+
+.shadowbox-image-frame[zoomed] {
+  cursor: zoom-out;
+  overflow: visible;
+}
+
+.shadowbox-image-frame[pannable] {
+  cursor: grab;
+}
+
+.shadowbox-image-frame[dragging] {
+  cursor: grabbing;
+}
+
+.shadowbox-image {
+  display: block;
+  border-radius: 8px;
+  background: transparent;
+  transform: translate(var(--img-tx, 0px), var(--img-ty, 0px))
+    scale(var(--img-zoom, 1));
+  transform-origin: 0 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.shadowbox-video {
+  background: transparent;
+}
+
+.shadowbox-image-frame[hidden],
+.shadowbox-video[hidden] {
+  display: none !important;
+}
+
+--- script ---
+/**
+ * Fullscreen lightbox for image / video (mxc → blob like matrix-image).
+ * Images: scroll-wheel zoom, click to zoom in / reset, drag to pan when zoomed.
+ *
+ *   <slate-shadowbox open src="mxc://…" kind="image" title="photo"></slate-shadowbox>
+ *
+ * Events: opened, closed
+ */
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 5;
+const ZOOM_CLICK = 2.5;
+const DRAG_CLICK_SLOP = 6;
+
+function imageViewportMax() {
+  return {
+    w: Math.min(window.innerWidth * 0.96, 1100),
+    h: Math.min(window.innerHeight * 0.8, 820),
+  };
+}
+
+function fitShadowImage(el, img) {
+  const iw = img.naturalWidth || 0;
+  const ih = img.naturalHeight || 0;
+  if (iw <= 0 || ih <= 0) return;
+  const { w: maxW, h: maxH } = imageViewportMax();
+  const s = Math.min(1, maxW / iw, maxH / ih);
+  const w = Math.max(1, Math.round(iw * s));
+  const h = Math.max(1, Math.round(ih * s));
+  img.setAttribute("width", String(w));
+  img.setAttribute("height", String(h));
+  img.style.width = `${w}px`;
+  img.style.height = `${h}px`;
+  el._imgBase = { w, h };
+  applyImageZoom(el);
+}
+
+function clampImagePan(el) {
+  const img = shadowImage(el);
+  const frame = imageFrame(el);
+  const z = imageZoomState(el);
+  if (!img || !frame) return;
+  const baseW = img.offsetWidth || el._imgBase?.w || 0;
+  const baseH = img.offsetHeight || el._imgBase?.h || 0;
+  const frameW = frame.clientWidth;
+  const frameH = frame.clientHeight;
+  if (!baseW || !baseH || !frameW || !frameH) return;
+  const scaledW = baseW * z.scale;
+  const scaledH = baseH * z.scale;
+  if (scaledW <= frameW) z.tx = (frameW - scaledW) / 2;
+  else z.tx = Math.min(0, Math.max(frameW - scaledW, z.tx));
+  if (scaledH <= frameH) z.ty = (frameH - scaledH) / 2;
+  else z.ty = Math.min(0, Math.max(frameH - scaledH, z.ty));
+}
+
+async function resolveSrc(url, opts = {}) {
+  const raw = String(url || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("blob:") || raw.startsWith("data:")) return raw;
+  if (/^https?:\/\//i.test(raw) && !raw.includes("/_matrix/")) return raw;
+  if (!raw.startsWith("mxc://")) return raw;
+  // Apps (e.g. Matrix) can provide: globalThis.slateMediaResolve = mediaBrushUrl
+  const resolve = globalThis.slateMediaResolve;
+  if (typeof resolve === "function") return (await resolve(raw, opts)) || "";
+  return "";
+}
+
+function imageFrame(el) {
+  return el.querySelector(".shadowbox-image-frame");
+}
+
+function shadowImage(el) {
+  return el.querySelector("img.shadowbox-image");
+}
+
+function imageZoomState(el) {
+  if (!el._imgZoom) el._imgZoom = { scale: 1, tx: 0, ty: 0 };
+  return el._imgZoom;
+}
+
+function applyImageZoom(el) {
+  const img = shadowImage(el);
+  const frame = imageFrame(el);
+  const z = imageZoomState(el);
+  if (!img) return;
+  clampImagePan(el);
+  img.style.setProperty("--img-zoom", String(z.scale));
+  img.style.setProperty("--img-tx", `${z.tx}px`);
+  img.style.setProperty("--img-ty", `${z.ty}px`);
+  frame?.toggleAttribute("zoomed", z.scale > 1.01);
+  frame?.toggleAttribute("pannable", z.scale > 1.01);
+}
+
+function resetImageZoom(el) {
+  el._imgZoom = { scale: 1, tx: 0, ty: 0 };
+  el._imgDrag = null;
+  imageFrame(el)?.removeAttribute("dragging");
+  applyImageZoom(el);
+}
+
+function framePoint(frame, clientX, clientY) {
+  const r = frame.getBoundingClientRect();
+  return { x: clientX - r.left, y: clientY - r.top };
+}
+
+function zoomAround(el, px, py, newScale) {
+  const z = imageZoomState(el);
+  const ix = (px - z.tx) / z.scale;
+  const iy = (py - z.ty) / z.scale;
+  z.scale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newScale));
+  z.tx = px - ix * z.scale;
+  z.ty = py - iy * z.scale;
+  applyImageZoom(el);
+}
+
+function bindImageFit(el) {
+  const img = shadowImage(el);
+  if (!img || img._fitBound) return;
+  img._fitBound = true;
+  img.addEventListener("load", () => {
+    if (!el.hasAttribute("open") || el.getAttribute("kind") === "video") return;
+    fitShadowImage(el, img);
+  });
+}
+
+function bindImageZoom(el) {
+  if (el._zoomBound) return;
+  el._zoomBound = true;
+
+  const frame = imageFrame(el);
+  if (!frame) return;
+  bindImageFit(el);
+
+  frame.addEventListener(
+    "wheel",
+    (event) => {
+      if (!el.hasAttribute("open") || el.getAttribute("kind") === "video") return;
+      event.preventDefault();
+      const img = shadowImage(el);
+      if (!img?.src) return;
+      const z = imageZoomState(el);
+      const factor = Math.exp(-event.deltaY * 0.002);
+      const { x, y } = framePoint(frame, event.clientX, event.clientY);
+      zoomAround(el, x, y, z.scale * factor);
+    },
+    { passive: false }
+  );
+
+  frame.addEventListener("click", (event) => {
+    if (!el.hasAttribute("open") || el.getAttribute("kind") === "video") return;
+    if (el._imgDrag?.moved) {
+      el._imgDrag = null;
+      return;
+    }
+    const img = shadowImage(el);
+    if (!img?.src) return;
+    event.preventDefault();
+    const z = imageZoomState(el);
+    const { x, y } = framePoint(frame, event.clientX, event.clientY);
+    if (z.scale <= 1.01) {
+      zoomAround(el, x, y, ZOOM_CLICK);
+    } else {
+      resetImageZoom(el);
+    }
+  });
+
+  frame.addEventListener("pointerdown", (event) => {
+    if (!el.hasAttribute("open") || el.getAttribute("kind") === "video") return;
+    if (event.button !== 0) return;
+    const z = imageZoomState(el);
+    if (z.scale <= 1.01) return;
+    el._imgDrag = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      tx: z.tx,
+      ty: z.ty,
+      moved: false,
+    };
+    frame.setPointerCapture(event.pointerId);
+    frame.toggleAttribute("dragging", true);
+  });
+
+  frame.addEventListener("pointermove", (event) => {
+    const drag = el._imgDrag;
+    if (!drag || drag.id !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > DRAG_CLICK_SLOP) drag.moved = true;
+    const z = imageZoomState(el);
+    z.tx = drag.tx + dx;
+    z.ty = drag.ty + dy;
+    applyImageZoom(el);
+  });
+
+  const endDrag = (event) => {
+    const drag = el._imgDrag;
+    if (!drag || drag.id !== event.pointerId) return;
+    frame.releasePointerCapture?.(event.pointerId);
+    frame.removeAttribute("dragging");
+    if (!drag.moved) el._imgDrag = null;
+    else el._imgDrag = { moved: true };
+  };
+  frame.addEventListener("pointerup", endDrag);
+  frame.addEventListener("pointercancel", endDrag);
+}
+
+function closeBox(el, api) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  resetImageZoom(el);
+  const video = el.querySelector("slate-media.shadowbox-video");
+  const native = video?.querySelector("video");
+  native?.pause?.();
+  api.emit("closed", {
+    src: el.getAttribute("src") || "",
+    kind: el.getAttribute("kind") || "image",
+  });
+}
+
+export default defineUmc({
+  tag: "slate-shadowbox",
+  attrs: {
+    open: "",
+    src: "",
+    kind: "image",
+    title: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    bindImageZoom(el);
+
+    el.addEventListener("click", (event) => {
+      const close = event.target?.closest?.(".shadowbox-close");
+      if (close && el.contains(close)) {
+        event.preventDefault();
+        closeBox(el, api);
+        return;
+      }
+      const backdrop = event.target?.closest?.(".shadowbox-backdrop");
+      if (backdrop && el.contains(backdrop)) {
+        closeBox(el, api);
+      }
+    });
+
+    el._onKey = (event) => {
+      if (!el.hasAttribute("open")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeBox(el, api);
+      }
+    };
+    document.addEventListener("keydown", el._onKey);
+  },
+
+  Destroyed(el, api) {
+    if (el._onKey) {
+      document.removeEventListener("keydown", el._onKey);
+      el._onKey = null;
+    }
+    closeBox(el, api);
+    el._bound = false;
+  },
+
+  async SynchronizeProperties(el, api) {
+    const { attr } = api;
+    const open = el.hasAttribute("open");
+    const root =
+      el.querySelector(":scope > .shadowbox-root") || el.firstElementChild;
+    root?.toggleAttribute("hidden", !open);
+    if (root) root.inert = !open;
+    el.setAttribute("aria-hidden", open ? "false" : "true");
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+
+    const kind = attr("kind", "image") === "video" ? "video" : "image";
+    const src = (attr("src", "") || "").trim();
+    const title = attr("title", "") || "";
+    const frame = imageFrame(el);
+    const img = shadowImage(el);
+    const video = el.querySelector("slate-media.shadowbox-video");
+    const titleEl = el.querySelector("[data-title]");
+    const gen = (el._loadGen = (el._loadGen || 0) + 1);
+    const mediaKey = `${kind}|${src}`;
+
+    titleEl?.setAttribute("text", title);
+    frame?.toggleAttribute("hidden", kind !== "image");
+    video?.toggleAttribute("hidden", kind !== "video");
+
+    if (!open) {
+      el._wasOpen = false;
+      resetImageZoom(el);
+      return;
+    }
+
+    if (el._zoomMediaKey !== mediaKey) {
+      el._zoomMediaKey = mediaKey;
+      resetImageZoom(el);
+    }
+
+    if (!el._wasOpen) {
+      el._wasOpen = true;
+      api.emit("opened", { src, kind });
+    }
+
+    if (!src) {
+      if (img) img.removeAttribute("src");
+      video?.removeAttribute("src");
+      return;
+    }
+
+    if (kind === "video") {
+      video?.setAttribute("kind", "video");
+      video?.setAttribute("src", src);
+      if (!video._aspectBound) {
+        video._aspectBound = true;
+        video.addEventListener("aspectchange", (event) => {
+          const iw = Number(event.detail?.width) || 0;
+          const ih = Number(event.detail?.height) || 0;
+          if (iw <= 0 || ih <= 0) return;
+          const maxW = Math.min(window.innerWidth * 0.96, 1100);
+          const maxH = Math.min(window.innerHeight * 0.8, 820);
+          const s = Math.min(maxW / iw, maxH / ih);
+          const w = Math.max(1, Math.round(iw * s));
+          const h = Math.max(1, Math.round(ih * s));
+          video.setAttribute("width", String(w));
+          video.setAttribute("height", String(h));
+          const stage = video.querySelector(".media-stage");
+          stage?.setAttribute("width", String(w));
+          stage?.setAttribute("height", String(h));
+        });
+      }
+      return;
+    }
+
+    try {
+      const resolved = await resolveSrc(src, {
+        width: 1600,
+        height: 1600,
+        resize: "scale",
+      });
+      if (gen !== el._loadGen) return;
+      if (img) {
+        img.src = resolved || "";
+        if (img.complete && img.naturalWidth > 0) fitShadowImage(el, img);
+      }
+    } catch (err) {
+      console.warn("[slate-shadowbox] resolve failed", src, err);
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="640" height="420" kind="stage">
+  <border kind="backdrop" anchors="fill" top="0" left="0" right="0" bottom="0"></border>
+  <slate-shadowbox
+    open
+    kind="image"
+    src="https://i.pravatar.cc/800?img=12"
+    title="Preview"
+    anchors="fill"
+    top="0"
+    left="0"
+    right="0"
+    bottom="0"
+  ></slate-shadowbox>
+</canvaspanel>

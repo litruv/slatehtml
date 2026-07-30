@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SlateHTML — UMG widgets</title>
+  <link rel="stylesheet" href="widget.css" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+    :root {
+      --ink: #15201a;
+      --muted: #5a6a60;
+      --paper: #dfe8e2;
+      --panel: #f3f7f4;
+      --panel-deep: #e7eee9;
+      --line: #b4c2b8;
+      --line-strong: #8fa094;
+      --accent: #1f6b4a;
+      --accent-soft: #cfe6d8;
+      --hud: #15201a;
+      --hud-ink: #e8f2ec;
+      --stage: #edf3ef;
+      --warn: #9a6418;
+      --radius: 4px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: Sora, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 480px at 8% -8%, #c5d9cc 0%, transparent 55%),
+        radial-gradient(700px 420px at 100% 0%, #b7c9be 0%, transparent 50%),
+        linear-gradient(180deg, #e8efe9 0%, var(--paper) 40%, #d5e0d8 100%);
+    }
+
+    /* --- type --- */
+    textblock[kind="title"] {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+    textblock[kind="subtitle"] {
+      color: var(--muted);
+      max-width: 48ch;
+      line-height: 1.45;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    textblock[kind="label"] {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    textblock[kind="hint"] {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      max-width: 52ch;
+    }
+    textblock[kind="hud"] {
+      color: var(--hud-ink);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    textblock[kind="mono"] {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* --- chrome --- */
+    border[kind="panel"] {
+      --widget-background: var(--panel);
+      --widget-border: 1px solid var(--line);
+      --widget-radius: var(--radius);
+    }
+    border[kind="well"] {
+      --widget-background: var(--stage);
+      --widget-border: 1px solid var(--line);
+      --widget-radius: var(--radius);
+      --widget-padding: 0;
+    }
+    border[kind="chip"] {
+      --widget-background: var(--accent-soft);
+      --widget-border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+      --widget-padding: 8px 12px;
+      --widget-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+    border[kind="hud"] {
+      --widget-background: var(--hud);
+      --widget-padding: 8px 12px;
+      --widget-radius: var(--radius);
+      color: var(--hud-ink);
+      font-size: 12px;
+    }
+    border[kind="slot"],
+    backgroundblur[kind="slot"] {
+      --widget-border: 1px dashed var(--line-strong);
+      --widget-background: color-mix(in srgb, var(--accent) 6%, var(--stage));
+      --widget-padding: 8px 10px;
+      --widget-radius: var(--radius);
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    border[kind="pin"] {
+      --widget-background: var(--hud);
+      --widget-padding: 5px 9px;
+      --widget-radius: 2px;
+      color: var(--hud-ink);
+      white-space: nowrap;
+    }
+    border[kind="stretch"] {
+      --widget-background: color-mix(in srgb, var(--accent-soft) 88%, white);
+      --widget-border: 1px dashed var(--accent);
+      --widget-padding: 6px 10px;
+      --widget-radius: var(--radius);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      color: var(--accent);
+    }
+    border[kind="inset"] {
+      --widget-background: var(--panel);
+      --widget-border: 1px solid var(--accent);
+      --widget-padding: 14px;
+      --widget-radius: var(--radius);
+    }
+    border[kind="backdrop"] {
+      --widget-border: none;
+      --widget-radius: 0;
+      --widget-background: var(--stage);
+      background-color: var(--stage);
+      background-image:
+        linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px;
+    }
+
+    /* --- stages --- */
+    overlay[kind="stage"],
+    canvaspanel[kind="stage"],
+    scrollbox[kind="stage"] {
+      background: var(--stage);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    overlay[kind="stage"],
+    verticalbox > overlay[kind="stage"],
+    border > overlay[kind="stage"] {
+      min-height: 200px;
+    }
+    canvaspanel[kind="stage"],
+    verticalbox > canvaspanel[kind="stage"],
+    border > canvaspanel[kind="stage"] {
+      background-color: var(--stage);
+      background-image:
+        linear-gradient(to right, color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1px),
+        linear-gradient(to right, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px);
+      background-size: 50% 100%, 100% 50%, 20px 20px, 20px 20px;
+      background-position: center, center, 0 0, 0 0;
+      min-height: 340px;
+    }
+    scrollbox[kind="stage"],
+    verticalbox > scrollbox[kind="stage"],
+    border > scrollbox[kind="stage"] {
+      --widget-padding: 10px;
+      background: var(--panel-deep);
+      min-height: 140px;
+    }
+
+    /* --- leaf chrome --- */
+    button[widget] {
+      --widget-background: var(--accent);
+      --widget-border: 1px solid color-mix(in srgb, var(--accent) 70%, black);
+      --widget-radius: var(--radius);
+      --widget-padding: 8px 14px;
+      color: #f4faf6;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    button[widget]:hover {
+      filter: brightness(1.06);
+    }
+    button[widget]:active {
+      filter: brightness(0.94);
+    }
+
+    progressbar {
+      --widget-fill: var(--accent);
+      --widget-background: var(--accent-soft);
+      --widget-radius: 2px;
+      height: 8px;
+    }
+
+    slider {
+      color: var(--accent);
+      width: 120px;
+    }
+
+    checkbox {
+      color: var(--accent);
+      border-color: var(--line-strong);
+      width: 1.15em;
+      height: 1.15em;
+    }
+
+    editabletext {
+      --widget-border: 1px solid var(--line);
+      --widget-background: #fff;
+      --widget-padding: 8px 10px;
+      --widget-radius: var(--radius);
+      font-size: 13px;
+      color: var(--ink);
+      min-width: 140px;
+    }
+    editabletext:focus {
+      outline-color: var(--accent);
+    }
+
+    image[kind="swatch"] {
+      --widget-background: linear-gradient(135deg, var(--accent) 0%, #3d8f68 100%);
+      --widget-radius: var(--radius);
+      border-radius: var(--radius);
+    }
+
+    /* Nested panel inside a panel — slightly deeper well */
+    border[kind="panel"] border[kind="panel"] {
+      --widget-background: var(--panel-deep);
+    }
+  </style>
+</head>
+<body>
+  <verticalbox padding="28" gap="18" style="min-height: 100%;">
+    <horizontalbox valign="center" gap="16">
+      <verticalbox gap="6">
+        <textblock kind="title" text="SlateHTML"></textblock>
+        <textblock kind="subtitle" text="UMG-style panel tags in HTML — boxes, overlay, canvas anchors, scroll. No divs."></textblock>
+      </verticalbox>
+      <spacer></spacer>
+      <border kind="chip">
+        <textblock kind="mono" text="horizontalbox · verticalbox · overlay · canvaspanel · scrollbox · widgetswitcher"></textblock>
+      </border>
+    </horizontalbox>
+
+    <horizontalbox gap="14" style="flex: 0 0 auto;">
+      <!-- Boxes -->
+      <border kind="panel" fill padding="16" style="min-height: 320px;">
+        <verticalbox gap="12" height="100%">
+          <textblock kind="label" text="Horizontal / Vertical / Spacer / Fill"></textblock>
+
+          <border kind="panel" padding="10">
+            <horizontalbox gap="8" valign="center">
+              <border kind="chip"><textblock text="A"></textblock></border>
+              <border kind="chip"><textblock text="B"></textblock></border>
+              <spacer></spacer>
+              <border kind="chip"><textblock text="pinned right"></textblock></border>
+            </horizontalbox>
+          </border>
+
+          <verticalbox fill gap="8">
+            <border kind="chip" style="align-self: flex-start;"><textblock text="auto height"></textblock></border>
+            <border kind="slot" fill>
+              <textblock kind="mono" text="fill — remaining space"></textblock>
+            </border>
+            <horizontalbox gap="8" min-height="52">
+              <border kind="slot" fill="1"><textblock kind="mono" text="fill 1"></textblock></border>
+              <border kind="slot" fill="2"><textblock kind="mono" text="fill 2"></textblock></border>
+              <border kind="slot" fill="1"><textblock kind="mono" text="fill 1"></textblock></border>
+            </horizontalbox>
+          </verticalbox>
+        </verticalbox>
+      </border>
+
+      <!-- Overlay + scroll -->
+      <verticalbox fill gap="14">
+        <border kind="panel" fill="1.2" padding="16" style="min-height: 260px;">
+          <verticalbox gap="10" height="100%">
+            <textblock kind="label" text="Overlay + alignment"></textblock>
+            <overlay kind="stage" fill height="0" padding="12">
+              <border kind="backdrop" halign="fill" valign="fill"></border>
+              <border kind="hud" halign="left" valign="top">
+                <textblock kind="hud" text="left · top"></textblock>
+              </border>
+              <border kind="hud" halign="right" valign="top">
+                <textblock kind="hud" text="right · top"></textblock>
+              </border>
+              <border kind="hud" halign="left" valign="bottom">
+                <textblock kind="hud" text="left · bottom"></textblock>
+              </border>
+              <border kind="hud" halign="right" valign="bottom">
+                <textblock kind="hud" text="right · bottom"></textblock>
+              </border>
+              <border kind="chip" halign="center" valign="center">
+                <textblock text="center · center"></textblock>
+              </border>
+            </overlay>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" fill padding="16" style="min-height: 180px;">
+          <verticalbox gap="10" height="100%">
+            <textblock kind="label" text="Scrollbox"></textblock>
+            <scrollbox kind="stage" fill>
+              <verticalbox gap="8">
+                <border kind="chip"><textblock text="Inventory slot 01"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 02"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 03"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 04"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 05"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 06"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 07"></textblock></border>
+                <border kind="chip"><textblock text="Inventory slot 08"></textblock></border>
+              </verticalbox>
+            </scrollbox>
+          </verticalbox>
+        </border>
+      </verticalbox>
+    </horizontalbox>
+
+    <!-- Canvas -->
+    <border kind="panel" padding="16" style="min-height: 400px;">
+      <verticalbox gap="10" height="100%">
+        <horizontalbox valign="center" gap="12">
+          <textblock kind="label" text="Canvaspanel — child positioning"></textblock>
+          <spacer></spacer>
+          <textblock kind="hint" text="anchors + top/left/right/bottom. Resize to see stretch anchors."></textblock>
+        </horizontalbox>
+
+        <canvaspanel kind="stage" fill height="0" min-height="340">
+          <border kind="pin" anchors="top-left" top="12" left="12">
+            <textblock kind="hud" text="top-left"></textblock>
+          </border>
+          <border kind="pin" anchors="top" top="12">
+            <textblock kind="hud" text="top"></textblock>
+          </border>
+          <border kind="pin" anchors="top-right" top="12" right="12">
+            <textblock kind="hud" text="top-right"></textblock>
+          </border>
+          <border kind="pin" anchors="left" left="12">
+            <textblock kind="hud" text="left"></textblock>
+          </border>
+          <border kind="pin" anchors="right" right="12">
+            <textblock kind="hud" text="right"></textblock>
+          </border>
+          <border kind="pin" anchors="bottom-left" bottom="12" left="12">
+            <textblock kind="hud" text="bottom-left"></textblock>
+          </border>
+          <border kind="pin" anchors="bottom" bottom="12">
+            <textblock kind="hud" text="bottom"></textblock>
+          </border>
+          <border kind="pin" anchors="bottom-right" bottom="12" right="12">
+            <textblock kind="hud" text="bottom-right"></textblock>
+          </border>
+
+          <!-- Stretch along an edge (not center-axis h-fill/v-fill, which would sit under the inset) -->
+          <border kind="stretch" anchors="0,0,1,0" top="52" left="88" right="88" height="34">
+            <textblock text='h-stretch · top edge'></textblock>
+          </border>
+          <border kind="stretch" anchors="0,0,0,1" left="16" top="100" bottom="64" width="48">
+            <textblock text="v-stretch" style="writing-mode: vertical-lr; letter-spacing: 0.04em;"></textblock>
+          </border>
+
+          <border kind="inset" anchors="fill" top="100" left="138" right="138" bottom="64">
+            <verticalbox gap="8" height="100%" valign="center" halign="center">
+              <textblock kind="label" text='anchors="fill"'></textblock>
+              <textblock kind="mono" text="insets stretch with parent"></textblock>
+              <progressbar percent="70" width="150"></progressbar>
+            </verticalbox>
+          </border>
+
+          <border kind="chip" anchors="0.22,0.78,0.22,0.78">
+            <textblock kind="mono" text="0.22, 0.78"></textblock>
+          </border>
+
+          <border kind="hud" left="138" right="138" bottom="20" height="28">
+            <horizontalbox height="100%" valign="center" halign="center">
+              <textblock kind="hud" text="manual left + right + bottom"></textblock>
+            </horizontalbox>
+          </border>
+        </canvaspanel>
+      </verticalbox>
+    </border>
+
+    <horizontalbox gap="14" valign="stretch">
+      <border kind="panel" fill padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Wrapbox"></textblock>
+          <wrapbox gap="8" width="100%">
+            <border kind="chip"><textblock text="wrapbox"></textblock></border>
+            <border kind="chip"><textblock text="flows"></textblock></border>
+            <border kind="chip"><textblock text="to"></textblock></border>
+            <border kind="chip"><textblock text="the"></textblock></border>
+            <border kind="chip"><textblock text="next"></textblock></border>
+            <border kind="chip"><textblock text="line"></textblock></border>
+            <border kind="chip"><textblock text="when"></textblock></border>
+            <border kind="chip"><textblock text="narrow"></textblock></border>
+          </wrapbox>
+        </verticalbox>
+      </border>
+
+      <border kind="panel" padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Gridpanel"></textblock>
+          <gridpanel columns="3" gap="8" width="200">
+            <border kind="slot" min-height="36"><textblock kind="mono" text="1"></textblock></border>
+            <border kind="slot" min-height="36"><textblock kind="mono" text="2"></textblock></border>
+            <border kind="slot" min-height="36"><textblock kind="mono" text="3"></textblock></border>
+          </gridpanel>
+        </verticalbox>
+      </border>
+
+      <border kind="panel" fill padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Leaf widgets"></textblock>
+          <wrapbox gap="12" valign="center">
+            <button widget type="button">Button</button>
+            <checkbox checked></checkbox>
+            <progressbar percent="62" width="110"></progressbar>
+            <slider percent="40" width="100"></slider>
+            <editabletext text="EditableText" width="140"></editabletext>
+            <image kind="swatch" width="36" height="36"></image>
+          </wrapbox>
+        </verticalbox>
+      </border>
+    </horizontalbox>
+
+    <horizontalbox gap="14" valign="stretch">
+      <border kind="panel" fill padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Uniformgridpanel"></textblock>
+          <uniformgridpanel columns="2" rows="2" gap="8" width="160" height="160">
+            <border kind="slot"><textblock kind="mono" text="A"></textblock></border>
+            <border kind="slot"><textblock kind="mono" text="B"></textblock></border>
+            <border kind="slot"><textblock kind="mono" text="C"></textblock></border>
+            <border kind="slot"><textblock kind="mono" text="D"></textblock></border>
+          </uniformgridpanel>
+        </verticalbox>
+      </border>
+
+      <border kind="panel" fill padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Widgetswitcher"></textblock>
+          <widgetswitcher active="one">
+            <border page="one" kind="slot" padding="10">
+              <textblock text="Page one (active=&quot;one&quot;)"></textblock>
+            </border>
+            <border page="two" kind="slot" padding="10">
+              <textblock text="Page two"></textblock>
+            </border>
+          </widgetswitcher>
+          <textblock kind="mono" text="retainerbox / invalidationbox = passthrough parity"></textblock>
+        </verticalbox>
+      </border>
+
+      <border kind="panel" fill padding="16">
+        <verticalbox gap="10">
+          <textblock kind="label" text="Safezone · Backgroundblur"></textblock>
+          <safezone pad="1">
+            <overlay height="80" fill>
+              <backgroundblur blur="10" halign="fill" valign="fill"></backgroundblur>
+              <border kind="slot" padding="12" halign="center" valign="center">
+                <textblock text="Card above blur layer"></textblock>
+              </border>
+            </overlay>
+          </safezone>
+        </verticalbox>
+      </border>
+    </horizontalbox>
+  </verticalbox>
+
+  <!-- Prefer linking widget.css above for first paint; JS entry wires attributes. -->
+  <script type="module">
+    import "./widget.js";
+  </script>
+</body>
+</html>

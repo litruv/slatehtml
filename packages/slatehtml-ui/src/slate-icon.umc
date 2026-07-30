@@ -1,0 +1,80 @@
+--- html ---
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok — painted control host */
+  align-items: center; /* umc-layout-ok */
+  justify-content: center; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+  line-height: 0;
+  color: inherit;
+}
+
+self > svg {
+  display: block;
+  width: var(--icon-size, 16px);
+  height: var(--icon-size, 16px);
+  stroke: currentColor;
+  fill: none;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self[hidden] {
+  display: none !important;
+}
+
+--- script ---
+/**
+ * Lucide icon leaf for UMG widgets.
+ *
+ *   <slate-icon name="chevron-down" size="16"></slate-icon>
+ *   <slate-icon name="log-out" size="14" stroke-width="2"></slate-icon>
+ *
+ * Register new icons in `lucide-icons.js` (keeps the bundle tree-shaken).
+ * Color follows `currentColor` / parent text color.
+ */
+import { lucideSvg } from "./lucide-icons.js";
+
+function paint(el, { attr }) {
+  const name = attr("name", "");
+  const size = attr("size", "16") || "16";
+  const stroke = attr("stroke-width", "2") || "2";
+  el.style.setProperty("--icon-size", /^\d+$/.test(size) ? `${size}px` : size);
+
+  const svg = lucideSvg(name, {
+    width: size,
+    height: size,
+    "stroke-width": stroke,
+    "aria-hidden": "true",
+  });
+
+  el.replaceChildren();
+  if (svg) {
+    el.appendChild(svg);
+    el.removeAttribute("title");
+  } else if (name) {
+    el.setAttribute("title", `Unknown icon: ${name}`);
+  }
+}
+
+export default defineUmc({
+  tag: "slate-icon",
+  attrs: {
+    name: "",
+    size: "16",
+    "stroke-width": "2",
+  },
+
+  SynchronizeProperties(el, api) {
+    paint(el, api);
+  },
+});
+
+--- preview ---
+<horizontalbox gap="12" padding="16" valign="center">
+  <slate-icon name="chevron-down" size="18"></slate-icon>
+  <slate-icon name="log-out" size="18"></slate-icon>
+  <slate-icon name="hash" size="18"></slate-icon>
+  <slate-icon name="at-sign" size="18"></slate-icon>
+  <textblock kind="hint" text="slate-icon · Lucide"></textblock>
+</horizontalbox>

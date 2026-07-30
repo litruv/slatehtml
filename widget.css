@@ -1,0 +1,571 @@
+/*
+  UMG-style layout panels as plain HTML tags.
+  <canvas> is reserved by HTML5 — use <canvaspanel> instead.
+*/
+
+/* --- reset unknown tags to block boxes --- */
+:is(horizontalbox, umc-horizontalbox),
+:is(verticalbox, umc-verticalbox),
+:is(wrapbox, umc-wrapbox),
+:is(overlay, umc-overlay),
+:is(canvaspanel, umc-canvaspanel),
+:is(scrollbox, umc-scrollbox),
+:is(sizebox, umc-sizebox),
+:is(spacer, umc-spacer),
+:is(gridpanel, umc-gridpanel),
+:is(uniformgridpanel, umc-uniformgridpanel),
+:is(scalebox, umc-scalebox),
+:is(border, umc-border),
+:is(safezone, umc-safezone),
+:is(retainerbox, umc-retainerbox),
+:is(invalidationbox, umc-invalidationbox),
+:is(backgroundblur, umc-backgroundblur),
+:is(textblock, umc-textblock),
+:is(image, umc-image),
+:is(progressbar, umc-progressbar),
+:is(checkbox, umc-checkbox),
+:is(slider, umc-slider),
+:is(editabletext, umc-editabletext) {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Panel display rules below override UA [hidden]{display:none} — restore collapse */
+:is(horizontalbox, umc-horizontalbox, verticalbox, umc-verticalbox, wrapbox, umc-wrapbox,
+  overlay, umc-overlay, canvaspanel, umc-canvaspanel, scrollbox, umc-scrollbox,
+  sizebox, umc-sizebox, spacer, umc-spacer, gridpanel, umc-gridpanel,
+  uniformgridpanel, umc-uniformgridpanel, scalebox, umc-scalebox, border, umc-border,
+  safezone, umc-safezone, widgetswitcher, umc-widgetswitcher, retainerbox, umc-retainerbox,
+  invalidationbox, umc-invalidationbox, backgroundblur, umc-backgroundblur, textblock, umc-textblock,
+  image, umc-image, progressbar, umc-progressbar, checkbox, umc-checkbox, slider, umc-slider,
+  editabletext, umc-editabletext)[hidden] {
+  display: none !important;
+}
+
+:is(horizontalbox, umc-horizontalbox) > *,
+:is(verticalbox, umc-verticalbox) > *,
+:is(wrapbox, umc-wrapbox) > *,
+:is(overlay, umc-overlay) > *,
+:is(canvaspanel, umc-canvaspanel) > *,
+:is(scrollbox, umc-scrollbox) > *,
+:is(sizebox, umc-sizebox) > *,
+:is(gridpanel, umc-gridpanel) > *,
+:is(uniformgridpanel, umc-uniformgridpanel) > *,
+:is(scalebox, umc-scalebox) > *,
+:is(border, umc-border) > *,
+:is(safezone, umc-safezone) > *,
+:is(retainerbox, umc-retainerbox) > *,
+:is(invalidationbox, umc-invalidationbox) > *,
+:is(backgroundblur, umc-backgroundblur) > * {
+  box-sizing: border-box;
+}
+
+/* --- Horizontal / Vertical / Wrap boxes --- */
+:is(horizontalbox, umc-horizontalbox),
+:is(verticalbox, umc-verticalbox),
+:is(wrapbox, umc-wrapbox),
+:is(overlay, umc-overlay),
+:is(canvaspanel, umc-canvaspanel),
+:is(scrollbox, umc-scrollbox),
+:is(sizebox, umc-sizebox),
+:is(gridpanel, umc-gridpanel),
+:is(uniformgridpanel, umc-uniformgridpanel),
+:is(scalebox, umc-scalebox),
+:is(border, umc-border),
+:is(safezone, umc-safezone),
+:is(retainerbox, umc-retainerbox),
+:is(invalidationbox, umc-invalidationbox),
+:is(backgroundblur, umc-backgroundblur) {
+  /* Don't inherit padding/gap from ancestor panels */
+  --widget-padding: 0px;
+  --widget-gap: 0px;
+}
+
+:is(horizontalbox, umc-horizontalbox) {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: var(--widget-gap, 0px);
+  padding: var(--widget-padding, 0px);
+}
+
+:is(verticalbox, umc-verticalbox) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--widget-gap, 0px);
+  padding: var(--widget-padding, 0px);
+}
+
+:is(wrapbox, umc-wrapbox) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: var(--widget-gap, 0px);
+  padding: var(--widget-padding, 0px);
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Fill / auto children (weights refined by widget.js from fill="N") */
+:is(horizontalbox, umc-horizontalbox) > [fill],
+:is(verticalbox, umc-verticalbox) > [fill],
+:is(wrapbox, umc-wrapbox) > [fill],
+:is(border, umc-border) > [fill] {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+/* Auto-sized children: intrinsic size along the main axis */
+:is(horizontalbox, umc-horizontalbox) > :not([fill]):not(:is(spacer, umc-spacer)),
+:is(verticalbox, umc-verticalbox) > :not([fill]):not(:is(spacer, umc-spacer)),
+:is(wrapbox, umc-wrapbox) > :not([fill]):not(:is(spacer, umc-spacer)) {
+  flex: 0 0 auto;
+}
+
+/* Wrapbox in a column should take the slot width so children can wrap */
+:is(verticalbox, umc-verticalbox) > :is(wrapbox, umc-wrapbox) {
+  align-self: stretch;
+  width: auto;
+  max-width: 100%;
+}
+
+/* In a row, non-fill chrome shrink-wraps to content */
+:is(horizontalbox, umc-horizontalbox) > :is(border, umc-border):not([fill]),
+:is(horizontalbox, umc-horizontalbox) > :is(textblock, umc-textblock):not([fill]),
+:is(wrapbox, umc-wrapbox) > :is(border, umc-border):not([fill]),
+:is(wrapbox, umc-wrapbox) > :is(textblock, umc-textblock):not([fill]) {
+  width: max-content;
+  max-width: 100%;
+}
+
+:is(spacer, umc-spacer) {
+  display: block;
+  flex: 1 1 0%;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: none;
+}
+
+/* Explicit size → fixed slot (virtual list chrome, settings gaps).
+   Default flex-basis:0% would ignore height/width on the flex item. */
+:is(spacer, umc-spacer)[height] {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+:is(spacer, umc-spacer)[width] {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+/* Alignment helpers via attributes (mirrored in JS vars too) */
+:is(horizontalbox, umc-horizontalbox)[valign="top"],
+:is(wrapbox, umc-wrapbox)[valign="top"] { align-items: flex-start; }
+:is(horizontalbox, umc-horizontalbox)[valign="center"],
+:is(wrapbox, umc-wrapbox)[valign="center"] { align-items: center; }
+:is(horizontalbox, umc-horizontalbox)[valign="bottom"],
+:is(wrapbox, umc-wrapbox)[valign="bottom"] { align-items: flex-end; }
+:is(horizontalbox, umc-horizontalbox)[valign="fill"],
+:is(horizontalbox, umc-horizontalbox)[valign="stretch"],
+:is(wrapbox, umc-wrapbox)[valign="fill"],
+:is(wrapbox, umc-wrapbox)[valign="stretch"] { align-items: stretch; }
+
+:is(verticalbox, umc-verticalbox)[halign="left"] { align-items: flex-start; }
+:is(verticalbox, umc-verticalbox)[halign="center"] { align-items: center; }
+:is(verticalbox, umc-verticalbox)[halign="right"] { align-items: flex-end; }
+:is(verticalbox, umc-verticalbox)[halign="fill"],
+:is(verticalbox, umc-verticalbox)[halign="stretch"] { align-items: stretch; }
+
+:is(horizontalbox, umc-horizontalbox)[halign="left"],
+:is(wrapbox, umc-wrapbox)[halign="left"] { justify-content: flex-start; }
+:is(horizontalbox, umc-horizontalbox)[halign="center"],
+:is(wrapbox, umc-wrapbox)[halign="center"] { justify-content: center; }
+:is(horizontalbox, umc-horizontalbox)[halign="right"],
+:is(wrapbox, umc-wrapbox)[halign="right"] { justify-content: flex-end; }
+:is(horizontalbox, umc-horizontalbox)[halign="fill"],
+:is(wrapbox, umc-wrapbox)[halign="fill"] { justify-content: space-between; }
+
+:is(verticalbox, umc-verticalbox)[valign="top"] { justify-content: flex-start; }
+:is(verticalbox, umc-verticalbox)[valign="center"] { justify-content: center; }
+:is(verticalbox, umc-verticalbox)[valign="bottom"] { justify-content: flex-end; }
+:is(verticalbox, umc-verticalbox)[valign="fill"] { justify-content: space-between; }
+
+/* --- Overlay: all children share one cell --- */
+:is(overlay, umc-overlay) {
+  display: grid;
+  grid-template: 1fr / 1fr;
+  padding: var(--widget-padding, 0px);
+  min-width: 0;
+  min-height: 0;
+  /* Size from the slot, not from stretched children's min-content */
+  align-content: stretch;
+  justify-content: stretch;
+}
+:is(overlay, umc-overlay) > * {
+  grid-area: 1 / 1;
+  justify-self: stretch;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+/* Content-sized when aligned (UE Overlay slot alignment) */
+:is(overlay, umc-overlay) > [halign="left"] { justify-self: start; }
+:is(overlay, umc-overlay) > [halign="center"] { justify-self: center; }
+:is(overlay, umc-overlay) > [halign="right"] { justify-self: end; }
+:is(overlay, umc-overlay) > [halign="fill"] { justify-self: stretch; max-width: none; }
+:is(overlay, umc-overlay) > [valign="top"] { align-self: start; }
+:is(overlay, umc-overlay) > [valign="center"] { align-self: center; }
+:is(overlay, umc-overlay) > [valign="bottom"] { align-self: end; }
+:is(overlay, umc-overlay) > [valign="fill"] { align-self: stretch; max-height: none; }
+/* Backdrop blur must sit under siblings — `backdrop-filter` creates a stacking context. */
+:is(overlay, umc-overlay) > :is(backgroundblur, umc-backgroundblur) {
+  z-index: 0;
+}
+:is(overlay, umc-overlay) > *:not(:is(backgroundblur, umc-backgroundblur)) {
+  z-index: 1;
+}
+/* Intrinsic size for pinned children — don't let flex/grid chrome expand them */
+:is(overlay, umc-overlay) > [halign]:not([halign="fill"]),
+:is(overlay, umc-overlay) > [valign]:not([valign="fill"]) {
+  flex: 0 0 auto;
+}
+:is(overlay, umc-overlay) > [halign]:not([halign="fill"]) {
+  width: max-content;
+  max-width: 100%;
+}
+:is(overlay, umc-overlay) > [valign]:not([valign="fill"]) {
+  height: max-content;
+  max-height: 100%;
+}
+:is(overlay, umc-overlay) > [halign]:not([halign="fill"])[valign]:not([valign="fill"]) {
+  width: max-content;
+  height: max-content;
+}
+
+/* --- Canvas panel: absolute children with top/left/right/bottom --- */
+:is(canvaspanel, umc-canvaspanel) {
+  position: relative;
+  overflow: hidden; /* UE clips canvas children to the panel */
+  padding: var(--widget-padding, 0px);
+  isolation: isolate;
+}
+/* Opt out of clipping (e.g. MenuAnchor-style popups that extend past the slot). */
+:is(canvaspanel, umc-canvaspanel)[clip="false"] {
+  overflow: visible;
+}
+:is(canvaspanel, umc-canvaspanel) > * {
+  position: absolute;
+  z-index: 1;
+}
+
+/* --- Scroll box --- */
+/* Like UE: clips to allocated size. Needs a bounded height (height= / fill slot). */
+:is(scrollbox, umc-scrollbox) {
+  display: block;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--widget-padding, 0px);
+  min-width: 0;
+  min-height: 0;
+}
+:is(scrollbox, umc-scrollbox)[orientation="horizontal"] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+:is(scrollbox, umc-scrollbox)[orientation="vertical"] {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Fill slots must be allowed to shrink below content size or overflow never triggers */
+:is(horizontalbox, umc-horizontalbox) > :is(scrollbox, umc-scrollbox)[fill],
+:is(verticalbox, umc-verticalbox) > :is(scrollbox, umc-scrollbox)[fill],
+:is(border, umc-border) > :is(scrollbox, umc-scrollbox)[fill] {
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* --- Size box --- */
+:is(sizebox, umc-sizebox) {
+  display: block;
+}
+:is(sizebox, umc-sizebox) > * {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Grid panel --- */
+:is(gridpanel, umc-gridpanel) {
+  display: grid;
+  gap: var(--widget-gap, 0px);
+  padding: var(--widget-padding, 0px);
+  grid-template-columns: repeat(var(--widget-columns, 2), minmax(0, 1fr));
+}
+
+/* --- Uniform grid panel — equal 1fr rows and columns --- */
+:is(uniformgridpanel, umc-uniformgridpanel) {
+  display: grid;
+  gap: var(--widget-gap, 0px);
+  padding: var(--widget-padding, 0px);
+  grid-template-columns: repeat(var(--widget-columns, 2), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--widget-rows, 2), minmax(0, 1fr));
+}
+
+/* --- Scale box: scale children to fit --- */
+:is(scalebox, umc-scalebox) {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+:is(scalebox, umc-scalebox) > * {
+  grid-area: 1 / 1;
+  transform-origin: center center;
+}
+/* Chat-style: shrink to width only, keep top-left anchor. */
+:is(scalebox, umc-scalebox)[stretch="down-x"],
+:is(scalebox, umc-scalebox)[stretch="scale-down-x"],
+:is(scalebox, umc-scalebox)[stretch="down"],
+:is(scalebox, umc-scalebox)[stretch="scale-down"] {
+  place-items: start;
+}
+:is(scalebox, umc-scalebox)[stretch="down-x"] > *,
+:is(scalebox, umc-scalebox)[stretch="scale-down-x"] > *,
+:is(scalebox, umc-scalebox)[stretch="down"] > *,
+:is(scalebox, umc-scalebox)[stretch="scale-down"] > * {
+  transform-origin: top left;
+}
+
+/* --- Border (padding + optional chrome via CSS vars) --- */
+:is(border, umc-border) {
+  /* flex so a single [fill] child can take remaining height (UE slot) */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--widget-padding, 0px);
+  border: var(--widget-border, none);
+  background: var(--widget-background, transparent);
+  border-radius: var(--widget-radius, 0);
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+/* Fill borders accept the slot size from the parent box */
+:is(border, umc-border)[fill] {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+/* --- Safe zone — display cutouts / notches --- */
+:is(safezone, umc-safezone) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding-top: calc(env(safe-area-inset-top, 0px) * var(--widget-safe-pad, 1));
+  padding-right: calc(env(safe-area-inset-right, 0px) * var(--widget-safe-pad, 1));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) * var(--widget-safe-pad, 1));
+  padding-left: calc(env(safe-area-inset-left, 0px) * var(--widget-safe-pad, 1));
+}
+:is(safezone, umc-safezone) > [fill] {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* --- Widget switcher — one child page at a time --- */
+:is(widgetswitcher, umc-widgetswitcher) {
+  display: contents;
+}
+:is(widgetswitcher, umc-widgetswitcher) > [hidden] {
+  display: none !important;
+}
+
+/* --- Named slot — light-DOM injection placeholder --- */
+:is(namedslot, umc-namedslot) {
+  display: contents;
+}
+
+/* --- Retainer / Invalidation — UMG API parity passthroughs (no browser cache) --- */
+:is(retainerbox, umc-retainerbox),
+:is(invalidationbox, umc-invalidationbox) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+:is(retainerbox, umc-retainerbox) > [fill],
+:is(invalidationbox, umc-invalidationbox) > [fill] {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* --- Background blur — blur content behind the panel --- */
+:is(backgroundblur, umc-backgroundblur) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--widget-padding, 0px);
+  border: var(--widget-border, none);
+  background: var(--widget-background, color-mix(in srgb, #000 35%, transparent));
+  border-radius: var(--widget-radius, 0);
+  backdrop-filter: blur(var(--widget-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--widget-blur, 12px));
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+:is(backgroundblur, umc-backgroundblur) > [fill] {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* --- Leaf widgets (UMG palette) --- */
+:is(textblock, umc-textblock) {
+  display: block;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
+:is(image, umc-image) {
+  display: block;
+  background-color: var(--widget-background, #888);
+  background-image: var(--widget-brush, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Native button styled as UMG Button */
+button.widget,
+button[widget] {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: var(--widget-padding, 8px 14px);
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  border-radius: var(--widget-radius, 0);
+}
+
+:is(progressbar, umc-progressbar) {
+  display: block;
+  height: var(--widget-height, 8px);
+  background: var(--widget-background, color-mix(in srgb, currentColor 15%, transparent));
+  border-radius: var(--widget-radius, 0);
+  overflow: hidden;
+}
+:is(progressbar, umc-progressbar)::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: calc(var(--widget-percent, 0) * 1%);
+  background: var(--widget-fill, currentColor);
+}
+
+:is(checkbox, umc-checkbox) {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25em;
+  height: 1.25em;
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  flex: 0 0 auto;
+  cursor: pointer;
+  user-select: none;
+}
+:is(checkbox, umc-checkbox):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+:is(checkbox, umc-checkbox)[checked]::after {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  background: currentColor;
+}
+:is(checkbox, umc-checkbox)[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+:is(slider, umc-slider) {
+  display: block;
+  height: 16px;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 6px,
+      color-mix(in srgb, currentColor 20%, transparent) 6px,
+      color-mix(in srgb, currentColor 20%, transparent) 10px,
+      transparent 10px
+    );
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+:is(slider, umc-slider):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+:is(slider, umc-slider)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--widget-percent, 0) * 1%);
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  background: currentColor;
+  border-radius: 1px;
+  pointer-events: none;
+}
+:is(slider, umc-slider)[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+:is(editabletext, umc-editabletext) {
+  display: block;
+  padding: var(--widget-padding, 6px 10px);
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  min-height: 1.6em;
+  cursor: text;
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+:is(editabletext, umc-editabletext):focus {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+:is(editabletext, umc-editabletext)[multiline] {
+  white-space: pre-wrap;
+  overflow: auto;
+}
+:is(editabletext, umc-editabletext)[readonly] {
+  cursor: default;
+}
