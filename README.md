@@ -195,7 +195,7 @@ widgets/
 ```
 
 Parents pass state down in `SynchronizeProperties` and children report back with
-events — see `example/widgets/matrix/matrix-shell.umc`.
+events — see `../matrix/widgets/matrix/matrix-shell.umc`.
 
 ### Declarative bind (`data-umc`)
 
@@ -220,7 +220,7 @@ el.set(/* replace */);
 el.clear();
 ```
 
-Hand-written widgets can `extends WidgetElement` (from `slatehtml/umc`) for the same API. Dynamic lists in `.umc` use `el.set({ tag: "user-message", … })` / `el.add(…)` into a `[data-content]` region — see `example/widgets/matrix/matrix-message-list.umc`.
+Hand-written widgets can `extends WidgetElement` (from `slatehtml/umc`) for the same API. Dynamic lists in `.umc` use `el.set({ tag: "user-message", … })` / `el.add(…)` into a `[data-content]` region — see `../matrix/widgets/matrix/matrix-chat-roll.umc`.
 
 ### Lifecycle (UMG UserWidget-style)
 
@@ -287,7 +287,7 @@ btn.emit("selected", { id: 3 });
 // or api.emit("selected", { id: 3 })
 ```
 
-Reference button: `example/widgets/lib/slate-button.umc`.
+Reference button: `packages/slatehtml-ui/src/slate-button.umc`.
 
 ### Hook API (`api`)
 
@@ -318,8 +318,6 @@ export default defineConfig({
 ```js
 import "./widgets/app/title-bar.umc"; // registers <title-bar>
 ```
-
-`npm run build` in `example/` emits a single `dist/index.html` with the layout engine, widgets, and app CSS inlined. Drop `singleFile()` for normal split JS/CSS assets.
 
 ### Runtime imports
 
@@ -361,7 +359,7 @@ Workspace settings used by this repo:
 
 ```json
 {
-  "umc.preview.stylesheets": ["example/discord.css"],
+  "umc.preview.stylesheets": ["../matrix/discord.css"],
   "html.customData": ["./slatehtml.html-data.json"],
   "css.customData": ["./slatehtml.css-data.json"]
 }
@@ -387,39 +385,14 @@ start();            // same as boot (alias for controlled init)
 npm run demo
 ```
 
-**Discord clone** (Vite + `.umc` UserWidgets):
+**Matrix client** (sibling app at `~/dev/matrix`):
 
 ```bash
-cd example && npm install && npm run dev
+cd ../matrix && npm install && npm run dev
 ```
 
-```bash
-cd example && npm run build   # → dist/ (HTML + JS/CSS assets)
-```
+Uses [`matrix-js-sdk`](https://github.com/matrix-org/matrix-js-sdk) with `slatehtml` + `slatehtml-ui`.
 
-### Capacitor (Android + Linux)
-
-The Discord example ships as a Capacitor app (`com.slatehtml.discord`). Linux uses Electron via `@capawesome/capacitor-electron`.
-
-```bash
-cd example
-npm run cap:sync          # vite build + sync android + electron
-npm run linux:run         # desktop window
-npm run linux:pack        # AppImage + deb under example/electron/dist/
-npm run android:open      # open in Android Studio (needs JDK + Android SDK)
-```
-
-Android APK builds require Android Studio / SDK (`ANDROID_HOME`). Sync still copies web assets into `android/` without a device.
-
-| Path | Role |
-|------|------|
-| `example/capacitor.config.json` | appId / webDir |
-| `example/android/` | Official Capacitor Android project |
-| `example/electron/` | Capawesome Electron scaffold (window + electron-builder) |
-
-### Matrix
-
-The **Matrix** example uses [`matrix-js-sdk`](https://github.com/matrix-org/matrix-js-sdk). Builtin `widgetswitcher` drives login steps; `matrix-login` is the password/SSO modal; session helpers live in `example/matrix/session.js`.
 ## Package layout
 
 | Path | Role |
@@ -427,9 +400,9 @@ The **Matrix** example uses [`matrix-js-sdk`](https://github.com/matrix-org/matr
 | `widget.css` / `widget.js` | Layout engine |
 | `index.js` / `inject-styles.js` | Default entry |
 | `umc/` | `.umc` runtime + Vite plugin |
-| `example/` | Discord app + Capacitor Android / Electron (Linux) |
+| `packages/slatehtml-ui/` | Reusable UI widgets |
 | `editors/vscode-umc/` | Language extension |
-| `test/` | Parser, preview, lifecycle, slots tests |
+| `test/` | Parser, preview, layout, reactivity tests |
 | `slatehtml.html-data.json` / `slatehtml.css-data.json` | Editor custom data |
 
 ## License
