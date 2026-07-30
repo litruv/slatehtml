@@ -1,6 +1,6 @@
 # UMC components
 
-**UMC** (User Markup Component) is SlateHTML's single-file widget format — like Unreal's UserWidget, but plain HTML + CSS + JS in one `.umc` file. Vite compiles it to a custom element with lifecycle hooks, declarative binding, and a content API.
+**UMC** (UMG Markup Component) is SlateHTML's single-file widget format — like Unreal's UserWidget, but plain HTML + CSS + JS in one `.umc` file. Vite compiles it to a custom element with lifecycle hooks, declarative binding, and a content API.
 
 ## File structure
 
