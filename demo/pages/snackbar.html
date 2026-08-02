@@ -5,16 +5,18 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed,action">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Show"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button snackbar="demo-snack" text="Show toast"></slate-button>
-                  <slate-snackbar id="demo-snack" text="Copied to clipboard"></slate-snackbar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button snackbar="demo-snack" text="Show toast"></slate-button>
+                    <slate-snackbar id="demo-snack" text="Copied to clipboard"></slate-snackbar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -32,16 +34,18 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed,action">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Timed"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button ref="show" text="Show 6s toast"></slate-button>
-                  <slate-snackbar ref="toast" text="This fades out with a countdown bar" duration="6000"></slate-snackbar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button ref="show" text="Show 6s toast"></slate-button>
+                    <slate-snackbar ref="toast" text="This fades out with a countdown bar" duration="6000"></slate-snackbar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -62,16 +66,18 @@ on(self.show, e.clicked, () => bump(self.toast));
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed,action">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="With action"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button ref="archive" text="Archive"></slate-button>
-                  <slate-snackbar ref="toast" text="Message archived" action="Undo" duration="5000"></slate-snackbar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button ref="archive" text="Archive"></slate-button>
+                    <slate-snackbar ref="toast" text="Message archived" action="Undo" duration="5000"></slate-snackbar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -92,20 +98,22 @@ on(self.archive, e.clicked, () => bump(self.toast));
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed,action">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Stack"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button ref="showA" text="Toast A"></slate-button>
-                  <slate-button ref="showB" text="Toast B"></slate-button>
-                  <slate-button ref="showC" text="Toast C"></slate-button>
-                  <slate-snackbar ref="toastA" text="First notification" duration="0"></slate-snackbar>
-                  <slate-snackbar ref="toastB" text="Second notification" action="Undo" duration="0"></slate-snackbar>
-                  <slate-snackbar ref="toastC" text="Third notification" duration="0"></slate-snackbar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button ref="showA" text="Toast A"></slate-button>
+                    <slate-button ref="showB" text="Toast B"></slate-button>
+                    <slate-button ref="showC" text="Toast C"></slate-button>
+                    <slate-snackbar ref="toastA" text="First notification" duration="0"></slate-snackbar>
+                    <slate-snackbar ref="toastB" text="Second notification" action="Undo" duration="0"></slate-snackbar>
+                    <slate-snackbar ref="toastC" text="Third notification" duration="0"></slate-snackbar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

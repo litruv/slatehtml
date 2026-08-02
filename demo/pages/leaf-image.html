@@ -5,15 +5,17 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Basic"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <image brush="https://i.pravatar.cc/80?img=8" width="80" height="80"></image>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <image brush="https://i.pravatar.cc/80?img=8" width="80" height="80"></image>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -26,17 +28,19 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Row"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <image brush="https://i.pravatar.cc/64?img=9" width="48" height="48"></image>
-                  <image brush="https://i.pravatar.cc/64?img=10" width="48" height="48"></image>
-                  <image brush="https://i.pravatar.cc/64?img=11" width="48" height="48"></image>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <image brush="https://i.pravatar.cc/64?img=9" width="48" height="48"></image>
+                    <image brush="https://i.pravatar.cc/64?img=10" width="48" height="48"></image>
+                    <image brush="https://i.pravatar.cc/64?img=11" width="48" height="48"></image>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

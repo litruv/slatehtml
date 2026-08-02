@@ -20,6 +20,7 @@
 import { deferCustomElementDefines } from "slatehtml/umc";
 
 const modules = import.meta.glob(["./*.umc", "./input/*.umc"]);
+// Glob picks up new widgets (title-bar, footer, …) when this module reloads.
 
 await deferCustomElementDefines(async () => {
   await Promise.all(

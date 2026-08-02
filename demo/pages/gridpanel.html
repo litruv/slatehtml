@@ -5,22 +5,24 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="3 columns"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <gridpanel columns="3" gap="8" width="100%">
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="1"></slate-text></border>
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="2"></slate-text></border>
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="3"></slate-text></border>
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="4"></slate-text></border>
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="5"></slate-text></border>
-                    <border kind="slot" min-height="48"><slate-text kind="mono" text="6"></slate-text></border>
-                  </gridpanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <gridpanel columns="3" gap="8" width="100%">
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="1"></slate-text></border>
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="2"></slate-text></border>
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="3"></slate-text></border>
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="4"></slate-text></border>
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="5"></slate-text></border>
+                      <border kind="slot" min-height="48"><slate-text kind="mono" text="6"></slate-text></border>
+                    </gridpanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -40,20 +42,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="2 columns"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <gridpanel columns="2" gap="10" width="100%">
-                    <border kind="slot" min-height="56"><slate-text kind="mono" text="A"></slate-text></border>
-                    <border kind="slot" min-height="56"><slate-text kind="mono" text="B"></slate-text></border>
-                    <border kind="slot" min-height="56"><slate-text kind="mono" text="C"></slate-text></border>
-                    <border kind="slot" min-height="56"><slate-text kind="mono" text="D"></slate-text></border>
-                  </gridpanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <gridpanel columns="2" gap="10" width="100%">
+                      <border kind="slot" min-height="56"><slate-text kind="mono" text="A"></slate-text></border>
+                      <border kind="slot" min-height="56"><slate-text kind="mono" text="B"></slate-text></border>
+                      <border kind="slot" min-height="56"><slate-text kind="mono" text="C"></slate-text></border>
+                      <border kind="slot" min-height="56"><slate-text kind="mono" text="D"></slate-text></border>
+                    </gridpanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -71,22 +75,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Masonry"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <gridpanel masonry columns="3" gap="8" width="100%">
-                    <border kind="slot" min-height="40"><slate-text kind="mono" text="1"></slate-text></border>
-                    <border kind="slot" min-height="96"><slate-text kind="mono" text="2"></slate-text></border>
-                    <border kind="slot" min-height="56"><slate-text kind="mono" text="3"></slate-text></border>
-                    <border kind="slot" min-height="72"><slate-text kind="mono" text="4"></slate-text></border>
-                    <border kind="slot" min-height="40"><slate-text kind="mono" text="5"></slate-text></border>
-                    <border kind="slot" min-height="88"><slate-text kind="mono" text="6"></slate-text></border>
-                  </gridpanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <gridpanel masonry columns="3" gap="8" width="100%">
+                      <border kind="slot" min-height="40"><slate-text kind="mono" text="1"></slate-text></border>
+                      <border kind="slot" min-height="96"><slate-text kind="mono" text="2"></slate-text></border>
+                      <border kind="slot" min-height="56"><slate-text kind="mono" text="3"></slate-text></border>
+                      <border kind="slot" min-height="72"><slate-text kind="mono" text="4"></slate-text></border>
+                      <border kind="slot" min-height="40"><slate-text kind="mono" text="5"></slate-text></border>
+                      <border kind="slot" min-height="88"><slate-text kind="mono" text="6"></slate-text></border>
+                    </gridpanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -106,20 +112,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Uniform 2×2"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <gridpanel uniform columns="2" rows="2" gap="8" width="100%" height="140">
-                    <border kind="slot"><slate-text kind="mono" text="A"></slate-text></border>
-                    <border kind="slot"><slate-text kind="mono" text="B"></slate-text></border>
-                    <border kind="slot"><slate-text kind="mono" text="C"></slate-text></border>
-                    <border kind="slot"><slate-text kind="mono" text="D"></slate-text></border>
-                  </gridpanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <gridpanel uniform columns="2" rows="2" gap="8" width="100%" height="140">
+                      <border kind="slot"><slate-text kind="mono" text="A"></slate-text></border>
+                      <border kind="slot"><slate-text kind="mono" text="B"></slate-text></border>
+                      <border kind="slot"><slate-text kind="mono" text="C"></slate-text></border>
+                      <border kind="slot"><slate-text kind="mono" text="D"></slate-text></border>
+                    </gridpanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -137,19 +145,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Uniform 3×1"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <gridpanel uniform columns="3" rows="1" gap="8" width="100%" height="72">
-                    <border kind="slot"><slate-text kind="mono" text="1"></slate-text></border>
-                    <border kind="slot"><slate-text kind="mono" text="2"></slate-text></border>
-                    <border kind="slot"><slate-text kind="mono" text="3"></slate-text></border>
-                  </gridpanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <gridpanel uniform columns="3" rows="1" gap="8" width="100%" height="72">
+                      <border kind="slot"><slate-text kind="mono" text="1"></slate-text></border>
+                      <border kind="slot"><slate-text kind="mono" text="2"></slate-text></border>
+                      <border kind="slot"><slate-text kind="mono" text="3"></slate-text></border>
+                    </gridpanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

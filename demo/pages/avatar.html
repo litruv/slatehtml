@@ -5,18 +5,20 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Image + initials"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="Ada" size="40"></slate-avatar>
-                  <slate-avatar text="Grace Hopper" size="40"></slate-avatar>
-                  <slate-avatar text="Babbage" size="48" variant="rounded"></slate-avatar>
-                  <slate-avatar text="X" size="32" variant="square"></slate-avatar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="Ada" size="40"></slate-avatar>
+                    <slate-avatar text="Grace Hopper" size="40"></slate-avatar>
+                    <slate-avatar text="Babbage" size="48" variant="rounded"></slate-avatar>
+                    <slate-avatar text="X" size="32" variant="square"></slate-avatar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -32,17 +34,19 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Sizes"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-avatar text="S" size="24"></slate-avatar>
-                  <slate-avatar text="M" size="40"></slate-avatar>
-                  <slate-avatar text="L" size="56"></slate-avatar>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-avatar text="S" size="24"></slate-avatar>
+                    <slate-avatar text="M" size="40"></slate-avatar>
+                    <slate-avatar text="L" size="56"></slate-avatar>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -57,35 +61,37 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Groups (shapes)"></slate-text>
-                <verticalbox gap="16" valign="center" data-demo-mount>
-                  <slate-avatar-group variant="circular" max="4" size="40" spacing="12">
-                    <slate-avatar src="https://i.pravatar.cc/80?img=1" alt="A"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=2" alt="B"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=3" alt="C"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=4" alt="D"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="E"></slate-avatar>
-                  </slate-avatar-group>
-                  <slate-avatar-group variant="rounded" max="4" size="40" spacing="12">
-                    <slate-avatar src="https://i.pravatar.cc/80?img=11" alt="F"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=12" alt="G"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=13" alt="H"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=14" alt="I"></slate-avatar>
-                    <slate-avatar text="J"></slate-avatar>
-                  </slate-avatar-group>
-                  <slate-avatar-group variant="square" max="4" size="40" spacing="12">
-                    <slate-avatar src="https://i.pravatar.cc/80?img=21" alt="K"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=22" alt="L"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=23" alt="M"></slate-avatar>
-                    <slate-avatar text="N"></slate-avatar>
-                    <slate-avatar text="O"></slate-avatar>
-                  </slate-avatar-group>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="16" valign="center" data-demo-mount>
+                    <slate-avatar-group variant="circular" max="4" size="40" spacing="12">
+                      <slate-avatar src="https://i.pravatar.cc/80?img=1" alt="A"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=2" alt="B"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=3" alt="C"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=4" alt="D"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="E"></slate-avatar>
+                    </slate-avatar-group>
+                    <slate-avatar-group variant="rounded" max="4" size="40" spacing="12">
+                      <slate-avatar src="https://i.pravatar.cc/80?img=11" alt="F"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=12" alt="G"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=13" alt="H"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=14" alt="I"></slate-avatar>
+                      <slate-avatar text="J"></slate-avatar>
+                    </slate-avatar-group>
+                    <slate-avatar-group variant="square" max="4" size="40" spacing="12">
+                      <slate-avatar src="https://i.pravatar.cc/80?img=21" alt="K"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=22" alt="L"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=23" alt="M"></slate-avatar>
+                      <slate-avatar text="N"></slate-avatar>
+                      <slate-avatar text="O"></slate-avatar>
+                    </slate-avatar-group>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -118,22 +124,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Group + surplus"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-avatar-group max="3" size="44" spacing="14">
-                    <slate-avatar src="https://i.pravatar.cc/80?img=31" alt="A"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=32" alt="B"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=33" alt="C"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=34" alt="D"></slate-avatar>
-                    <slate-avatar src="https://i.pravatar.cc/80?img=35" alt="E"></slate-avatar>
-                    <slate-avatar text="F"></slate-avatar>
-                  </slate-avatar-group>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-avatar-group max="3" size="44" spacing="14">
+                      <slate-avatar src="https://i.pravatar.cc/80?img=31" alt="A"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=32" alt="B"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=33" alt="C"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=34" alt="D"></slate-avatar>
+                      <slate-avatar src="https://i.pravatar.cc/80?img=35" alt="E"></slate-avatar>
+                      <slate-avatar text="F"></slate-avatar>
+                    </slate-avatar-group>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

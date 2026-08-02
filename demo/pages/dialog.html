@@ -5,23 +5,25 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Open"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button dialog="demo-dialog" text="Open dialog"></slate-button>
-                  <slate-dialog
-                    id="demo-dialog"
-                    title="Delete file?"
-                    text="This cannot be undone."
-                  >
-                    <slate-button text="Cancel" dialog-action="cancel"></slate-button>
-                    <slate-button text="Delete" dialog-action="confirm"></slate-button>
-                  </slate-dialog>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button dialog="demo-dialog" text="Open dialog"></slate-button>
+                    <slate-dialog
+                      id="demo-dialog"
+                      title="Delete file?"
+                      text="This cannot be undone."
+                    >
+                      <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+                      <slate-button text="Delete" dialog-action="confirm"></slate-button>
+                    </slate-dialog>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -46,23 +48,25 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="From script"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button ref="show" text="Open dialog"></slate-button>
-                  <slate-dialog
-                    ref="dlg"
-                    title="Delete file?"
-                    text="This cannot be undone."
-                  >
-                    <slate-button text="Cancel" dialog-action="cancel"></slate-button>
-                    <slate-button text="Delete" dialog-action="confirm"></slate-button>
-                  </slate-dialog>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button ref="show" text="Open dialog"></slate-button>
+                    <slate-dialog
+                      ref="dlg"
+                      title="Delete file?"
+                      text="This cannot be undone."
+                    >
+                      <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+                      <slate-button text="Delete" dialog-action="confirm"></slate-button>
+                    </slate-dialog>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -92,24 +96,26 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Trigger settings"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button
-                    dialog="demo-dialog-2"
-                    dialog-title="Leave page?"
-                    dialog-text="Unsaved changes will be lost."
-                    text="Navigate away"
-                  ></slate-button>
-                  <slate-dialog id="demo-dialog-2" title="Leave page?" text="Unsaved changes will be lost.">
-                    <slate-button text="Stay" dialog-action="cancel"></slate-button>
-                    <slate-button text="Leave" dialog-action="confirm"></slate-button>
-                  </slate-dialog>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button
+                      dialog="demo-dialog-2"
+                      dialog-title="Leave page?"
+                      dialog-text="Unsaved changes will be lost."
+                      text="Navigate away"
+                    ></slate-button>
+                    <slate-dialog id="demo-dialog-2" title="Leave page?" text="Unsaved changes will be lost.">
+                      <slate-button text="Stay" dialog-action="cancel"></slate-button>
+                      <slate-button text="Leave" dialog-action="confirm"></slate-button>
+                    </slate-dialog>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

@@ -30,15 +30,17 @@ ${js}
                 </scrollbox>`
     : "";
   return `          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example${ev}>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="${title}"></slate-text>
-                <${mountTag} gap="${mountGap}" valign="center" data-demo-mount>
-${html.split("\n").map((l) => `                  ${l}`).join("\n")}
-                </${mountTag}>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <${mountTag} gap="${mountGap}" valign="center" data-demo-mount>
+${html.split("\n").map((l) => `                    ${l}`).join("\n")}
+                  </${mountTag}>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -1055,6 +1057,74 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
     </slot-leading>
     <slate-icon name="more-vertical" size="16"></slate-icon>
   </slate-app-bar>
+</border>`,
+      },
+    ],
+  }),
+
+  "title-bar.html": page({
+    title: "Title Bar",
+    hint: "Compact window/document chrome — title + optional status. Leading via slot-leading; bare children go trailing. Distinct from App Bar (page header). kind: elevated, transparent. dense.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-title-bar title="SlateHTML" status="Online" width="100%">
+  <slot-leading>
+    <slate-icon name="app-window" size="16"></slate-icon>
+  </slot-leading>
+</slate-title-bar>`,
+      },
+      {
+        name: "Window controls",
+        code: `<slate-title-bar title="Document.umc" status="Saved" kind="elevated" width="100%">
+  <slot-leading>
+    <slate-icon name="file-code" size="16"></slate-icon>
+  </slot-leading>
+  <slate-icon name="minus" size="14"></slate-icon>
+  <slate-icon name="square" size="12"></slate-icon>
+  <slate-icon name="x" size="14"></slate-icon>
+</slate-title-bar>`,
+      },
+      {
+        name: "Dense",
+        code: `<slate-title-bar title="Preview" dense width="100%"></slate-title-bar>`,
+      },
+    ],
+  }),
+
+  "footer.html": page({
+    title: "Footer",
+    hint: "Page/shell footer with text + optional meta. Leading via slot-leading; bare children go trailing. kind: elevated, transparent. dense.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-footer text="© 2026 SlateHTML" width="100%">
+  <slate-button text="Docs"></slate-button>
+  <slate-button text="GitHub"></slate-button>
+</slate-footer>`,
+      },
+      {
+        name: "Meta + elevated",
+        code: `<slate-footer
+  text="Built with UMC"
+  meta="MIT License"
+  kind="elevated"
+  width="100%"
+>
+  <slot-leading>
+    <slate-icon name="heart" size="14"></slate-icon>
+  </slot-leading>
+  <slate-text kind="hint" text="v1.0"></slate-text>
+</slate-footer>`,
+      },
+      {
+        name: "Dense transparent",
+        code: `<border kind="well" padding="0" width="100%">
+  <slate-footer text="Footer" kind="transparent" dense width="100%"></slate-footer>
 </border>`,
       },
     ],

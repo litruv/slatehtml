@@ -5,21 +5,23 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Basic"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-app-bar title="Inbox" width="100%">
-                    <slot-leading>
-                      <slate-icon name="menu" size="20"></slate-icon>
-                    </slot-leading>
-                    <slate-icon name="search" size="18"></slate-icon>
-                    <slate-icon name="bell" size="18"></slate-icon>
-                  </slate-app-bar>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-app-bar title="Inbox" width="100%">
+                      <slot-leading>
+                        <slate-icon name="menu" size="20"></slate-icon>
+                      </slot-leading>
+                      <slate-icon name="search" size="18"></slate-icon>
+                      <slate-icon name="bell" size="18"></slate-icon>
+                    </slate-app-bar>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -38,25 +40,27 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Subtitle + elevated"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-app-bar
-                    title="Messages"
-                    subtitle="Design system"
-                    kind="elevated"
-                    width="100%"
-                  >
-                    <slot-leading>
-                      <slate-icon name="arrow-left" size="20"></slate-icon>
-                    </slot-leading>
-                    <slate-button text="Compose"></slate-button>
-                  </slate-app-bar>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-app-bar
+                      title="Messages"
+                      subtitle="Design system"
+                      kind="elevated"
+                      width="100%"
+                    >
+                      <slot-leading>
+                        <slate-icon name="arrow-left" size="20"></slate-icon>
+                      </slot-leading>
+                      <slate-button text="Compose"></slate-button>
+                    </slate-app-bar>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -79,22 +83,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Dense transparent"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <border kind="well" padding="0" width="100%">
-                    <slate-app-bar title="Gallery" kind="transparent" dense width="100%">
-                      <slot-leading>
-                        <slate-icon name="menu" size="18"></slate-icon>
-                      </slot-leading>
-                      <slate-icon name="more-vertical" size="16"></slate-icon>
-                    </slate-app-bar>
-                  </border>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <border kind="well" padding="0" width="100%">
+                      <slate-app-bar title="Gallery" kind="transparent" dense width="100%">
+                        <slot-leading>
+                          <slate-icon name="menu" size="18"></slate-icon>
+                        </slot-leading>
+                        <slate-icon name="more-vertical" size="16"></slate-icon>
+                      </slate-app-bar>
+                    </border>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

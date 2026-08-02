@@ -5,28 +5,30 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Open"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button drawer="demo-drawer" text="Open drawer"></slate-button>
-                  <slate-drawer id="demo-drawer" title="Menu" placement="left" width="300">
-                    <verticalbox gap="10">
-                      <slate-list
-                        kind="plain"
-                        options="home|Home|house, search|Search|search, settings|Settings|settings"
-                        selected="home"
-                      ></slate-list>
-                      <slate-button drawer="demo-drawer-sub" text="Open details"></slate-button>
-                    </verticalbox>
-                    <slate-drawer id="demo-drawer-sub" title="Details" stack width="280">
-                      <slate-text text="Stacked toward the center — close to return to the menu."></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button drawer="demo-drawer" text="Open drawer"></slate-button>
+                    <slate-drawer id="demo-drawer" title="Menu" placement="left" width="300">
+                      <verticalbox gap="10">
+                        <slate-list
+                          kind="plain"
+                          options="home|Home|house, search|Search|search, settings|Settings|settings"
+                          selected="home"
+                        ></slate-list>
+                        <slate-button drawer="demo-drawer-sub" text="Open details"></slate-button>
+                      </verticalbox>
+                      <slate-drawer id="demo-drawer-sub" title="Details" stack width="280">
+                        <slate-text text="Stacked toward the center — close to return to the menu."></slate-text>
+                      </slate-drawer>
                     </slate-drawer>
-                  </slate-drawer>
-                </horizontalbox>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -56,23 +58,25 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Placements"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <wrapbox gap="8">
-                    <slate-button drawer="demo-drawer-edge" drawer-placement="left" text="Left"></slate-button>
-                    <slate-button drawer="demo-drawer-edge" drawer-placement="right" text="Right"></slate-button>
-                    <slate-button drawer="demo-drawer-edge" drawer-placement="top" text="Top"></slate-button>
-                    <slate-button drawer="demo-drawer-edge" drawer-placement="bottom" text="Bottom"></slate-button>
-                  </wrapbox>
-                  <slate-drawer id="demo-drawer-edge" title="Drawer" placement="left" width="280" height="200">
-                    <slate-text text="Same drawer — edge comes from the trigger."></slate-text>
-                  </slate-drawer>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <wrapbox gap="8">
+                      <slate-button drawer="demo-drawer-edge" drawer-placement="left" text="Left"></slate-button>
+                      <slate-button drawer="demo-drawer-edge" drawer-placement="right" text="Right"></slate-button>
+                      <slate-button drawer="demo-drawer-edge" drawer-placement="top" text="Top"></slate-button>
+                      <slate-button drawer="demo-drawer-edge" drawer-placement="bottom" text="Bottom"></slate-button>
+                    </wrapbox>
+                    <slate-drawer id="demo-drawer-edge" title="Drawer" placement="left" width="280" height="200">
+                      <slate-text text="Same drawer — edge comes from the trigger."></slate-text>
+                    </slate-drawer>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -97,24 +101,26 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Replace (default)"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <horizontalbox gap="8">
-                    <slate-button drawer="demo-drawer-a" text="Open A"></slate-button>
-                    <slate-button drawer="demo-drawer-b" text="Open B"></slate-button>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <horizontalbox gap="8">
+                      <slate-button drawer="demo-drawer-a" text="Open A"></slate-button>
+                      <slate-button drawer="demo-drawer-b" text="Open B"></slate-button>
+                    </horizontalbox>
+                    <slate-drawer id="demo-drawer-a" title="Drawer A" placement="left" width="260">
+                      <slate-text text="Opening B closes this one."></slate-text>
+                    </slate-drawer>
+                    <slate-drawer id="demo-drawer-b" title="Drawer B" placement="right" width="260">
+                      <slate-text text="Opening A closes this one."></slate-text>
+                    </slate-drawer>
                   </horizontalbox>
-                  <slate-drawer id="demo-drawer-a" title="Drawer A" placement="left" width="260">
-                    <slate-text text="Opening B closes this one."></slate-text>
-                  </slate-drawer>
-                  <slate-drawer id="demo-drawer-b" title="Drawer B" placement="right" width="260">
-                    <slate-text text="Opening A closes this one."></slate-text>
-                  </slate-drawer>
-                </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -140,21 +146,23 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="From script"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button ref="show" text="Open drawer"></slate-button>
-                  <slate-drawer ref="drawer" title="Menu" width="280">
-                    <verticalbox gap="8" padding="4 0">
-                      <slate-text text="Slotted body content."></slate-text>
-                      <slate-text kind="hint" text="Dismiss with the X, backdrop, or Escape."></slate-text>
-                    </verticalbox>
-                  </slate-drawer>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <slate-button ref="show" text="Open drawer"></slate-button>
+                    <slate-drawer ref="drawer" title="Menu" width="280">
+                      <verticalbox gap="8" padding="4 0">
+                        <slate-text text="Slotted body content."></slate-text>
+                        <slate-text kind="hint" text="Dismiss with the X, backdrop, or Escape."></slate-text>
+                      </verticalbox>
+                    </slate-drawer>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

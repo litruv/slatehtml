@@ -5,23 +5,25 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Basic"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <horizontalbox gap="8" valign="center">
-                    <slate-button data-demo-switcher-prev text="Prev"></slate-button>
-                    <slate-button data-demo-switcher-next text="Next"></slate-button>
-                  </horizontalbox>
-                  <widgetswitcher data-demo-switcher active="one" height="100">
-                    <border kind="slot" page="one" height="100"><slate-text kind="mono" text="page one"></slate-text></border>
-                    <border kind="slot" page="two" height="100"><slate-text kind="mono" text="page two"></slate-text></border>
-                    <border kind="slot" page="three" height="100"><slate-text kind="mono" text="page three"></slate-text></border>
-                  </widgetswitcher>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <horizontalbox gap="8" valign="center">
+                      <slate-button data-demo-switcher-prev text="Prev"></slate-button>
+                      <slate-button data-demo-switcher-next text="Next"></slate-button>
+                    </horizontalbox>
+                    <widgetswitcher data-demo-switcher active="one" height="100">
+                      <border kind="slot" page="one" height="100"><slate-text kind="mono" text="page one"></slate-text></border>
+                      <border kind="slot" page="two" height="100"><slate-text kind="mono" text="page two"></slate-text></border>
+                      <border kind="slot" page="three" height="100"><slate-text kind="mono" text="page three"></slate-text></border>
+                    </widgetswitcher>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -46,19 +48,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Active two"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <widgetswitcher active="two" height="100">
-                    <border kind="slot" data-page="one" height="100"><slate-text kind="mono" text="one"></slate-text></border>
-                    <border kind="slot" data-page="two" height="100"><slate-text kind="mono" text="two (active)"></slate-text></border>
-                    <border kind="slot" data-page="three" height="100"><slate-text kind="mono" text="three"></slate-text></border>
-                  </widgetswitcher>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <widgetswitcher active="two" height="100">
+                      <border kind="slot" data-page="one" height="100"><slate-text kind="mono" text="one"></slate-text></border>
+                      <border kind="slot" data-page="two" height="100"><slate-text kind="mono" text="two (active)"></slate-text></border>
+                      <border kind="slot" data-page="three" height="100"><slate-text kind="mono" text="three"></slate-text></border>
+                    </widgetswitcher>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

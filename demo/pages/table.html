@@ -5,36 +5,38 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Rows + columns"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-table selectable selected="ada" width="100%">
-                    <slate-row kind="header">
-                      <slate-column text="Name"></slate-column>
-                      <slate-column text="Email"></slate-column>
-                      <slate-column text="Role"></slate-column>
-                    </slate-row>
-                    <slate-row value="ada">
-                      <slate-column text="Ada"></slate-column>
-                      <slate-column text="ada@x.dev"></slate-column>
-                      <slate-column text="Admin"></slate-column>
-                    </slate-row>
-                    <slate-row value="linus">
-                      <slate-column text="Linus"></slate-column>
-                      <slate-column text="linus@x.dev"></slate-column>
-                      <slate-column text="Dev"></slate-column>
-                    </slate-row>
-                    <slate-row value="grace">
-                      <slate-column text="Grace"></slate-column>
-                      <slate-column text="grace@x.dev"></slate-column>
-                      <slate-column text="Ops"></slate-column>
-                    </slate-row>
-                  </slate-table>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-table selectable selected="ada" width="100%">
+                      <slate-row kind="header">
+                        <slate-column text="Name"></slate-column>
+                        <slate-column text="Email"></slate-column>
+                        <slate-column text="Role"></slate-column>
+                      </slate-row>
+                      <slate-row value="ada">
+                        <slate-column text="Ada"></slate-column>
+                        <slate-column text="ada@x.dev"></slate-column>
+                        <slate-column text="Admin"></slate-column>
+                      </slate-row>
+                      <slate-row value="linus">
+                        <slate-column text="Linus"></slate-column>
+                        <slate-column text="linus@x.dev"></slate-column>
+                        <slate-column text="Dev"></slate-column>
+                      </slate-row>
+                      <slate-row value="grace">
+                        <slate-column text="Grace"></slate-column>
+                        <slate-column text="grace@x.dev"></slate-column>
+                        <slate-column text="Ops"></slate-column>
+                      </slate-row>
+                    </slate-table>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -72,31 +74,33 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Column widths"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-table selectable selected="ada" width="100%">
-                    <slate-row kind="header">
-                      <slate-column text="Name" width="120"></slate-column>
-                      <slate-column text="Email"></slate-column>
-                      <slate-column text="Role" width="72"></slate-column>
-                    </slate-row>
-                    <slate-row value="ada">
-                      <slate-column text="Ada"></slate-column>
-                      <slate-column text="ada@x.dev"></slate-column>
-                      <slate-column text="Admin"></slate-column>
-                    </slate-row>
-                    <slate-row value="linus">
-                      <slate-column text="Linus"></slate-column>
-                      <slate-column text="linus@x.dev"></slate-column>
-                      <slate-column text="Dev"></slate-column>
-                    </slate-row>
-                  </slate-table>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-table selectable selected="ada" width="100%">
+                      <slate-row kind="header">
+                        <slate-column text="Name" width="120"></slate-column>
+                        <slate-column text="Email"></slate-column>
+                        <slate-column text="Role" width="72"></slate-column>
+                      </slate-row>
+                      <slate-row value="ada">
+                        <slate-column text="Ada"></slate-column>
+                        <slate-column text="ada@x.dev"></slate-column>
+                        <slate-column text="Admin"></slate-column>
+                      </slate-row>
+                      <slate-row value="linus">
+                        <slate-column text="Linus"></slate-column>
+                        <slate-column text="linus@x.dev"></slate-column>
+                        <slate-column text="Dev"></slate-column>
+                      </slate-row>
+                    </slate-table>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -129,21 +133,23 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Shorthand attrs"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-table
-                    columns="Name|120, Role|72, Status"
-                    rows="ada|Ada|Admin|Active, linus|Linus|Dev|Away, grace|Grace|Ops|Active"
-                    selectable
-                    selected="ada"
-                    width="100%"
-                  ></slate-table>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-table
+                      columns="Name|120, Role|72, Status"
+                      rows="ada|Ada|Admin|Active, linus|Linus|Dev|Away, grace|Grace|Ops|Active"
+                      selectable
+                      selected="ada"
+                      width="100%"
+                    ></slate-table>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -166,21 +172,23 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Striped + dense"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-table
-                    columns="File, Size|64, Modified|88"
-                    rows="readme.md|4 KB|Today, umc.md|18 KB|Yesterday, layout.md|12 KB|Mon"
-                    striped
-                    dense
-                    width="100%"
-                  ></slate-table>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-table
+                      columns="File, Size|64, Modified|88"
+                      rows="readme.md|4 KB|Today, umc.md|18 KB|Yesterday, layout.md|12 KB|Mon"
+                      striped
+                      dense
+                      width="100%"
+                    ></slate-table>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

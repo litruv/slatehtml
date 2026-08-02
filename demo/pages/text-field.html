@@ -5,18 +5,20 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Basic"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Name"
-                    helper="Display name"
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Name"
+                      helper="Display name"
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -36,20 +38,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Email"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Email"
-                    type="email"
-                    required
-                    helper="We'll never share it."
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Email"
+                      type="email"
+                      required
+                      helper="We'll never share it."
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -71,22 +75,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Pattern"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Username"
-                    required
-                    minlength="3"
-                    maxlength="16"
-                    pattern="^[a-z][a-z0-9_]*$"
-                    errormessage="3-16 chars, start with a letter"
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Username"
+                      required
+                      minlength="3"
+                      maxlength="16"
+                      pattern="^[a-z][a-z0-9_]*$"
+                      errormessage="3-16 chars, start with a letter"
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -110,19 +116,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Multiline"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Bio"
-                    multiline
-                    helper="A short intro"
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Bio"
+                      multiline
+                      helper="A short intro"
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -143,20 +151,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Error"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Server"
-                    value=""
-                    error
-                    errormessage="Could not reach host"
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Server"
+                      value=""
+                      error
+                      errormessage="Could not reach host"
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -178,20 +188,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="valuechanged,committed,validitychanged">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Disabled"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-text-field
-                    label="Locked"
-                    value="read-only value"
-                    disabled
-                    readonly
-                  ></slate-text-field>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-text-field
+                      label="Locked"
+                      value="read-only value"
+                      disabled
+                      readonly
+                    ></slate-text-field>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

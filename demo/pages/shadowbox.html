@@ -5,19 +5,21 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Open"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <shadowbox-button
-                    src="https://i.pravatar.cc/800?img=12"
-                    title="Preview"
-                    text="Open image lightbox"
-                  ></shadowbox-button>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <shadowbox-button
+                      src="https://i.pravatar.cc/800?img=12"
+                      title="Preview"
+                      text="Open image lightbox"
+                    ></shadowbox-button>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -34,19 +36,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Other image"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <shadowbox-button
-                    src="https://i.pravatar.cc/800?img=32"
-                    title="Another photo"
-                    text="Open other image"
-                  ></shadowbox-button>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <shadowbox-button
+                      src="https://i.pravatar.cc/800?img=32"
+                      title="Another photo"
+                      text="Open other image"
+                    ></shadowbox-button>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -63,22 +67,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Invoker command"></slate-text>
-                <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <button type="button" commandfor="demo-shadowbox" command="--open">
-                    Open (commandfor)
-                  </button>
-                  <slate-shadowbox
-                    id="demo-shadowbox"
-                    src="https://i.pravatar.cc/800?img=12"
-                    title="Invoker target"
-                  ></slate-shadowbox>
-                </horizontalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <horizontalbox gap="10" valign="center" data-demo-mount>
+                    <button type="button" commandfor="demo-shadowbox" command="--open">
+                      Open (commandfor)
+                    </button>
+                    <slate-shadowbox
+                      id="demo-shadowbox"
+                      src="https://i.pravatar.cc/800?img=12"
+                      title="Invoker target"
+                    ></slate-shadowbox>
+                  </horizontalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

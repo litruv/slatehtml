@@ -139,6 +139,12 @@ export const HUB_PREVIEWS = {
   <slot-leading><slate-icon name="menu" size="16"></slate-icon></slot-leading>
   <slate-icon name="search" size="14"></slate-icon>
 </slate-app-bar>`,
+  "title-bar": `<slate-title-bar title="SlateHTML" status="Online" dense width="140">
+  <slot-leading><slate-icon name="app-window" size="14"></slate-icon></slot-leading>
+</slate-title-bar>`,
+  footer: `<slate-footer text="© SlateHTML" dense width="140">
+  <slate-text kind="hint" text="Docs"></slate-text>
+</slate-footer>`,
   "bottom-nav": `<slate-bottom-nav selected="home" width="140">
   <slate-bottom-nav-item value="home" text="Home" icon="house" selected></slate-bottom-nav-item>
   <slate-bottom-nav-item value="search" text="Search" icon="search"></slate-bottom-nav-item>

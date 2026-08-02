@@ -1,0 +1,107 @@
+--- html ---
+<horizontalbox class="slate-footer-row" gap="12" valign="center" width="100%" padding="10 14">
+  <horizontalbox class="slate-footer-leading" data-slot="leading" gap="6" valign="center"></horizontalbox>
+  <verticalbox class="slate-footer-copy" gap="2" fill min-width="0">
+    <textblock class="slate-footer-text" data-umc="text"></textblock>
+    <textblock class="slate-footer-meta" data-umc="meta" hidden></textblock>
+  </verticalbox>
+  <horizontalbox class="slate-footer-trailing" data-content gap="8" valign="center"></horizontalbox>
+</horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 0;
+  --widget-radius: 0;
+  --widget-background: color-mix(in srgb, currentColor 5%, transparent);
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border-top: var(--widget-border);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+}
+
+self[kind="elevated"] {
+  --widget-background: var(--panel, color-mix(in srgb, currentColor 10%, transparent));
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.18);
+  border-top: none;
+}
+
+self[kind="transparent"] {
+  --widget-background: transparent;
+  border-top: none;
+}
+
+self .slate-footer-text {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.85;
+  min-width: 0; /* umc-layout-ok */
+}
+
+self .slate-footer-meta {
+  font-size: 11px;
+  line-height: 1.3;
+  opacity: 0.55;
+}
+
+self .slate-footer-meta[hidden] {
+  display: none !important;
+}
+
+self .slate-footer-leading:empty,
+self .slate-footer-trailing:empty {
+  display: none; /* umc-layout-ok */
+}
+
+self[dense] .slate-footer-row {
+  padding: 6px 10px; /* umc-layout-ok */
+}
+
+self[dense] .slate-footer-text {
+  font-size: 11px;
+}
+
+--- script ---
+/**
+ * Page / shell footer strip.
+ *
+ *   <slate-footer text="© 2026 SlateHTML" meta="Built with UMC">
+ *     <slate-button text="Docs"></slate-button>
+ *     <slate-button text="GitHub"></slate-button>
+ *   </slate-footer>
+ *
+ * Leading via <slot-leading>; bare children land trailing.
+ * Attrs: text, meta, kind ("" | elevated | transparent), dense
+ */
+export default defineUmc({
+  tag: "slate-footer",
+  attrs: {
+    text: "",
+    meta: "",
+    kind: "",
+    dense: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "contentinfo");
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const meta = (attr("meta", "") || "").trim();
+    el.querySelector(".slate-footer-meta")?.toggleAttribute("hidden", !meta);
+  },
+});
+
+--- preview ---
+<canvaspanel width="420" height="110" kind="stage">
+  <border kind="panel" padding="0" anchors="fill" top="24" left="16" right="16" bottom="24">
+    <slate-footer text="© 2026 SlateHTML" meta="MIT License" kind="elevated">
+      <slate-button text="Docs"></slate-button>
+      <slate-button text="GitHub"></slate-button>
+    </slate-footer>
+  </border>
+</canvaspanel>

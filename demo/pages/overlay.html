@@ -5,20 +5,22 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Overlay · Center"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <overlay kind="stage" height="160" padding="12">
-                    <border kind="backdrop" halign="fill" valign="fill"></border>
-                    <border kind="chip" halign="center" valign="center">
-                      <textblock text="centered"></textblock>
-                    </border>
-                  </overlay>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <overlay kind="stage" height="160" padding="12">
+                      <border kind="backdrop" halign="fill" valign="fill"></border>
+                      <border kind="chip" halign="center" valign="center">
+                        <textblock text="centered"></textblock>
+                      </border>
+                    </overlay>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -36,23 +38,25 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Overlay · Corners"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <overlay kind="stage" height="160" padding="12">
-                    <border kind="backdrop" halign="fill" valign="fill"></border>
-                    <border kind="hud" halign="left" valign="top">
-                      <slate-text kind="hud" text="left · top"></slate-text>
-                    </border>
-                    <border kind="hud" halign="right" valign="bottom">
-                      <slate-text kind="hud" text="right · bottom"></slate-text>
-                    </border>
-                  </overlay>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <overlay kind="stage" height="160" padding="12">
+                      <border kind="backdrop" halign="fill" valign="fill"></border>
+                      <border kind="hud" halign="left" valign="top">
+                        <slate-text kind="hud" text="left · top"></slate-text>
+                      </border>
+                      <border kind="hud" halign="right" valign="bottom">
+                        <slate-text kind="hud" text="right · bottom"></slate-text>
+                      </border>
+                    </overlay>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -73,25 +77,27 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Canvas · Pins"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <canvaspanel kind="stage" height="220">
-                    <border kind="pin" anchors="top-left" top="12" left="12">
-                      <slate-text kind="hud" text="top-left"></slate-text>
-                    </border>
-                    <border kind="pin" anchors="center">
-                      <slate-text kind="hud" text="center"></slate-text>
-                    </border>
-                    <border kind="pin" anchors="bottom-right" bottom="12" right="12">
-                      <slate-text kind="hud" text="bottom-right"></slate-text>
-                    </border>
-                  </canvaspanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <canvaspanel kind="stage" height="220">
+                      <border kind="pin" anchors="top-left" top="12" left="12">
+                        <slate-text kind="hud" text="top-left"></slate-text>
+                      </border>
+                      <border kind="pin" anchors="center">
+                        <slate-text kind="hud" text="center"></slate-text>
+                      </border>
+                      <border kind="pin" anchors="bottom-right" bottom="12" right="12">
+                        <slate-text kind="hud" text="bottom-right"></slate-text>
+                      </border>
+                    </canvaspanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -114,22 +120,24 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Canvas · Fill"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <canvaspanel kind="stage" height="220">
-                    <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
-                      <verticalbox gap="6" height="100%" valign="center" halign="center">
-                        <slate-text kind="label" text='anchors="fill"'></slate-text>
-                        <progressbar percent="70" width="150"></progressbar>
-                      </verticalbox>
-                    </border>
-                  </canvaspanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <canvaspanel kind="stage" height="220">
+                      <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
+                        <verticalbox gap="6" height="100%" valign="center" halign="center">
+                          <slate-text kind="label" text='anchors="fill"'></slate-text>
+                          <progressbar percent="70" width="150"></progressbar>
+                        </verticalbox>
+                      </border>
+                    </canvaspanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -149,20 +157,22 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Canvas · Edges"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <canvaspanel kind="stage" height="220">
-                    <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
-                    <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
-                    <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
-                    <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
-                  </canvaspanel>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <canvaspanel kind="stage" height="220">
+                      <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
+                      <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
+                      <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
+                      <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
+                    </canvaspanel>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

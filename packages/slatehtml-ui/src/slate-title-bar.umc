@@ -1,0 +1,117 @@
+--- html ---
+<horizontalbox class="slate-title-bar-row" gap="10" valign="center" width="100%" padding="0 14" height="36">
+  <horizontalbox class="slate-title-bar-leading" data-slot="leading" gap="6" valign="center"></horizontalbox>
+  <textblock class="slate-title-bar-title" data-umc="title" fill min-width="0"></textblock>
+  <textblock class="slate-title-bar-status" data-umc="status" kind="mono" hidden></textblock>
+  <horizontalbox class="slate-title-bar-trailing" data-content gap="8" valign="center"></horizontalbox>
+</horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 0;
+  --widget-radius: 0;
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border-bottom: var(--widget-border);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+}
+
+self[kind="elevated"] {
+  --widget-background: var(--panel, color-mix(in srgb, currentColor 10%, transparent));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  border-bottom: none;
+}
+
+self[kind="transparent"] {
+  --widget-background: transparent;
+  border-bottom: none;
+}
+
+self .slate-title-bar-title {
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  min-width: 0; /* umc-layout-ok */
+}
+
+self .slate-title-bar-status {
+  font-family: var(--slate-font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+self .slate-title-bar-status[hidden] {
+  display: none !important;
+}
+
+self .slate-title-bar-leading:empty,
+self .slate-title-bar-trailing:empty {
+  display: none; /* umc-layout-ok */
+}
+
+self[dense] .slate-title-bar-row {
+  height: 28px; /* umc-layout-ok */
+  padding: 0 10px; /* umc-layout-ok */
+}
+
+self[dense] .slate-title-bar-title {
+  font-size: 12px;
+}
+
+--- script ---
+/**
+ * Compact window / document title strip.
+ *
+ *   <slate-title-bar title="SlateHTML" status="Online">
+ *     <slot-leading>
+ *       <slate-icon name="app-window" size="16"></slate-icon>
+ *     </slot-leading>
+ *     <slate-icon name="minus" size="14"></slate-icon>
+ *     <slate-icon name="x" size="14"></slate-icon>
+ *   </slate-title-bar>
+ *
+ * Distinct from slate-app-bar (page header with subtitle): this is a single-line
+ * chrome bar — title + optional status, leading / trailing slots.
+ *
+ * Attrs: title, status, kind ("" | elevated | transparent), dense
+ */
+export default defineUmc({
+  tag: "slate-title-bar",
+  attrs: {
+    title: "",
+    status: "",
+    kind: "",
+    dense: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "banner");
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const status = (attr("status", "") || "").trim();
+    el.querySelector(".slate-title-bar-status")?.toggleAttribute("hidden", !status);
+  },
+});
+
+--- preview ---
+<canvaspanel width="420" height="100" kind="stage">
+  <border kind="panel" padding="0" anchors="fill" top="24" left="16" right="16" bottom="24">
+    <slate-title-bar title="SlateHTML" status="Online" kind="elevated">
+      <slot-leading>
+        <slate-icon name="app-window" size="16"></slate-icon>
+      </slot-leading>
+      <slate-icon name="minus" size="14"></slate-icon>
+      <slate-icon name="x" size="14"></slate-icon>
+    </slate-title-bar>
+  </border>
+</canvaspanel>

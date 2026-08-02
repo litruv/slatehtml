@@ -5,17 +5,19 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Linear"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-progress value="20"></slate-progress>
-                  <slate-progress value="55"></slate-progress>
-                  <slate-progress value="90"></slate-progress>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-progress value="20"></slate-progress>
+                    <slate-progress value="55"></slate-progress>
+                    <slate-progress value="90"></slate-progress>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -30,19 +32,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Circular"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <horizontalbox gap="14" valign="center">
-                    <slate-progress variant="circular" value="25" size="40"></slate-progress>
-                    <slate-progress variant="circular" value="60" size="48"></slate-progress>
-                    <slate-progress variant="circular" value="90" size="56"></slate-progress>
-                  </horizontalbox>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <horizontalbox gap="14" valign="center">
+                      <slate-progress variant="circular" value="25" size="40"></slate-progress>
+                      <slate-progress variant="circular" value="60" size="48"></slate-progress>
+                      <slate-progress variant="circular" value="90" size="56"></slate-progress>
+                    </horizontalbox>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -59,19 +63,21 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Indeterminate"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-progress indeterminate></slate-progress>
-                  <horizontalbox gap="14" valign="center">
-                    <slate-progress variant="circular" indeterminate size="40"></slate-progress>
-                    <slate-progress variant="circular" indeterminate size="48"></slate-progress>
-                  </horizontalbox>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-progress indeterminate></slate-progress>
+                    <horizontalbox gap="14" valign="center">
+                      <slate-progress variant="circular" indeterminate size="40"></slate-progress>
+                      <slate-progress variant="circular" indeterminate size="48"></slate-progress>
+                    </horizontalbox>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>

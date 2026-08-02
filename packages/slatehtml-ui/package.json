@@ -52,6 +52,8 @@
     "./accordion": "./src/slate-accordion.umc",
     "./accordion-item": "./src/slate-accordion-item.umc",
     "./app-bar": "./src/slate-app-bar.umc",
+    "./title-bar": "./src/slate-title-bar.umc",
+    "./footer": "./src/slate-footer.umc",
     "./bottom-nav": "./src/slate-bottom-nav.umc",
     "./bottom-nav-item": "./src/slate-bottom-nav-item.umc",
     "./drawer": "./src/slate-drawer.umc",

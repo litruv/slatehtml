@@ -464,10 +464,12 @@ slate-combobox {
   width: 100%; /* umc-layout-ok */
 }
 
+.docs-hub-preview-scale {
+  min-height: 0; /* umc-layout-ok */
+}
+
 .docs-hub-preview-stage {
-  max-width: 100%; /* umc-layout-ok */
-  transform: scale(0.92); /* umc-layout-ok, fit chrome in tile */
-  transform-origin: center center; /* umc-layout-ok */
+  max-width: none; /* umc-layout-ok — scalebox owns fitting */
 }
 
 /* Full-bleed miniatures (dialog scrim) — no padded well frame */
@@ -475,10 +477,6 @@ slate-combobox {
 .docs-hub-preview-bleed[kind="well"] {
   --widget-padding: 0;
   --widget-border: 1px solid var(--line);
-}
-
-.docs-hub-preview-bleed .docs-hub-preview-stage {
-  transform: none;
 }
 
 .docs-hub-snack-fake {
@@ -583,6 +581,20 @@ slate-combobox {
 
 .demo-meta {
   --widget-background: var(--panel-deep);
+}
+
+/* Prefer ~280px columns; wrap to full width on narrow viewports, then scalebox shrinks content. */
+:is(wrapbox, umc-wrapbox).demo-example > .demo-live,
+:is(wrapbox, umc-wrapbox).demo-example > .demo-meta {
+  flex: 1 1 280px; /* umc-layout-ok */
+  min-width: 0; /* umc-layout-ok */
+  max-width: 100%; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+}
+
+.demo-live-scale {
+  width: 100%; /* umc-layout-ok */
+  min-width: 0; /* umc-layout-ok */
 }
 
 /* Inputs: live demo | umc code box + events */

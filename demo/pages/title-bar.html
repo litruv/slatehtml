@@ -1,18 +1,20 @@
         <verticalbox gap="8">
-          <slate-text kind="section" text="Skeleton"></slate-text>
-          <slate-text kind="hint" text="Loading placeholders. kind: circle, button. Optional width / height."></slate-text>
+          <slate-text kind="section" text="Title Bar"></slate-text>
+          <slate-text kind="hint" text="Compact window/document chrome — title + optional status. Leading via slot-leading; bare children go trailing. Distinct from App Bar (page header). kind: elevated, transparent. dense."></slate-text>
         </verticalbox>
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Lines"></slate-text>
+                <slate-text kind="label" text="Basic"></slate-text>
                 <scalebox class="demo-live-scale" stretch="down-x" width="100%">
                   <verticalbox gap="10" valign="center" data-demo-mount>
-                    <slate-skeleton></slate-skeleton>
-                    <slate-skeleton width="80%"></slate-skeleton>
-                    <slate-skeleton width="55%"></slate-skeleton>
+                    <slate-title-bar title="SlateHTML" status="Online" width="100%">
+                      <slot-leading>
+                        <slate-icon name="app-window" size="16"></slate-icon>
+                      </slot-leading>
+                    </slate-title-bar>
                   </verticalbox>
                 </scalebox>
               </verticalbox>
@@ -25,25 +27,28 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<slate-skeleton></slate-skeleton>
-<slate-skeleton width="80%"></slate-skeleton>
-<slate-skeleton width="55%"></slate-skeleton>
+<slate-title-bar title="SlateHTML" status="Online" width="100%">
+  <slot-leading>
+    <slate-icon name="app-window" size="16"></slate-icon>
+  </slot-leading>
+</slate-title-bar>
             </script>
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Avatar row"></slate-text>
+                <slate-text kind="label" text="Window controls"></slate-text>
                 <scalebox class="demo-live-scale" stretch="down-x" width="100%">
                   <verticalbox gap="10" valign="center" data-demo-mount>
-                    <horizontalbox gap="10" valign="center" width="100%">
-                      <slate-skeleton kind="circle"></slate-skeleton>
-                      <verticalbox gap="6" fill>
-                        <slate-skeleton></slate-skeleton>
-                        <slate-skeleton width="70%"></slate-skeleton>
-                      </verticalbox>
-                    </horizontalbox>
+                    <slate-title-bar title="Document.umc" status="Saved" kind="elevated" width="100%">
+                      <slot-leading>
+                        <slate-icon name="file-code" size="16"></slate-icon>
+                      </slot-leading>
+                      <slate-icon name="minus" size="14"></slate-icon>
+                      <slate-icon name="square" size="12"></slate-icon>
+                      <slate-icon name="x" size="14"></slate-icon>
+                    </slate-title-bar>
                   </verticalbox>
                 </scalebox>
               </verticalbox>
@@ -56,24 +61,24 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<horizontalbox gap="10" valign="center" width="100%">
-  <slate-skeleton kind="circle"></slate-skeleton>
-  <verticalbox gap="6" fill>
-    <slate-skeleton></slate-skeleton>
-    <slate-skeleton width="70%"></slate-skeleton>
-  </verticalbox>
-</horizontalbox>
+<slate-title-bar title="Document.umc" status="Saved" kind="elevated" width="100%">
+  <slot-leading>
+    <slate-icon name="file-code" size="16"></slate-icon>
+  </slot-leading>
+  <slate-icon name="minus" size="14"></slate-icon>
+  <slate-icon name="square" size="12"></slate-icon>
+  <slate-icon name="x" size="14"></slate-icon>
+</slate-title-bar>
             </script>
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Block + button"></slate-text>
+                <slate-text kind="label" text="Dense"></slate-text>
                 <scalebox class="demo-live-scale" stretch="down-x" width="100%">
                   <verticalbox gap="10" valign="center" data-demo-mount>
-                    <slate-skeleton height="72"></slate-skeleton>
-                    <slate-skeleton kind="button"></slate-skeleton>
+                    <slate-title-bar title="Preview" dense width="100%"></slate-title-bar>
                   </verticalbox>
                 </scalebox>
               </verticalbox>
@@ -86,8 +91,7 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<slate-skeleton height="72"></slate-skeleton>
-<slate-skeleton kind="button"></slate-skeleton>
+<slate-title-bar title="Preview" dense width="100%"></slate-title-bar>
             </script>
           </wrapbox>
         </verticalbox>

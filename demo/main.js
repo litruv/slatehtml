@@ -110,6 +110,8 @@ const NAV = [
           { id: "table", title: "Table", icon: "table" },
           { id: "accordion", title: "Accordion", icon: "chevrons-down-up" },
           { id: "app-bar", title: "App Bar", icon: "panel-top" },
+          { id: "title-bar", title: "Title Bar", icon: "app-window" },
+          { id: "footer", title: "Footer", icon: "panel-bottom" },
           { id: "bottom-nav", title: "Bottom Nav", icon: "panel-bottom" },
           { id: "drawer", title: "Drawer", icon: "panel-left" },
           { id: "side-bar", title: "Side Bar", icon: "panel-left-close" },
@@ -303,9 +305,9 @@ function renderHub(hub) {
       const bleed = item.id === "dialog" || item.id === "drawer";
       const face = hasPreview
         ? `<border class="docs-hub-preview${bleed ? " docs-hub-preview-bleed" : ""}" kind="well" height="88" padding="${bleed ? 0 : 10}">
-              <overlay fill>
-                <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" fill width="100%" gap="0" valign="center" halign="center"></horizontalbox>
-              </overlay>
+              <scalebox class="docs-hub-preview-scale" stretch="fit" width="100%" height="100%" fill>
+                <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" gap="0" valign="center" halign="center"></horizontalbox>
+              </scalebox>
             </border>`
         : `<slate-icon name="${item.icon || "box"}" size="28"></slate-icon>`;
       return `

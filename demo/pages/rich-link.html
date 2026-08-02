@@ -5,20 +5,22 @@
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Card"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-rich-link
-                    href="https://example.com"
-                    title="Example Domain"
-                    description="This domain is for use in documentation examples without needing permission. Avoid use in operational systems."
-                    site="example.com"
-                  ></slate-rich-link>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-rich-link
+                      href="https://example.com"
+                      title="Example Domain"
+                      description="This domain is for use in documentation examples without needing permission. Avoid use in operational systems."
+                      site="example.com"
+                    ></slate-rich-link>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -40,21 +42,23 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="With image"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-rich-link
-                    href="https://picsum.photos"
-                    title="Lorem Picsum"
-                    description="Easy placeholder images for demos and mockups."
-                    image="https://picsum.photos/seed/richlink/320/200"
-                    site="picsum.photos"
-                  ></slate-rich-link>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-rich-link
+                      href="https://picsum.photos"
+                      title="Lorem Picsum"
+                      description="Easy placeholder images for demos and mockups."
+                      image="https://picsum.photos/seed/richlink/320/200"
+                      site="picsum.photos"
+                    ></slate-rich-link>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -77,21 +81,23 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Compact"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-rich-link
-                    href="https://example.com/docs"
-                    title="API docs"
-                    description="Short unfurl for chat-style layouts."
-                    site="example.com"
-                    compact
-                  ></slate-rich-link>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-rich-link
+                      href="https://example.com/docs"
+                      title="API docs"
+                      description="Short unfurl for chat-style layouts."
+                      site="example.com"
+                      compact
+                    ></slate-rich-link>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
@@ -114,15 +120,17 @@
           </wrapbox>
 
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
-            <border kind="panel" fill padding="16" min-width="280">
+            <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Href only"></slate-text>
-                <verticalbox gap="10" valign="center" data-demo-mount>
-                  <slate-rich-link href="https://example.com/bare"></slate-rich-link>
-                </verticalbox>
+                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                  <verticalbox gap="10" valign="center" data-demo-mount>
+                    <slate-rich-link href="https://example.com/bare"></slate-rich-link>
+                  </verticalbox>
+                </scalebox>
               </verticalbox>
             </border>
-            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+            <border kind="well" class="demo-meta" padding="12">
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
