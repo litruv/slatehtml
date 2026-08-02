@@ -25,23 +25,28 @@ self[hidden] {
 
 --- script ---
 /**
- * Lucide icon leaf for UMG widgets.
+ * Icon leaf for UMG widgets (Lucide by default).
  *
  *   <slate-icon name="chevron-down" size="16"></slate-icon>
  *   <slate-icon name="log-out" size="14" stroke-width="2"></slate-icon>
  *
- * Any kebab-case name from https://lucide.dev/icons/.
+ * Swap or extend the set via configure() from slatehtml-ui/configure.
  * Color follows `currentColor` / parent text color.
  */
-import { lucideSvg } from "./lucide-icons.js";
+import {
+  resolveIcon,
+  defaultIconSize,
+  defaultIconStrokeWidth,
+  onConfigure,
+} from "./configure.js";
 
 function paint(el, { attr }) {
   const name = attr("name", "");
-  const size = attr("size", "16") || "16";
-  const stroke = attr("stroke-width", "2") || "2";
+  const size = attr("size", "") || defaultIconSize();
+  const stroke = attr("stroke-width", "") || defaultIconStrokeWidth();
   el.style.setProperty("--icon-size", /^\d+$/.test(size) ? `${size}px` : size);
 
-  const svg = lucideSvg(name, {
+  const svg = resolveIcon(name, {
     width: size,
     height: size,
     "stroke-width": stroke,
@@ -61,8 +66,17 @@ export default defineUmc({
   tag: "slate-icon",
   attrs: {
     name: "",
-    size: "16",
-    "stroke-width": "2",
+    size: "",
+    "stroke-width": "",
+  },
+
+  Construct(el, api) {
+    el._slateIconOffConfigure = onConfigure(() => paint(el, api));
+  },
+
+  Destruct(el) {
+    el._slateIconOffConfigure?.();
+    el._slateIconOffConfigure = null;
   },
 
   SynchronizeProperties(el, api) {

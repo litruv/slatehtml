@@ -1,53 +1,106 @@
         <verticalbox gap="8">
           <slate-text kind="section" text="Settings"></slate-text>
-          <slate-text kind="subtitle" text="Turn framework behaviors on or off in your own app with configure()."></slate-text>
+          <slate-text kind="subtitle" text="Opt into framework behaviors and UI defaults from your app entry."></slate-text>
         </verticalbox>
 
         <border kind="panel" padding="16">
           <verticalbox gap="12">
-            <slate-text kind="label" text="configure / getSettings"></slate-text>
-            <slate-text kind="body" text="Import from slatehtml after (or with) the default entry. configure merges into the active settings object and returns a shallow copy. getSettings returns the current values."></slate-text>
-            <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+            <slate-text kind="label" text="Two configure APIs"></slate-text>
+            <slate-text kind="body" text="slatehtml owns layout behaviors (scroll). slatehtml-ui owns icon defaults. Call both early in your entry, before UI mounts when you can."></slate-text>
+            <scrollbox class="demo-code-box" max-height="280" padding="10 12">
               <pre><code class="language-js">import { configure, getSettings } from "slatehtml";
+import {
+  configure as configureUi,
+  getSettings as getUiSettings,
+  lucideSvg,
+} from "slatehtml-ui/configure";
 
 configure({ dragScroll: true });
-console.log(getSettings()); // { dragScroll: true }</code></pre>
+
+configureUi({
+  iconSize: "18",
+  iconStrokeWidth: "1.75",
+  // Replace or compose with Lucide:
+  icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+});
+
+console.log(getSettings(), getUiSettings());</code></pre>
             </scrollbox>
-            <slate-text kind="hint" text="Defaults are off unless you opt in. Call configure early in your app entry so scrollboxes pick up the flag when they enhance."></slate-text>
           </verticalbox>
         </border>
 
         <border kind="panel" padding="16">
           <verticalbox gap="12">
-            <slate-text kind="label" text="Options"></slate-text>
+            <slate-text kind="label" text="slatehtml"></slate-text>
             <verticalbox gap="10">
               <verticalbox gap="4">
                 <slate-text kind="body" text="dragScroll (boolean, default false)"></slate-text>
-                <slate-text kind="hint" text="Click-drag to pan scrollboxes with mouse or pen (phone-like). Touch keeps native panning. Drag can start on buttons and list chrome; it skips selectable text and pointer-owned controls (fields, sliders, menus)."></slate-text>
+                <slate-text kind="hint" text="Click-drag to pan scrollboxes with mouse or pen. Touch keeps native panning. Skips selectable text and pointer-owned controls."></slate-text>
               </verticalbox>
             </verticalbox>
-          </verticalbox>
-        </border>
-
-        <border kind="panel" padding="16">
-          <verticalbox gap="12">
-            <slate-text kind="label" text="Per-element overrides"></slate-text>
-            <slate-text kind="body" text="Global configure is the default for every scrollbox. Override one box with the drag-scroll attribute."></slate-text>
-            <scrollbox class="demo-code-box" max-height="220" padding="10 12">
-              <pre><code class="language-html">&lt;!-- Force on, even if configure({ dragScroll: false }) --&gt;
-&lt;scrollbox drag-scroll height="160"&gt;…&lt;/scrollbox&gt;
-
-&lt;!-- Force off, even if dragScroll is enabled globally --&gt;
-&lt;scrollbox drag-scroll="false" height="160"&gt;…&lt;/scrollbox&gt;</code></pre>
+            <slate-text kind="label" text="Per scrollbox"></slate-text>
+            <scrollbox class="demo-code-box" max-height="160" padding="10 12">
+              <pre><code class="language-html">&lt;scrollbox drag-scroll&gt;…&lt;/scrollbox&gt;
+&lt;scrollbox drag-scroll="false"&gt;…&lt;/scrollbox&gt;</code></pre>
             </scrollbox>
-            <slate-text kind="hint" text='Accepted off values: false, 0, off. Bare drag-scroll (or any other value) means on.'></slate-text>
+            <slate-text kind="hint" text='Off values: false, 0, off. Bare drag-scroll means on.'></slate-text>
           </verticalbox>
         </border>
 
         <border kind="panel" padding="16">
           <verticalbox gap="12">
-            <slate-text kind="label" text="Try it"></slate-text>
-            <slate-text kind="hint" text="These demos ignore the gallery Options toggle and set drag-scroll on the element."></slate-text>
+            <slate-text kind="label" text="slatehtml-ui"></slate-text>
+            <verticalbox gap="10">
+              <verticalbox gap="4">
+                <slate-text kind="body" text="icons (fn, default Lucide)"></slate-text>
+                <slate-text kind="hint" text="(name, attrs) => SVGElement | null. Default resolves kebab-case Lucide names. Return null for unknown. Compose with lucideSvg when you only override some names."></slate-text>
+              </verticalbox>
+              <verticalbox gap="4">
+                <slate-text kind="body" text='iconSize (string, default "16")'></slate-text>
+                <slate-text kind="hint" text="Used when slate-icon has no size attribute. Unitless numbers become px."></slate-text>
+              </verticalbox>
+              <verticalbox gap="4">
+                <slate-text kind="body" text='iconStrokeWidth (string, default "2")'></slate-text>
+                <slate-text kind="hint" text="Used when slate-icon has no stroke-width attribute."></slate-text>
+              </verticalbox>
+            </verticalbox>
+            <scrollbox class="demo-code-box" max-height="200" padding="10 12">
+              <pre><code class="language-js">import { configure, lucideSvg } from "slatehtml-ui/configure";
+
+configure({
+  icons(name, attrs) {
+    if (name === "brand") return brandSvg(attrs);
+    return lucideSvg(name, attrs);
+  },
+});</code></pre>
+            </scrollbox>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Theming"></slate-text>
+            <slate-text kind="body" text="Look (colors, radius, chrome) is not a configure() flag. Set CSS variables and kind selectors in your app stylesheet, the same pattern as the layout gallery."></slate-text>
+            <scrollbox class="demo-code-box" max-height="200" padding="10 12">
+              <pre><code class="language-css">:root {
+  --accent: #8839ef;
+  --widget-radius: 8px;
+  --widget-background: #eff1f5;
+  --widget-border: 1px solid #ccd0da;
+}</code></pre>
+            </scrollbox>
+            <horizontalbox gap="14" valign="center">
+              <a class="docs-text-link" href="#/scrollbox">Scroll Box →</a>
+              <a class="docs-text-link" href="#/icon">Icon →</a>
+            </horizontalbox>
+            <slate-text kind="hint" text="Docs Appearance (sidebar) only themes this gallery, not your app."></slate-text>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Try drag-scroll"></slate-text>
+            <slate-text kind="hint" text="Element attrs win over the gallery Appearance toggle."></slate-text>
             <horizontalbox gap="14" valign="stretch" width="100%">
               <border kind="well" fill padding="12" min-width="200">
                 <verticalbox gap="8">
@@ -84,11 +137,19 @@ console.log(getSettings()); // { dragScroll: true }</code></pre>
         </border>
 
         <border kind="panel" padding="16">
-          <verticalbox gap="10">
-            <slate-text kind="label" text="Related"></slate-text>
-            <horizontalbox gap="14" valign="center">
-              <a class="docs-text-link" href="#/scrollbox">Scroll Box →</a>
-              <a class="docs-text-link" href="#/usage">Usage →</a>
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Try icon defaults"></slate-text>
+            <slate-text kind="hint" text="Live toggle for this page only (does not persist)."></slate-text>
+            <horizontalbox gap="10" valign="center">
+              <slate-button data-docs-icon-defaults="default" text="Defaults 16 / 2"></slate-button>
+              <slate-button data-docs-icon-defaults="large" text="Large 22 / 1.5"></slate-button>
+            </horizontalbox>
+            <horizontalbox gap="16" valign="center" padding="8 0">
+              <slate-icon name="search"></slate-icon>
+              <slate-icon name="settings"></slate-icon>
+              <slate-icon name="layout-grid"></slate-icon>
+              <slate-icon name="chevrons-right"></slate-icon>
+              <slate-text kind="mono" text="size from configureUi"></slate-text>
             </horizontalbox>
           </verticalbox>
         </border>

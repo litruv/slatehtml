@@ -51,6 +51,8 @@
     "./scope-picker-option": "./src/scope-picker-option.umc",
     "./server-picker": "./src/slate-server-picker.umc",
     "./accent": "./src/accent.js",
+    "./configure": "./src/configure.js",
+    "./icons": "./src/lucide-icons.js",
     "./package.json": "./package.json"
   },
   "files": [

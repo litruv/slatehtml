@@ -381,6 +381,20 @@ getSettings();                   // { dragScroll }
 ```
 
 Per scrollbox: `drag-scroll` enables, `drag-scroll="false"` opts out. Touch still uses native panning. Drag can start on buttons (click only if you don't move); it skips selectable text and pointer-owned controls (fields, sliders, menus).
+
+**UI kit** (`slatehtml-ui/configure`): icon provider and defaults for `slate-icon`.
+
+```js
+import { configure, lucideSvg } from "slatehtml-ui/configure";
+
+configure({
+  iconSize: "18",
+  iconStrokeWidth: "1.75",
+  icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+});
+```
+
+See the docs [Settings](https://litruv.github.io/slatehtml/#/settings) page. Look (colors, chrome) stays CSS variables / `kind`, not `configure()`.
 ## Demos
 
 **Layout gallery** (no Vite, all built-in tags). See [Layout & positioning](./docs/layout.md) for a guided tour of each section:

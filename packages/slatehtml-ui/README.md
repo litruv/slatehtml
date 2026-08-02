@@ -33,6 +33,21 @@ import "slatehtml";
 import "slatehtml-ui"; // one prebuilt bundle, registers every widget
 ```
 
+### Configure (icons)
+
+```js
+import { configure, lucideSvg } from "slatehtml-ui/configure";
+
+configure({
+  iconSize: "18",
+  iconStrokeWidth: "1.75",
+  // Default provider is Lucide; compose or replace:
+  icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+});
+```
+
+Mounted `slate-icon` elements refresh when `configure()` runs. Per-icon `size` / `stroke-width` attrs still win over the defaults.
+
 ```html
 <verticalbox gap="8" padding="16">
   <slate-text kind="title" text="SlateHTML"></slate-text>
