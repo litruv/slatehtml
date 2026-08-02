@@ -1,0 +1,351 @@
+--- html ---
+<canvaspanel class="slate-sidebar-root" clip="false" height="100%">
+  <border class="slate-sidebar-backdrop" anchors="fill" top="0" left="0" right="0" bottom="0" hidden></border>
+  <border class="slate-sidebar-panel" padding="0" height="100%">
+    <verticalbox class="slate-sidebar-chrome" gap="0" fill height="100%" data-content></verticalbox>
+  </border>
+</canvaspanel>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok, inline rail */
+  box-sizing: border-box;
+  position: relative; /* umc-layout-ok */
+  width: var(--sidebar-width, 200px); /* umc-layout-ok */
+  min-width: var(--sidebar-width, 200px); /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  --widget-background: var(--panel, transparent);
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-padding: 0;
+  overflow: hidden;
+  z-index: 1; /* umc-layout-ok */
+}
+
+/* Narrow viewport: drop out of the flex row until opened as a drawer. */
+self[layout="drawer"] {
+  width: 0 !important; /* umc-layout-ok */
+  min-width: 0 !important; /* umc-layout-ok */
+  border: none !important;
+  overflow: visible; /* umc-layout-ok, allow fixed panel */
+  pointer-events: none;
+}
+
+self[layout="drawer"][open] {
+  pointer-events: auto;
+}
+
+.slate-sidebar-root {
+  --widget-padding: 0;
+  height: 100%; /* umc-layout-ok */
+}
+
+self[layout="rail"] > .slate-sidebar-root {
+  position: relative; /* umc-layout-ok */
+  inset: auto; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+}
+
+self[layout="drawer"] > .slate-sidebar-root {
+  display: none;
+}
+
+self[layout="drawer"][open] > .slate-sidebar-root {
+  display: block !important; /* umc-layout-ok */
+  position: fixed !important; /* umc-layout-ok */
+  inset: 0 !important; /* umc-layout-ok */
+  width: auto !important; /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+  z-index: var(--sidebar-z, 200); /* umc-layout-ok */
+  pointer-events: auto;
+}
+
+.slate-sidebar-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.45);
+  --widget-border: none;
+  --widget-radius: 0;
+  cursor: pointer;
+  z-index: 0; /* umc-layout-ok */
+}
+
+self[layout="rail"] .slate-sidebar-backdrop {
+  display: none !important;
+}
+
+self[layout="drawer"][open] .slate-sidebar-backdrop {
+  display: block !important; /* umc-layout-ok */
+}
+
+.slate-sidebar-panel {
+  --widget-background: var(--sidebar-bg, var(--panel, #eff1f5));
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-padding: 0;
+  color: var(--ink, inherit);
+  box-sizing: border-box;
+  overflow: hidden; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  z-index: 1; /* umc-layout-ok */
+}
+
+self[layout="rail"] .slate-sidebar-panel {
+  position: relative; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  border-right: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+}
+
+self[layout="drawer"][open] .slate-sidebar-panel {
+  position: absolute !important; /* umc-layout-ok */
+  top: 0 !important; /* umc-layout-ok */
+  bottom: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: auto !important; /* umc-layout-ok */
+  width: var(--sidebar-width, 200px) !important; /* umc-layout-ok */
+  max-width: min(92vw, 360px); /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.28);
+}
+
+self[placement="right"][layout="drawer"][open] .slate-sidebar-panel {
+  left: auto !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.28);
+}
+
+self[placement="right"][layout="rail"] .slate-sidebar-panel {
+  border-right: none;
+  border-left: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+}
+
+.slate-sidebar-chrome {
+  min-height: 0; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * Collapsible side rail — permanent on wide viewports, drawer when narrow.
+ *
+ *   <slate-side-bar id="nav" width="220" collapse-at="840">
+ *     …nav…
+ *   </slate-side-bar>
+ *   <slate-button sidebar="nav" text="Menu"></slate-button>
+ *
+ * Attrs: open, width, collapse-at (px), placement (left|right),
+ *        mode (auto|rail|drawer). layout is resolved (rail|drawer).
+ * Events: opened, closed, modechanged { mode, layout }
+ *
+ * Note: prefer rail/drawer over inline/overlay — "overlay" is a layout builtin
+ * and used to get rewritten in .umc script strings.
+ */
+
+const DEFAULT_COLLAPSE = 840;
+const LAYOUT_RAIL = "rail";
+const LAYOUT_DRAWER = "drawer";
+
+function parsePx(raw, fallback) {
+  const n = Number.parseFloat(String(raw ?? "").trim());
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function normalizeMode(raw) {
+  const v = String(raw || "auto").toLowerCase();
+  if (v === LAYOUT_RAIL || v === "inline") return LAYOUT_RAIL;
+  // "overlay" alias: avoid a bare "overlay" string (builtin tag rewriter).
+  if (v === LAYOUT_DRAWER || v === "over" + "lay" || v === "umc-overlay") {
+    return LAYOUT_DRAWER;
+  }
+  return "auto";
+}
+
+function resolveMode(el, attr) {
+  const forced = normalizeMode(attr("mode", "auto"));
+  if (forced === LAYOUT_RAIL || forced === LAYOUT_DRAWER) return forced;
+  const at = parsePx(attr("collapse-at", String(DEFAULT_COLLAPSE)), DEFAULT_COLLAPSE);
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return LAYOUT_RAIL;
+  }
+  return window.matchMedia(`(max-width: ${at}px)`).matches ? LAYOUT_DRAWER : LAYOUT_RAIL;
+}
+
+function applyWidth(el, attr) {
+  const w = parsePx(attr("width", "200"), 200);
+  el.style.setProperty("--sidebar-width", `${w}px`);
+  el.setAttribute("width", String(w));
+}
+
+function setLayout(el, api, layout) {
+  const prev = el.getAttribute("layout") || "";
+  el.setAttribute("layout", layout);
+  el.toggleAttribute("drawer", layout === LAYOUT_DRAWER);
+  if (layout === LAYOUT_RAIL && el.hasAttribute("open")) {
+    el.removeAttribute("open");
+  }
+  if (prev && prev !== layout) {
+    api.emit("modechanged", { mode: layout, layout });
+  }
+  syncOpenChrome(el);
+}
+
+function syncOpenChrome(el) {
+  const open = el.hasAttribute("open");
+  const drawer = el.getAttribute("layout") === LAYOUT_DRAWER;
+  const backdrop = el.querySelector(".slate-sidebar-backdrop");
+  if (backdrop) backdrop.toggleAttribute("hidden", !(drawer && open));
+  el.setAttribute("aria-expanded", open || !drawer ? "true" : "false");
+}
+
+function openBar(el, api) {
+  if (el.getAttribute("layout") !== LAYOUT_DRAWER) return;
+  if (el.hasAttribute("open")) return;
+  el.setAttribute("open", "");
+  syncOpenChrome(el);
+  api.emit("opened", { open: true });
+}
+
+function closeBar(el, api, reason = "close") {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  syncOpenChrome(el);
+  api.emit("closed", { open: false, reason });
+}
+
+function toggleBar(el, api) {
+  if (el.getAttribute("layout") !== LAYOUT_DRAWER) return;
+  if (el.hasAttribute("open")) closeBar(el, api, "toggle");
+  else openBar(el, api);
+}
+
+function findSidebar(id) {
+  if (!id) return null;
+  const byId = document.getElementById(id);
+  if (byId?.localName === "slate-side-bar") return byId;
+  for (const node of document.querySelectorAll("slate-side-bar")) {
+    if (node.getAttribute("id") === id || node.getAttribute("name") === id) {
+      return node;
+    }
+  }
+  return null;
+}
+
+function ensureDocListeners() {
+  if (typeof document === "undefined" || document.__slateSidebarBound) return;
+  document.__slateSidebarBound = true;
+
+  const onTrigger = (event) => {
+    const t = event.target;
+    const trigger =
+      t instanceof Element
+        ? t.hasAttribute("sidebar")
+          ? t
+          : t.closest("[sidebar]")
+        : null;
+    if (!trigger) return;
+    const bar = findSidebar(trigger.getAttribute("sidebar"));
+    if (!bar) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    const api = bar.__sidebarApi;
+    if (api) toggleBar(bar, api);
+    else bar.toggleAttribute("open");
+  };
+
+  document.addEventListener("clicked", onTrigger, true);
+  document.addEventListener("click", onTrigger, true);
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const t = event.target;
+    if (!(t instanceof Element)) return;
+    const trigger = t.hasAttribute("sidebar") ? t : t.closest("[sidebar]");
+    if (!trigger) return;
+    event.preventDefault();
+    onTrigger(event);
+  });
+}
+
+export default defineUmc({
+  tag: "slate-side-bar",
+  attrs: {
+    open: "",
+    width: "200",
+    "collapse-at": String(DEFAULT_COLLAPSE),
+    placement: "left",
+    /** auto | rail | drawer (inline/overlay accepted as aliases) */
+    mode: "auto",
+  },
+
+  Construct(el, api) {
+    el.__sidebarApi = api;
+    el.setAttribute("role", "navigation");
+    ensureDocListeners();
+
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (event) => {
+      if (event.target?.closest?.(".slate-sidebar-backdrop")) {
+        closeBar(el, api, "backdrop");
+      }
+    });
+
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && el.hasAttribute("open")) {
+        event.preventDefault();
+        closeBar(el, api, "escape");
+      }
+    });
+
+    const sync = () => setLayout(el, api, resolveMode(el, api.attr));
+    el._onResize = sync;
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", sync);
+      const at = parsePx(api.attr("collapse-at", String(DEFAULT_COLLAPSE)), DEFAULT_COLLAPSE);
+      try {
+        el._mq = window.matchMedia(`(max-width: ${at}px)`);
+        el._onMq = sync;
+        el._mq.addEventListener?.("change", el._onMq);
+      } catch {
+        /* ignore */
+      }
+    }
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    applyWidth(el, attr);
+    const placement = attr("placement", "left") === "right" ? "right" : "left";
+    el.setAttribute("placement", placement);
+    setLayout(el, el.__sidebarApi || { emit() {} }, resolveMode(el, attr));
+    syncOpenChrome(el);
+  },
+
+  Destruct(el) {
+    if (typeof window !== "undefined" && el._onResize) {
+      window.removeEventListener("resize", el._onResize);
+    }
+    try {
+      el._mq?.removeEventListener?.("change", el._onMq);
+    } catch {
+      /* ignore */
+    }
+    el.__sidebarApi = null;
+  },
+});
+
+--- preview ---
+<canvaspanel width="360" height="220" kind="stage">
+  <horizontalbox anchors="fill" top="0" left="0" right="0" bottom="0">
+    <slate-side-bar width="120" mode="rail">
+      <verticalbox gap="6" padding="10">
+        <slate-text kind="label" text="Side bar"></slate-text>
+        <slate-text kind="hint" text="Rail preview"></slate-text>
+      </verticalbox>
+    </slate-side-bar>
+    <border kind="well" fill padding="12">
+      <slate-text kind="body" text="Content"></slate-text>
+    </border>
+  </horizontalbox>
+</canvaspanel>

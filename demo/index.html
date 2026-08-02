@@ -27,46 +27,73 @@
 </head>
 <body>
   <canvaspanel height="100%">
-    <horizontalbox class="docs-shell" anchors="fill" top="0" left="0" right="0" bottom="0">
-      <border class="docs-nav" width="200" min-width="180" padding="0" height="100%">
-        <verticalbox gap="0" height="100%">
-          <verticalbox class="docs-nav-brand" gap="2" padding="14 12 8">
-            <a class="docs-brand" href="#/">SlateHTML</a>
-            <span class="docs-brand-sub">Docs</span>
-          </verticalbox>
-          <scrollbox class="docs-nav-scroll" fill padding="4 8 16">
-            <verticalbox gap="0" data-docs-nav></verticalbox>
-          </scrollbox>
-          <border class="docs-nav-options" padding="12 10 14">
-            <verticalbox gap="10">
-              <slate-text kind="label" text="Appearance"></slate-text>
-              <verticalbox gap="4">
-                <slate-text kind="hint" text="Theme"></slate-text>
-                <select class="docs-select" data-docs-opt="theme" aria-label="Theme">
-                  <option value="mocha">Mocha</option>
-                  <option value="latte">Latte</option>
-                  <option value="system">System</option>
-                </select>
-              </verticalbox>
-              <slate-switch data-docs-opt="drag-scroll" label="Drag scroll" checked></slate-switch>
-            </verticalbox>
+    <verticalbox class="docs-shell" anchors="fill" top="0" left="0" right="0" bottom="0" gap="0">
+      <slate-app-bar
+        class="docs-mobile-bar"
+        title="SlateHTML"
+        subtitle="Docs"
+        dense
+      >
+        <slot-leading>
+          <border
+            class="docs-menu-btn"
+            sidebar="docs-sidebar"
+            padding="6 8"
+            role="button"
+            tabindex="0"
+            aria-label="Open navigation"
+          >
+            <slate-icon name="menu" size="18"></slate-icon>
           </border>
-        </verticalbox>
-      </border>
+        </slot-leading>
+      </slate-app-bar>
 
-      <scrollbox class="gallery-scroll docs-content" fill>
-        <verticalbox
-          class="gallery-column"
-          data-docs-page
-          padding="28"
-          gap="22"
-          width="100%"
-          max-width="1100"
-          min-width="320"
-        ></verticalbox>
-      </scrollbox>
-    </horizontalbox>
+      <horizontalbox class="docs-body" fill gap="0" height="100%" min-height="0">
+        <slate-side-bar
+          id="docs-sidebar"
+          class="docs-nav"
+          width="240"
+          collapse-at="840"
+          placement="left"
+        >
+          <verticalbox gap="0" height="100%">
+            <verticalbox class="docs-nav-brand" gap="2" padding="14 12 8">
+              <a class="docs-brand" href="#/">SlateHTML</a>
+              <span class="docs-brand-sub">Docs</span>
+            </verticalbox>
+            <scrollbox class="docs-nav-scroll" fill padding="4 8 16">
+              <verticalbox gap="0" data-docs-nav></verticalbox>
+            </scrollbox>
+            <border class="docs-nav-options" padding="12 10 14">
+              <verticalbox gap="10">
+                <slate-text kind="label" text="Appearance"></slate-text>
+                <verticalbox gap="4">
+                  <slate-text kind="hint" text="Theme"></slate-text>
+                  <select class="docs-select" data-docs-opt="theme" aria-label="Theme">
+                    <option value="mocha">Mocha</option>
+                    <option value="latte">Latte</option>
+                    <option value="system">System</option>
+                  </select>
+                </verticalbox>
+                <slate-switch data-docs-opt="drag-scroll" label="Drag scroll" checked></slate-switch>
+              </verticalbox>
+            </border>
+          </verticalbox>
+        </slate-side-bar>
 
+        <scrollbox class="gallery-scroll docs-content" fill>
+          <verticalbox
+            class="gallery-column"
+            data-docs-page
+            padding="28"
+            gap="22"
+            width="100%"
+            max-width="1100"
+            min-width="320"
+          ></verticalbox>
+        </scrollbox>
+      </horizontalbox>
+    </verticalbox>
   </canvaspanel>
 
   <script type="module" src="./main.js"></script>

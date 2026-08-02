@@ -1179,6 +1179,53 @@ on(self.drawer, e.closed, (ev) => console.log("closed", ev.detail));`,
     ],
   }),
 
+  "side-bar.html": page({
+    title: "Side Bar",
+    hint: "Collapsible rail: permanent on wide viewports, drawer below collapse-at. Toggle with sidebar=\"id\" (same idea as drawer).",
+    events: "opened,closed,modechanged",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Rail",
+        code: `<horizontalbox gap="0" width="100%" height="160">
+  <slate-side-bar mode="rail" width="140">
+    <verticalbox gap="8" padding="10">
+      <slate-text kind="label" text="Nav"></slate-text>
+      <slate-list
+        kind="plain"
+        dense
+        options="home|Home|house, search|Search|search"
+        selected="home"
+      ></slate-list>
+    </verticalbox>
+  </slate-side-bar>
+  <border kind="well" fill padding="12">
+    <slate-text kind="body" text="Main content"></slate-text>
+  </border>
+</horizontalbox>`,
+      },
+      {
+        name: "Drawer (force)",
+        code: `<slate-button sidebar="demo-sidebar" text="Open side bar"></slate-button>
+<slate-side-bar id="demo-sidebar" mode="drawer" width="220">
+  <verticalbox gap="8" padding="12" height="100%">
+    <slate-text kind="label" text="Menu"></slate-text>
+    <slate-list
+      kind="plain"
+      dense
+      options="inbox|Inbox|inbox, starred|Starred|star, settings|Settings|settings"
+      selected="inbox"
+    ></slate-list>
+  </verticalbox>
+</slate-side-bar>`,
+      },
+      {
+        name: "Auto (collapse-at)",
+        code: `<slate-text kind="hint" text="Resize the window — below 840px the gallery docs rail becomes a drawer (+ menu button)."></slate-text>`,
+      },
+    ],
+  }),
+
   "breadcrumb.html": page({
     title: "Breadcrumb",
     hint: "Hierarchical trail, Overview › category › page.",

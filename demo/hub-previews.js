@@ -145,15 +145,29 @@ export const HUB_PREVIEWS = {
   <slate-bottom-nav-item value="me" text="Me" icon="user"></slate-bottom-nav-item>
 </slate-bottom-nav>`,
   drawer: `<border class="docs-hub-drawer-fake" fill>
-  <border class="docs-hub-drawer-panel" padding="6 8">
-    <verticalbox gap="4" fill>
-      <textblock class="docs-hub-drawer-title" text="Menu"></textblock>
-      <textblock class="docs-hub-drawer-row" text="Home"></textblock>
-      <textblock class="docs-hub-drawer-row" text="Search"></textblock>
-      <textblock class="docs-hub-drawer-row docs-hub-drawer-row-active" text="Profile"></textblock>
+  <horizontalbox fill>
+    <border class="docs-hub-drawer-panel" width="44" padding="6">
+      <verticalbox gap="4">
+        <textblock class="docs-hub-drawer-title" text="Menu"></textblock>
+        <textblock class="docs-hub-drawer-row" text="Home"></textblock>
+        <textblock class="docs-hub-drawer-row" text="Search"></textblock>
+        <textblock class="docs-hub-drawer-row docs-hub-drawer-row-active" text="Profile"></textblock>
+      </verticalbox>
+    </border>
+  </horizontalbox>
+</border>`,
+  "side-bar": `<horizontalbox gap="0" width="120" height="56">
+  <border kind="well" padding="4" width="36" height="56">
+    <verticalbox gap="3" padding="4">
+      <border kind="chip" height="6"></border>
+      <border kind="chip" height="6"></border>
+      <border kind="chip" height="6"></border>
     </verticalbox>
   </border>
-</border>`,
+  <border kind="panel" fill padding="6">
+    <slate-text kind="hint" text="…"></slate-text>
+  </border>
+</horizontalbox>`,
   breadcrumb: `<slate-breadcrumb items="Home, Docs, Button"></slate-breadcrumb>`,
   pagination: `<slate-pagination count="5" page="2"></slate-pagination>`,
   menu: `<slate-menu options="cut|Cut|scissors, copy|Copy|copy">

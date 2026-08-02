@@ -55,6 +55,7 @@
     "./bottom-nav": "./src/slate-bottom-nav.umc",
     "./bottom-nav-item": "./src/slate-bottom-nav-item.umc",
     "./drawer": "./src/slate-drawer.umc",
+    "./side-bar": "./src/slate-side-bar.umc",
     "./pagination": "./src/slate-pagination.umc",
     "./alert": "./src/slate-alert.umc",
     "./snackbar": "./src/slate-snackbar.umc",

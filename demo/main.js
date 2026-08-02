@@ -112,6 +112,7 @@ const NAV = [
           { id: "app-bar", title: "App Bar", icon: "panel-top" },
           { id: "bottom-nav", title: "Bottom Nav", icon: "panel-bottom" },
           { id: "drawer", title: "Drawer", icon: "panel-left" },
+          { id: "side-bar", title: "Side Bar", icon: "panel-left-close" },
           { id: "menu", title: "Menu", icon: "menu" },
           { id: "platform", title: "Platform", icon: "monitor" },
           { id: "breadcrumb", title: "Breadcrumb", icon: "chevrons-right" },
@@ -249,6 +250,7 @@ function buildNav() {
     if (!id || !ROUTES[id]) return;
     const next = id === "home" ? "#/" : `#/${id}`;
     if (location.hash !== next) location.hash = next;
+    closeMobileSidebar();
   });
   list.addEventListener("activated", (event) => {
     const id = event.detail?.value;
@@ -256,8 +258,14 @@ function buildNav() {
     const next = id === "home" ? "#/" : `#/${id}`;
     if (location.hash !== next) location.hash = next;
     else window.dispatchEvent(new HashChangeEvent("hashchange"));
+    closeMobileSidebar();
   });
   navRoot.append(list);
+}
+
+function closeMobileSidebar() {
+  const bar = document.getElementById("docs-sidebar");
+  if (bar?.hasAttribute("open")) bar.removeAttribute("open");
 }
 
 function routeFromHash() {

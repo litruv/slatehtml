@@ -488,10 +488,14 @@ function prefixBuiltinTagsInScript(script) {
   );
 
   // String / template literals that look like CSS/DOM selectors with a builtin type.
+  // Skip bare identifiers (`"overlay"`, `"inline"`) — those are usually attr
+  // enums / mode tokens, not selectors. Real selectors have combinators,
+  // classes, attrs, or multiple tokens (`"overlay > .x"`, `"verticalbox.foo"`).
   out = out.replace(
     /(["'`])((?:\\.|(?!\1).)*?)\1/g,
     (full, quote, body) => {
       if (quote === "`" && body.includes("${")) return full;
+      if (/^[a-z][a-z0-9]*$/i.test(body)) return full;
       if (!/(^|[,\s>+~(])([a-z][a-z0-9]*)\b/.test(body)) return full;
       const hasBuiltin = BARE_TAGS_SORTED.some(
         (tag) =>
