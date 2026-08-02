@@ -61,6 +61,11 @@ self .slate-switch-label {
   line-height: 1.3;
 }
 
+self .slate-switch-label:empty,
+self .slate-switch-label[text=""] {
+  display: none; /* umc-layout-ok, no gap when unlabeled */
+}
+
 self:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
