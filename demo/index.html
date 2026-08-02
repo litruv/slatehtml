@@ -4,6 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SlateHTML, docs</title>
+  <script>
+    (() => {
+      try {
+        const raw = JSON.parse(localStorage.getItem("slatehtml-docs-options") || "{}");
+        const pref = ["mocha", "latte", "system"].includes(raw.theme) ? raw.theme : "mocha";
+        const theme =
+          pref === "system"
+            ? matchMedia("(prefers-color-scheme: light)").matches
+              ? "latte"
+              : "mocha"
+            : pref;
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme === "latte" ? "light" : "dark";
+      } catch (_) {
+        document.documentElement.setAttribute("data-theme", "mocha");
+      }
+    })();
+  </script>
   <style>html:not([data-ready]){visibility:hidden}</style>
   <link rel="stylesheet" href="./gallery.css" />
 </head>
@@ -19,6 +37,23 @@
           <scrollbox class="docs-nav-scroll" fill padding="4 8 16">
             <verticalbox gap="0" data-docs-nav></verticalbox>
           </scrollbox>
+          <border class="docs-nav-options" padding="12 10 14">
+            <verticalbox gap="10">
+              <slate-text kind="label" text="Options"></slate-text>
+              <verticalbox gap="4">
+                <slate-text kind="hint" text="Theme"></slate-text>
+                <select class="docs-select" data-docs-opt="theme" aria-label="Theme">
+                  <option value="mocha">Mocha</option>
+                  <option value="latte">Latte</option>
+                  <option value="system">System</option>
+                </select>
+              </verticalbox>
+              <horizontalbox gap="8" valign="center">
+                <slate-switch data-docs-opt="drag-scroll" checked></slate-switch>
+                <slate-text kind="hint" text="Drag scroll"></slate-text>
+              </horizontalbox>
+            </verticalbox>
+          </border>
         </verticalbox>
       </border>
 

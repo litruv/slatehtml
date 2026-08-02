@@ -1,10 +1,10 @@
-import { configure } from "slatehtml";
 import "slatehtml";
 import "slatehtml-ui";
 import { Prism } from "./prism-umc.js";
+import { initDocsOptions, wireDocsOptions } from "./docs-options.js";
 // Don't import prism's default (light) theme, gallery.css owns Catppuccin tokens.
 
-configure({ dragScroll: true });
+initDocsOptions();
 
 /** Bundled at build time so GitHub Pages (and `vite build`) do not need a fetch of loose HTML. */
 const PAGE_HTML = import.meta.glob("./pages/*.html", {
@@ -473,4 +473,5 @@ if (!location.hash || location.hash === "#") {
 }
 
 buildNav();
+wireDocsOptions();
 onRouteChange();

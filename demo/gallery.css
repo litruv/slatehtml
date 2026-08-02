@@ -1,7 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
-/* Catppuccin Mocha, https://github.com/catppuccin/catppuccin */
-:root {
+/* Catppuccin, https://github.com/catppuccin/catppuccin */
+:root,
+html[data-theme="mocha"] {
   --ctp-rosewater: #f5e0dc;
   --ctp-flamingo: #f2cdcd;
   --ctp-pink: #f5c2e7;
@@ -51,6 +52,54 @@
   --widget-scrollbar-thumb: color-mix(in srgb, var(--ctp-overlay0) 50%, transparent);
   --widget-scrollbar-thumb-hover: color-mix(in srgb, var(--ctp-overlay2) 75%, transparent);
   --widget-scrollbar-track: transparent;
+}
+
+html[data-theme="latte"] {
+  --ctp-rosewater: #dc8a78;
+  --ctp-flamingo: #dd7878;
+  --ctp-pink: #ea76cb;
+  --ctp-mauve: #8839ef;
+  --ctp-red: #d20f39;
+  --ctp-maroon: #e64553;
+  --ctp-peach: #fe640b;
+  --ctp-yellow: #df8e1d;
+  --ctp-green: #40a02b;
+  --ctp-teal: #179299;
+  --ctp-sky: #04a5e5;
+  --ctp-sapphire: #209fb5;
+  --ctp-blue: #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-text: #4c4f69;
+  --ctp-subtext1: #5c5f77;
+  --ctp-subtext0: #6c6f85;
+  --ctp-overlay2: #7c7f93;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-surface2: #acb0be;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface0: #ccd0da;
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+
+  --ink: var(--ctp-text);
+  --muted: var(--ctp-subtext0);
+  --paper: var(--ctp-base);
+  --panel: var(--ctp-surface0);
+  --panel-deep: var(--ctp-mantle);
+  --line: var(--ctp-surface1);
+  --line-strong: var(--ctp-surface2);
+  --accent: var(--ctp-mauve);
+  --accent-soft: color-mix(in srgb, var(--ctp-mauve) 16%, var(--ctp-base));
+  --hud: var(--ctp-crust);
+  --hud-ink: var(--ctp-text);
+  --stage: var(--ctp-mantle);
+  --warn: var(--ctp-peach);
+  --bg-input: var(--ctp-base);
+  --bg-channels: var(--ctp-mantle);
+  --blurple: var(--ctp-mauve);
+  --widget-scrollbar-thumb: color-mix(in srgb, var(--ctp-overlay0) 55%, transparent);
+  --widget-scrollbar-thumb-hover: color-mix(in srgb, var(--ctp-overlay2) 80%, transparent);
 }
 
 * { box-sizing: border-box; }
@@ -252,6 +301,38 @@ slate-combobox {
   --widget-padding: 4px 8px 16px;
 }
 
+.docs-nav-options {
+  --widget-background: transparent;
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.docs-select {
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 28px 6px 8px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% - 1px), calc(100% - 9px) calc(50% - 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.docs-select:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
 .docs-brand {
   color: var(--ink);
   text-decoration: none;
@@ -450,5 +531,5 @@ umc-textblock.demo-events {
   text-underline-offset: 2px;
 }
 .gallery-link:hover {
-  color: color-mix(in srgb, var(--accent) 70%, black);
+  color: color-mix(in srgb, var(--accent) 75%, var(--ink));
 }
