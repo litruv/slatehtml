@@ -650,6 +650,21 @@ function applyScaleBox(el) {
       return;
     }
 
+    // Down-only, centered in the box (docs live previews / hub tiles).
+    if (mode === "down-center" || mode === "scale-down-center") {
+      const s = ch ? Math.min(1, sx, sy) : Math.min(1, sx);
+      child.style.transformOrigin = "center center";
+      child.style.transform = s === 1 ? "" : `scale(${s})`;
+      // Auto-height boxes shrink-wrap the scaled visual; explicit height/fill
+      // keeps the slot (hub tiles) so place-items:center can center in it.
+      if (!el.hasAttribute("height") && !el.hasAttribute("fill")) {
+        el.style.height = `${Math.max(1, Math.round(bh * s))}px`;
+      } else {
+        el.style.removeProperty("height");
+      }
+      return;
+    }
+
     el.style.removeProperty("height");
     let s = 1;
     if (mode === "fill") s = Math.max(sx, sy || sx);

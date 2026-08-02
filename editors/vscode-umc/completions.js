@@ -22,7 +22,7 @@ const TAGS = {
   canvaspanel: ["padding", "fill"],
   scrollbox: ["orientation", "padding", "fill"],
   sizebox: ["width", "height", "fill"],
-  scalebox: ["stretch", "fill", "fit", "down", "down-x", "scale-down", "scale-down-x"],
+  scalebox: ["stretch", "fill", "fit", "down", "down-x", "down-center", "scale-down", "scale-down-x", "scale-down-center"],
   gridpanel: ["columns", "rows", "masonry", "uniform", "gap", "padding", "fill"],
   spacer: [],
   border: ["padding", "fill", "background", "border-color", "kind"],

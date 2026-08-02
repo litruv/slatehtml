@@ -398,6 +398,15 @@
 :is(scalebox, umc-scalebox)[stretch="scale-down"] > * {
   transform-origin: top left;
 }
+/* Down-only but centered (gallery live previews / hub tiles). */
+:is(scalebox, umc-scalebox)[stretch="down-center"],
+:is(scalebox, umc-scalebox)[stretch="scale-down-center"] {
+  place-items: center;
+}
+:is(scalebox, umc-scalebox)[stretch="down-center"] > *,
+:is(scalebox, umc-scalebox)[stretch="scale-down-center"] > * {
+  transform-origin: center center;
+}
 
 /* --- Border (padding + optional chrome via CSS vars) --- */
 :is(border, umc-border) {
