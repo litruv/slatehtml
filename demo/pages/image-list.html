@@ -1,0 +1,251 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Image List"></slate-text>
+          <slate-text kind="hint" text="Grid of images with standard, quilted, woven, and masonry layouts. Quilted items use cols/rows spans."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="itemactivated">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Standard"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-image-list cols="3" row-height="100" gap="6" width="360">
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s1/200/200" title="Breakfast"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s2/200/200" title="Burger"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s3/200/200" title="Camera"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s4/200/200" title="Coffee"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s5/200/200" title="Hats"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-s6/200/200" title="Honey"></slate-image-list-item>
+                  </slate-image-list>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-image-list cols="3" row-height="100" gap="6" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-s1/200/200" title="Breakfast"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s2/200/200" title="Burger"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s3/200/200" title="Camera"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s4/200/200" title="Coffee"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s5/200/200" title="Hats"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s6/200/200" title="Honey"></slate-image-list-item>
+</slate-image-list>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="itemactivated">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Quilted"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-image-list variant="quilted" cols="4" row-height="80" gap="4" width="360">
+                    <slate-image-list-item
+                      src="https://picsum.photos/seed/il-q1/320/320"
+                      title="Breakfast"
+                      cols="2"
+                      rows="2"
+                    ></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q2/160/160" title="Burger"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q3/160/160" title="Camera"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q4/320/160" title="Coffee" cols="2"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q5/320/160" title="Hats" cols="2"></slate-image-list-item>
+                    <slate-image-list-item
+                      src="https://picsum.photos/seed/il-q6/320/320"
+                      title="Honey"
+                      subtitle="@slate"
+                      cols="2"
+                      rows="2"
+                    ></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q7/160/160" title="Basketball"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-q8/160/160" title="Fern"></slate-image-list-item>
+                  </slate-image-list>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-image-list variant="quilted" cols="4" row-height="80" gap="4" width="360">
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-q1/320/320"
+    title="Breakfast"
+    cols="2"
+    rows="2"
+  ></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q2/160/160" title="Burger"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q3/160/160" title="Camera"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q4/320/160" title="Coffee" cols="2"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q5/320/160" title="Hats" cols="2"></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-q6/320/320"
+    title="Honey"
+    subtitle="@slate"
+    cols="2"
+    rows="2"
+  ></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q7/160/160" title="Basketball"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q8/160/160" title="Fern"></slate-image-list-item>
+</slate-image-list>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="itemactivated">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Woven"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-image-list variant="woven" cols="3" gap="8" width="360">
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w1/200/260" title="Sea star"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w2/200/240" title="Bike"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w3/200/260" title="Mushrooms"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w4/200/240" title="Tomato"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w5/200/260" title="Fern"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-w6/200/240" title="Hats"></slate-image-list-item>
+                  </slate-image-list>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-image-list variant="woven" cols="3" gap="8" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-w1/200/260" title="Sea star"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w2/200/240" title="Bike"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w3/200/260" title="Mushrooms"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w4/200/240" title="Tomato"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w5/200/260" title="Fern"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w6/200/240" title="Hats"></slate-image-list-item>
+</slate-image-list>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="itemactivated">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Masonry"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-image-list variant="masonry" cols="3" gap="8" width="360">
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m1/240/180" aspect="4/3" title="A"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m2/240/320" aspect="3/4" title="B"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m3/240/200" aspect="6/5" title="C"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m4/240/280" aspect="5/6" title="D"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m5/240/160" aspect="3/2" title="E"></slate-image-list-item>
+                    <slate-image-list-item src="https://picsum.photos/seed/il-m6/240/300" aspect="4/5" title="F"></slate-image-list-item>
+                  </slate-image-list>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-image-list variant="masonry" cols="3" gap="8" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-m1/240/180" aspect="4/3" title="A"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m2/240/320" aspect="3/4" title="B"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m3/240/200" aspect="6/5" title="C"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m4/240/280" aspect="5/6" title="D"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m5/240/160" aspect="3/2" title="E"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m6/240/300" aspect="4/5" title="F"></slate-image-list-item>
+</slate-image-list>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="itemactivated">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Clickable"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-image-list cols="3" row-height="96" gap="6" width="320">
+                    <slate-image-list-item
+                      src="https://picsum.photos/seed/il-c1/200/200"
+                      title="One"
+                      value="one"
+                      clickable
+                    ></slate-image-list-item>
+                    <slate-image-list-item
+                      src="https://picsum.photos/seed/il-c2/200/200"
+                      title="Two"
+                      value="two"
+                      clickable
+                    ></slate-image-list-item>
+                    <slate-image-list-item
+                      src="https://picsum.photos/seed/il-c3/200/200"
+                      title="Three"
+                      value="three"
+                      clickable
+                    ></slate-image-list-item>
+                  </slate-image-list>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-image-list cols="3" row-height="96" gap="6" width="320">
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c1/200/200"
+    title="One"
+    value="one"
+    clickable
+  ></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c2/200/200"
+    title="Two"
+    value="two"
+    clickable
+  ></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c3/200/200"
+    title="Three"
+    value="three"
+    clickable
+  ></slate-image-list-item>
+</slate-image-list>
+            </script>
+          </wrapbox>
+        </verticalbox>

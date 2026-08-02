@@ -1,19 +1,29 @@
+@parent widgetswitcher
+
 --- html ---
-<horizontalbox class="slate-tabs-list" gap="0" valign="end"></horizontalbox>
-<verticalbox class="slate-tabs-body" data-content gap="0" fill></verticalbox>
+<horizontalbox class="slate-tabs-list" gap="0" valign="end" width="100%"></horizontalbox>
 
 --- style ---
+/* Host *is* the widgetswitcher; override contents so the strip + pages stack. */
 self {
-  display: flex; /* umc-layout-ok, real box so parents can size the strip */
+  display: flex; /* umc-layout-ok */
   flex-direction: column; /* umc-layout-ok */
+  align-items: stretch; /* umc-layout-ok */
   color: inherit;
   font: inherit;
   min-width: 0; /* umc-layout-ok */
+  min-height: 0; /* umc-layout-ok */
 }
 
-self .slate-tabs-list {
+self > .slate-tabs-list {
   border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
   flex: 0 0 auto; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+}
+
+self > [page] {
+  flex: 1 1 auto; /* umc-layout-ok */
+  min-height: 0; /* umc-layout-ok */
 }
 
 self .slate-tabs-tab {
@@ -37,11 +47,6 @@ self .slate-tabs-tab[aria-selected="true"] {
   border-bottom-color: currentColor;
 }
 
-/* Host is a flex column, body is the second flex child. */
-self > .slate-tabs-body:empty {
-  display: none; /* umc-layout-ok */
-}
-
 self:focus-visible .slate-tabs-tab[aria-selected="true"],
 self .slate-tabs-tab:focus-visible {
   outline: 2px solid currentColor;
@@ -50,45 +55,42 @@ self .slate-tabs-tab:focus-visible {
 
 --- script ---
 import { create } from "slatehtml/umc";
+import { enhance } from "slatehtml/widget.js";
 import { parseOptions, selectableOptions } from "./input/parse-options.js";
 
 /**
- * Tab strip + optional panels.
+ * Tab strip on a widgetswitcher (@parent). Light children are the pages.
  *
- *   <slate-tabs active="email">
- *     <slate-tab name="basic" label="Basic">…</slate-tab>
- *     <slate-tab name="email" label="Email">…</slate-tab>
+ *   <slate-tabs active="email" height="160">
+ *     <border page="basic" label="Basic" kind="panel" padding="12">…</border>
+ *     <border page="email" label="Email" kind="panel" padding="12">…</border>
  *   </slate-tabs>
  *
- * Tab labels can also come from `tabs="Basic, Email"` when driving the strip
- * without panels (e.g. gallery variant switchers). Empty panel body hides itself.
+ * Optional `tabs="basic|Basic, email|Email"` overrides labels. Each page needs
+ * `page="…"`. Selection is the host `active` attr (same as widgetswitcher).
  *
  * Events: selectionchanged { value, label, index }
  */
 
-function tabKey(panel) {
-  return (
-    panel.getAttribute("name") ||
-    panel.getAttribute("label") ||
-    ""
-  ).trim();
+function pageChildren(el) {
+  return [...el.children].filter((child) => {
+    if (child.classList?.contains("slate-tabs-list")) return false;
+    return Boolean((child.getAttribute("page") || "").trim());
+  });
 }
 
-function panelsOf(el) {
-  const body = el.querySelector(".slate-tabs-body");
-  if (!body) return [];
-  return [...body.children].filter((n) => n.localName === "slate-tab");
+function pagesFromHost(el) {
+  return pageChildren(el).map((child) => {
+    const value = (child.getAttribute("page") || "").trim();
+    const label = (child.getAttribute("label") || value).trim() || value;
+    return { type: "option", value, label, avatar: "" };
+  });
 }
 
 function resolveTabs(el, attr) {
   const fromAttr = selectableOptions(parseOptions(attr("tabs", "")));
   if (fromAttr.length) return fromAttr;
-
-  return panelsOf(el).map((panel, index) => {
-    const value = tabKey(panel) || `tab-${index}`;
-    const label = (panel.getAttribute("label") || value).trim() || value;
-    return { type: "option", value, label, avatar: "" };
-  });
+  return pagesFromHost(el);
 }
 
 function tabRow(option, selected) {
@@ -107,25 +109,27 @@ function tabRow(option, selected) {
   };
 }
 
-function syncPanels(el, selected) {
-  const panels = panelsOf(el);
-  for (const panel of panels) {
-    const key = tabKey(panel);
-    if (key && key === selected) panel.setAttribute("active", "");
-    else panel.removeAttribute("active");
+function applyActive(el, selected) {
+  if (!selected) return;
+  if ((el.getAttribute("active") || "") !== selected) {
+    el.setAttribute("active", selected);
   }
-  const body = el.querySelector(".slate-tabs-body");
-  if (!body) return;
-  if (panels.length === 0) body.setAttribute("hidden", "");
-  else body.removeAttribute("hidden");
+  try {
+    enhance(el);
+  } catch {
+    /* ignore */
+  }
 }
 
 function select(el, api, value) {
   const tabs = resolveTabs(el, api.attr);
   const index = tabs.findIndex((t) => t.value === value);
   if (index < 0) return;
-  if (value === api.attr("active", "")) return;
-  el.setAttribute("active", value);
+  if (value === api.attr("active", "")) {
+    applyActive(el, value);
+    return;
+  }
+  applyActive(el, value);
   api.emit("selectionchanged", {
     value,
     label: tabs[index].label,
@@ -142,6 +146,7 @@ export default defineUmc({
 
   Construct(el, api) {
     if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "navigation");
 
     if (el._bound) return;
     el._bound = true;
@@ -183,9 +188,11 @@ export default defineUmc({
       if (attr("active", "") !== selected) el.setAttribute("active", selected);
     }
 
-    const list = el.querySelector(".slate-tabs-list");
+    const list = el.querySelector(":scope > .slate-tabs-list");
     if (list) {
       list.setAttribute("role", "tablist");
+      // Keep the strip first among host children.
+      if (el.firstElementChild !== list) el.insertBefore(list, el.firstChild);
       const key = tabs.map((t) => `${t.value}\u0000${t.label}`).join("\u0001");
       if (el._tabsKey !== key) {
         el._tabsKey = key;
@@ -201,22 +208,21 @@ export default defineUmc({
       }
     }
 
-    syncPanels(el, selected);
+    if (selected) applyActive(el, selected);
   },
 });
 
 --- preview ---
-<verticalbox gap="16" padding="16" width="360">
-  <slate-tabs active="email">
-    <slate-tab name="basic" label="Basic">
-      <slate-text-field label="Name" helper="Display name"></slate-text-field>
-    </slate-tab>
-    <slate-tab name="email" label="Email">
-      <slate-text-field label="Email" type="email" required validate="change"></slate-text-field>
-    </slate-tab>
-    <slate-tab name="bio" label="Bio">
-      <slate-text-field label="Bio" multiline helper="Optional"></slate-text-field>
-    </slate-tab>
+<canvaspanel width="380" height="220" kind="stage">
+  <slate-tabs active="email" anchors="fill" top="12" left="12" right="12" bottom="12">
+    <border page="basic" label="Basic" kind="panel" padding="12">
+      <slate-text text="Basic panel"></slate-text>
+    </border>
+    <border page="email" label="Email" kind="panel" padding="12">
+      <slate-text text="Email panel"></slate-text>
+    </border>
+    <border page="bio" label="Bio" kind="panel" padding="12">
+      <slate-text text="Bio panel"></slate-text>
+    </border>
   </slate-tabs>
-  <slate-tabs tabs="Day, Week, Month" active="Week"></slate-tabs>
-</verticalbox>
+</canvaspanel>

@@ -1,0 +1,114 @@
+--- html ---
+<horizontalbox class="slate-app-bar-row" gap="10" valign="center" width="100%" padding="8 12">
+  <horizontalbox class="slate-app-bar-leading" data-slot="leading" gap="6" valign="center"></horizontalbox>
+  <verticalbox class="slate-app-bar-titles" gap="1" fill min-width="0">
+    <textblock class="slate-app-bar-title" data-umc="title"></textblock>
+    <textblock class="slate-app-bar-subtitle" data-umc="subtitle" hidden></textblock>
+  </verticalbox>
+  <horizontalbox class="slate-app-bar-trailing" data-content gap="6" valign="center"></horizontalbox>
+</horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 0;
+  --widget-radius: 0;
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border-bottom: var(--widget-border);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+}
+
+self[kind="elevated"] {
+  --widget-background: var(--panel, color-mix(in srgb, currentColor 10%, transparent));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  border-bottom: none;
+}
+
+self[kind="transparent"] {
+  --widget-background: transparent;
+  border-bottom: none;
+}
+
+self .slate-app-bar-title {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  min-width: 0; /* umc-layout-ok */
+}
+
+self .slate-app-bar-subtitle {
+  font-size: 11px;
+  line-height: 1.3;
+  opacity: 0.7;
+}
+
+self .slate-app-bar-subtitle[hidden] {
+  display: none !important;
+}
+
+self .slate-app-bar-leading:empty,
+self .slate-app-bar-trailing:empty {
+  display: none; /* umc-layout-ok */
+}
+
+self[dense] .slate-app-bar-row {
+  padding: 4px 10px; /* umc-layout-ok */
+}
+
+self[dense] .slate-app-bar-title {
+  font-size: 13px;
+}
+
+--- script ---
+/**
+ * Top app bar — title plus optional leading / trailing chrome.
+ *
+ *   <slate-app-bar title="Inbox" subtitle="3 unread">
+ *     <slot-leading>
+ *       <slate-icon name="menu" size="20"></slate-icon>
+ *     </slot-leading>
+ *     <slate-icon name="search" size="18"></slate-icon>
+ *     <slate-icon name="bell" size="18"></slate-icon>
+ *   </slate-app-bar>
+ *
+ * Leading uses <slot-leading>; bare children land in the trailing cluster.
+ * Attrs: title, subtitle, kind ("" | elevated | transparent), dense
+ */
+export default defineUmc({
+  tag: "slate-app-bar",
+  attrs: {
+    title: "",
+    subtitle: "",
+    kind: "",
+    dense: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "banner");
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const subtitle = (attr("subtitle", "") || "").trim();
+    el.querySelector(".slate-app-bar-subtitle")?.toggleAttribute("hidden", !subtitle);
+  },
+});
+
+--- preview ---
+<canvaspanel width="420" height="120" kind="stage">
+  <border kind="panel" padding="0" anchors="fill" top="16" left="16" right="16" bottom="16">
+    <slate-app-bar title="Messages" subtitle="Workspace" kind="elevated">
+      <slot-leading>
+        <slate-icon name="menu" size="20"></slate-icon>
+      </slot-leading>
+      <slate-icon name="search" size="18"></slate-icon>
+      <slate-icon name="bell" size="18"></slate-icon>
+    </slate-app-bar>
+  </border>
+</canvaspanel>

@@ -32,8 +32,34 @@ import {
   watchSource,
 } from "./reactivity.js";
 import { e } from "./events.js";
+import {
+  registerShortcut,
+  installDefShortcuts,
+  syncHostShortcutAttr,
+  disposeHostShortcutAttr,
+} from "./shortcuts.js";
 
 export { e } from "./events.js";
+export {
+  registerShortcut,
+  unregisterShortcut,
+  parseShortcut,
+  matchShortcut,
+  formatShortcut,
+  clearShortcuts,
+  listShortcuts,
+} from "./shortcuts.js";
+
+function installShortcutsFor(el, api, def) {
+  if (typeof el.__umcShortcutsStop === "function") {
+    el.__umcShortcutsStop();
+    el.__umcShortcutsStop = null;
+  }
+  if (def.shortcuts) {
+    el.__umcShortcutsStop = installDefShortcuts(el, api, def.shortcuts);
+  }
+  syncHostShortcutAttr(el, api);
+}
 
 const styleIds = new Set();
 
@@ -568,7 +594,7 @@ export function defineUmc(def) {
         typeof Base.observedAttributes !== "undefined"
           ? Base.observedAttributes
           : [];
-      return [...new Set([...names, ...HOST_LAYOUT_ATTRS, ...inherited])];
+      return [...new Set([...names, ...HOST_LAYOUT_ATTRS, "shortcut", ...inherited])];
     }
 
     constructor() {
@@ -598,6 +624,7 @@ export function defineUmc(def) {
 
       if (legacyRender) {
         legacyRender.call(this, this, api);
+        installShortcutsFor(this, api, def);
       } else if (html && !this.__umcStamped) {
         // Stamp once. Re-stamping on reconnect would scoop the previous
         // template root as "light DOM" and append it again (duplicate trees).
@@ -610,12 +637,14 @@ export function defineUmc(def) {
         Construct?.call(this, this, api);
         SynchronizeProperties?.call(this, this, api);
         forwardHostLayout(this);
+        installShortcutsFor(this, api, def);
       } else {
         bind(this, defaults);
         syncExtendedLeaf(this, extendsBare);
         Construct?.call(this, this, api);
         SynchronizeProperties?.call(this, this, api);
         forwardHostLayout(this);
+        installShortcutsFor(this, api, def);
       }
 
       // Builtin parent: enhance() for layout + leaf attrs (text → textContent).
@@ -631,6 +660,11 @@ export function defineUmc(def) {
     disconnectedCallback() {
       stopTick(this);
       const api = makeApi(this, html, defaults);
+      disposeHostShortcutAttr(this);
+      if (typeof this.__umcShortcutsStop === "function") {
+        this.__umcShortcutsStop();
+        this.__umcShortcutsStop = null;
+      }
       Destruct?.call(this, this, api);
       runDisposeBag(this);
       if (typeof super.disconnectedCallback === "function") {
@@ -654,6 +688,8 @@ export function defineUmc(def) {
         SynchronizeProperties?.call(this, this, api);
         forwardHostLayout(this);
       }
+
+      if (name === "shortcut") syncHostShortcutAttr(this, api);
 
       if (typeof super.attributeChangedCallback === "function") {
         super.attributeChangedCallback(name, oldValue, newValue);
@@ -796,6 +832,15 @@ function makeApi(el, html, defaults) {
     /** Register teardown, runs on Destroyed / disconnect. */
     dispose(fn) {
       if (typeof fn === "function") disposeBag(el).push(fn);
+    },
+    /**
+     * Global shortcut while this host is connected.
+     *   api.shortcut("mod+S", (ev) => { … })
+     */
+    shortcut(spec, handler, opts = {}) {
+      const stop = registerShortcut(spec, handler, { el, ...opts });
+      disposeBag(el).push(stop);
+      return stop;
     },
     /** External source → fn; auto-disposes with the widget. */
     watch(subscribe, fn) {

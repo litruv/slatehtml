@@ -1,0 +1,160 @@
+--- html ---
+<verticalbox class="slate-bottom-nav-item-col" gap="2" valign="center" halign="center" fill>
+  <border class="slate-bottom-nav-item-icon-wrap" width="28" height="24" padding="0">
+    <slate-icon class="slate-bottom-nav-item-icon" name="" size="20"></slate-icon>
+    <textblock class="slate-bottom-nav-item-badge" data-umc="badge" hidden></textblock>
+  </border>
+  <textblock class="slate-bottom-nav-item-label" data-umc="text"></textblock>
+</verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  flex: 1 1 0; /* umc-layout-ok — equal destinations in the bar */
+  min-width: 0; /* umc-layout-ok */
+  --widget-padding: 6px 4px;
+  --widget-radius: 8px;
+  --widget-background: transparent;
+  padding: var(--widget-padding);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.62;
+}
+
+self:hover:not([disabled]):not([selected]) {
+  opacity: 0.9;
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  background: var(--widget-background);
+}
+
+self[selected] {
+  opacity: 1;
+  color: var(--accent, inherit);
+}
+
+self[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
+
+self:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.slate-bottom-nav-item-col {
+  pointer-events: none;
+}
+
+.slate-bottom-nav-item-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-align: center;
+  min-width: 0; /* umc-layout-ok */
+}
+
+.slate-bottom-nav-item-icon-wrap {
+  --widget-background: transparent;
+  --widget-border: none;
+  --widget-padding: 0;
+  position: relative; /* umc-layout-ok */
+  display: flex; /* umc-layout-ok */
+  align-items: center; /* umc-layout-ok */
+  justify-content: center; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+  margin: 0 auto; /* umc-layout-ok */
+}
+
+.slate-bottom-nav-item-badge {
+  position: absolute; /* umc-layout-ok */
+  top: -2px; /* umc-layout-ok */
+  right: -6px; /* umc-layout-ok */
+  min-width: 14px; /* umc-layout-ok */
+  padding: 0 4px; /* umc-layout-ok */
+  border-radius: 999px;
+  background: var(--accent, currentColor);
+  color: var(--ctp-base, #11111b);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+
+.slate-bottom-nav-item-badge[hidden] {
+  display: none !important;
+}
+
+self[labels="hide"] .slate-bottom-nav-item-label,
+self[labels="false"] .slate-bottom-nav-item-label {
+  display: none !important;
+}
+
+--- script ---
+/**
+ * One destination in a slate-bottom-nav.
+ *
+ *   <slate-bottom-nav-item value="home" text="Home" icon="house" selected></slate-bottom-nav-item>
+ *
+ * Attrs: value, text, icon, badge, selected, disabled, labels
+ * Events: clicked { value, text }
+ */
+function syncFill(el) {
+  if (!el.hasAttribute("fill")) el.setAttribute("fill", "");
+}
+
+export default defineUmc({
+  tag: "slate-bottom-nav-item",
+  attrs: {
+    value: "",
+    text: "",
+    icon: "",
+    badge: "",
+    selected: "",
+    disabled: "",
+    labels: "",
+  },
+
+  events: {
+    click: "clicked",
+  },
+
+  Construct(el) {
+    syncFill(el);
+    el.setAttribute("role", "tab");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    syncFill(el);
+    const iconName = (attr("icon", "") || "").trim();
+    const icon = el.querySelector(".slate-bottom-nav-item-icon");
+    if (icon) {
+      if (iconName) icon.setAttribute("name", iconName);
+      else icon.removeAttribute("name");
+    }
+    const badge = (attr("badge", "") || "").trim();
+    el.querySelector(".slate-bottom-nav-item-badge")?.toggleAttribute("hidden", !badge);
+
+    const selected = el.hasAttribute("selected");
+    el.setAttribute("aria-selected", selected ? "true" : "false");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    el.tabIndex = selected ? 0 : -1;
+  },
+});
+
+--- preview ---
+<horizontalbox gap="0" width="280" padding="8">
+  <slate-bottom-nav-item value="home" text="Home" icon="house" selected></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="search" text="Search" icon="search" badge="3"></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="profile" text="Profile" icon="user"></slate-bottom-nav-item>
+</horizontalbox>

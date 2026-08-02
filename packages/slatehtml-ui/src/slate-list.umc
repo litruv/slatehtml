@@ -140,7 +140,11 @@ function select(el, api, value) {
     if (index < 0) return;
     label = fromSlots[index].getAttribute("text") || value;
   }
-  if (value === api.attr("selected", "")) return;
+  if (value === api.attr("selected", "")) {
+    // Re-clicking the active row still counts (nav re-open, list activate).
+    api.emit("activated", { value, label });
+    return;
+  }
   el.setAttribute("selected", value);
   api.emit("selectionchanged", { value, label, index });
 }

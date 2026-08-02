@@ -1,0 +1,135 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Accordion"></slate-text>
+          <slate-text kind="hint" text="slate-accordion + slate-accordion-item. open selects panel(s); multiple allows several open. Events: selectionchanged."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-accordion open="general" width="100%">
+                    <slate-accordion-item name="general" title="General">
+                      <slate-text kind="body" text="Profile name and language."></slate-text>
+                    </slate-accordion-item>
+                    <slate-accordion-item name="notifications" title="Notifications">
+                      <slate-text kind="body" text="Email and push preferences."></slate-text>
+                    </slate-accordion-item>
+                    <slate-accordion-item name="security" title="Security">
+                      <slate-text kind="body" text="Password and active sessions."></slate-text>
+                    </slate-accordion-item>
+                  </slate-accordion>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-accordion open="general" width="100%">
+  <slate-accordion-item name="general" title="General">
+    <slate-text kind="body" text="Profile name and language."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="notifications" title="Notifications">
+    <slate-text kind="body" text="Email and push preferences."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="security" title="Security">
+    <slate-text kind="body" text="Password and active sessions."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Multiple"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-accordion multiple open="a,b" width="100%">
+                    <slate-accordion-item name="a" title="Shipping">
+                      <slate-text kind="body" text="Address book."></slate-text>
+                    </slate-accordion-item>
+                    <slate-accordion-item name="b" title="Billing">
+                      <slate-text kind="body" text="Cards on file."></slate-text>
+                    </slate-accordion-item>
+                    <slate-accordion-item name="c" title="Tax">
+                      <slate-text kind="body" text="VAT ID."></slate-text>
+                    </slate-accordion-item>
+                  </slate-accordion>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-accordion multiple open="a,b" width="100%">
+  <slate-accordion-item name="a" title="Shipping">
+    <slate-text kind="body" text="Address book."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="b" title="Billing">
+    <slate-text kind="body" text="Cards on file."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="c" title="Tax">
+    <slate-text kind="body" text="VAT ID."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="selectionchanged">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Plain"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-accordion kind="plain" open="faq1" width="100%">
+                    <slate-accordion-item name="faq1" title="What is SlateHTML?">
+                      <slate-text kind="body" text="UMG-style panels in the browser."></slate-text>
+                    </slate-accordion-item>
+                    <slate-accordion-item name="faq2" title="What is UMC?">
+                      <slate-text kind="body" text="HTML + style + script widgets."></slate-text>
+                    </slate-accordion-item>
+                  </slate-accordion>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-accordion kind="plain" open="faq1" width="100%">
+  <slate-accordion-item name="faq1" title="What is SlateHTML?">
+    <slate-text kind="body" text="UMG-style panels in the browser."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="faq2" title="What is UMC?">
+    <slate-text kind="body" text="HTML + style + script widgets."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>
+            </script>
+          </wrapbox>
+        </verticalbox>

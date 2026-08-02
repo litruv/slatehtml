@@ -26,6 +26,11 @@ const settings = {
   iconSize: "16",
   /** Default stroke-width when slate-icon has no stroke-width attr. */
   iconStrokeWidth: "2",
+  /**
+   * OS override for shortcuts / <slate-platform>:
+   *   "auto" | "mac" | "windows" | "linux"
+   */
+  platform: "auto",
 };
 
 function isFn(v) {
@@ -51,6 +56,9 @@ export function configure(partial = {}) {
     ) {
       settings.iconStrokeWidth = String(partial.iconStrokeWidth);
     }
+    if ("platform" in partial && partial.platform != null && partial.platform !== "") {
+      settings.platform = String(partial.platform);
+    }
   }
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(CONFIGURE_EVENT));
@@ -63,6 +71,7 @@ export function getSettings() {
     icons: settings.icons,
     iconSize: settings.iconSize,
     iconStrokeWidth: settings.iconStrokeWidth,
+    platform: settings.platform,
   };
 }
 

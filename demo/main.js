@@ -1,11 +1,12 @@
 import "slatehtml";
 import "slatehtml-ui";
-import { e as umcEvents } from "slatehtml/umc";
+import { e as umcEvents, registerShortcut } from "slatehtml/umc";
 import { configure as configureUi, lucideSvg } from "slatehtml-ui/configure";
 import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 import { Prism } from "./prism-umc.js";
 import { initDocsOptions, wireDocsOptions } from "./docs-options.js";
 import { HUB_PREVIEWS } from "./hub-previews.js";
+import "./gallery.css";
 // Don't import prism's default (light) theme, gallery.css owns Catppuccin tokens.
 
 initDocsOptions();
@@ -98,27 +99,38 @@ const NAV = [
       {
         id: "display",
         title: "Display",
-        blurb: "Icons, images, media, and overlays.",
+        blurb: "Icons, chips, lists, tables, media, and navigation chrome.",
         items: [
           { id: "icon", title: "Icon", icon: "smile" },
           { id: "chip", title: "Chip", icon: "tags" },
           { id: "badge", title: "Badge", icon: "badge" },
-          { id: "divider", title: "Divider", icon: "minus" },
+          { id: "avatar", title: "Avatar", icon: "circle-user" },
+          { id: "divider", title: "Divider", icon: "separator-horizontal" },
           { id: "list", title: "List", icon: "list" },
           { id: "table", title: "Table", icon: "table" },
-          { id: "tooltip", title: "Tooltip", icon: "message-square" },
+          { id: "accordion", title: "Accordion", icon: "chevrons-down-up" },
+          { id: "app-bar", title: "App Bar", icon: "panel-top" },
+          { id: "bottom-nav", title: "Bottom Nav", icon: "panel-bottom" },
+          { id: "drawer", title: "Drawer", icon: "panel-left" },
+          { id: "menu", title: "Menu", icon: "menu" },
+          { id: "platform", title: "Platform", icon: "monitor" },
           { id: "breadcrumb", title: "Breadcrumb", icon: "chevrons-right" },
+          { id: "pagination", title: "Pagination", icon: "ellipsis" },
+          { id: "progress", title: "Progress", icon: "loader-circle" },
           { id: "image", title: "Image", icon: "image" },
+          { id: "image-list", title: "Image List", icon: "layout-grid" },
+          { id: "rich-link", title: "Rich Link", icon: "link" },
           { id: "media", title: "Media", icon: "play" },
-          { id: "popup-anchor", title: "Popup Anchor", icon: "anchor" },
-          { id: "shadowbox", title: "Shadowbox", icon: "maximize-2" },
+          { id: "popup-anchor", title: "Popup Anchor", icon: "panel-top-open" },
+          { id: "shadowbox", title: "Shadowbox", icon: "expand" },
         ],
       },
       {
         id: "feedback",
         title: "Feedback",
-        blurb: "Alerts, toasts, dialogs, and loading placeholders.",
+        blurb: "Tooltips, alerts, toasts, dialogs, and loading placeholders.",
         items: [
+          { id: "tooltip", title: "Tooltip", icon: "message-square" },
           { id: "alert", title: "Alert", icon: "info" },
           { id: "snackbar", title: "Snackbar", icon: "message-circle" },
           { id: "dialog", title: "Dialog", icon: "app-window" },
@@ -188,29 +200,64 @@ function hubForRoute(id) {
   return null;
 }
 
+function navIcon(entry) {
+  if (entry.icon) return entry.icon;
+  return (
+    {
+      home: "house",
+      installation: "download",
+      usage: "book-open",
+      settings: "settings",
+      panel: "box",
+      common: "type",
+      input: "rectangle-ellipsis",
+      display: "layout-grid",
+      feedback: "message-circle",
+    }[entry.id] || ""
+  );
+}
+
+function buildNavOptions() {
+  const parts = [];
+  for (const section of NAV) {
+    parts.push(`# ${section.label}`);
+    for (const entry of section.items) {
+      const icon = navIcon(entry);
+      parts.push(
+        icon
+          ? `${entry.id}|${entry.title}|${icon}`
+          : `${entry.id}|${entry.title}`
+      );
+    }
+  }
+  return parts.join("\n");
+}
+
 function buildNav() {
   if (!navRoot) return;
   navRoot.replaceChildren();
   navRoot.setAttribute("gap", "0");
 
-  for (const section of NAV) {
-    const label = document.createElement("div");
-    label.className = "docs-nav-label";
-    label.textContent = section.label;
-    navRoot.append(label);
-
-    const group = document.createElement("div");
-    group.className = "docs-nav-group";
-    for (const entry of section.items) {
-      const link = document.createElement("a");
-      link.className = "docs-nav-link";
-      link.href = entry.id === "home" ? "#/" : `#/${entry.id}`;
-      link.setAttribute("data-route", entry.id);
-      link.textContent = entry.title;
-      group.append(link);
-    }
-    navRoot.append(group);
-  }
+  const list = document.createElement("slate-list");
+  list.className = "docs-nav-list";
+  list.setAttribute("kind", "plain");
+  list.setAttribute("dense", "");
+  list.setAttribute("options", buildNavOptions());
+  list.setAttribute("width", "100%");
+  list.addEventListener("selectionchanged", (event) => {
+    const id = event.detail?.value;
+    if (!id || !ROUTES[id]) return;
+    const next = id === "home" ? "#/" : `#/${id}`;
+    if (location.hash !== next) location.hash = next;
+  });
+  list.addEventListener("activated", (event) => {
+    const id = event.detail?.value;
+    if (!id || !ROUTES[id]) return;
+    const next = id === "home" ? "#/" : `#/${id}`;
+    if (location.hash !== next) location.hash = next;
+    else window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+  navRoot.append(list);
 }
 
 function routeFromHash() {
@@ -237,22 +284,19 @@ async function loadPageHtml(id) {
 function setActiveNav(id) {
   const hub = hubForRoute(id);
   const activeId = hub ? hub.id : id;
-  for (const link of document.querySelectorAll(".docs-nav-link[data-route]")) {
-    link.classList.toggle(
-      "is-active",
-      link.getAttribute("data-route") === activeId
-    );
-  }
+  const list = navRoot?.querySelector("slate-list.docs-nav-list");
+  if (list && ROUTES[activeId]) list.setAttribute("selected", activeId);
 }
 
 function renderHub(hub) {
   const tiles = (hub.items || [])
     .map((item) => {
       const hasPreview = Boolean(HUB_PREVIEWS[item.id]);
+      const bleed = item.id === "dialog" || item.id === "drawer";
       const face = hasPreview
-        ? `<border class="docs-hub-preview" kind="well" height="88" padding="10">
-              <overlay fill halign="center" valign="center">
-                <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" gap="0" valign="center" halign="center"></horizontalbox>
+        ? `<border class="docs-hub-preview${bleed ? " docs-hub-preview-bleed" : ""}" kind="well" height="88" padding="${bleed ? 0 : 10}">
+              <overlay fill>
+                <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" fill width="100%" gap="0" valign="center" halign="center"></horizontalbox>
               </overlay>
             </border>`
         : `<slate-icon name="${item.icon || "box"}" size="28"></slate-icon>`;
@@ -417,8 +461,8 @@ function applySnippet(mount, source, runScript) {
   };
   try {
     // Demo-authored snippets only. Locals match Construct(el, { self, on, bump, e }).
-    const run = new Function("self", "on", "bump", "e", js);
-    run(self, on, demoBump, umcEvents);
+    const run = new Function("self", "on", "bump", "e", "registerShortcut", js);
+    run(self, on, demoBump, umcEvents, registerShortcut);
   } catch (err) {
     console.error("[demo script]", err);
   }

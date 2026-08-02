@@ -1,0 +1,221 @@
+--- html ---
+<horizontalbox class="slate-bottom-nav-row" data-content gap="0" valign="stretch" width="100%"></horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 4px 6px;
+  --widget-radius: 0;
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  padding: var(--widget-padding);
+  border-top: var(--widget-border);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+}
+
+self[kind="elevated"] {
+  --widget-background: var(--panel, color-mix(in srgb, currentColor 10%, transparent));
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.18);
+  border-top: none;
+}
+
+self[kind="transparent"] {
+  --widget-background: transparent;
+  border-top: none;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * Bottom destination bar.
+ *
+ *   <slate-bottom-nav
+ *     options="home|Home|house, search|Search|search, me|Profile|user"
+ *     selected="home"
+ *   ></slate-bottom-nav>
+ *
+ * Or slotted slate-bottom-nav-item children.
+ *
+ * options: value|Label|icon|badge (comma / newline)
+ * Attrs: options, selected, kind ("" | elevated | transparent), labels ("" | hide), disabled
+ * Events: selectionchanged { value, label, index }
+ */
+
+function parseEntries(spec) {
+  return String(spec ?? "")
+    .split(/[,\n]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .filter((entry) => !entry.startsWith("#") && !/^-{2,}$/.test(entry))
+    .map((entry) => {
+      const parts = entry.split("|").map((p) => p.trim());
+      if (parts.length === 1) {
+        return { value: parts[0], label: parts[0], icon: "", badge: "" };
+      }
+      const [value, label, icon = "", badge = ""] = parts;
+      return { value, label: label || value, icon, badge };
+    });
+}
+
+function itemSpec(entry, selected, labels) {
+  const on = entry.value === selected;
+  return {
+    tag: "slate-bottom-nav-item",
+    value: entry.value,
+    text: entry.label,
+    icon: entry.icon || "",
+    badge: entry.badge || "",
+    fill: "",
+    ...(on ? { selected: "" } : {}),
+    ...(labels === "hide" || labels === "false" ? { labels: "hide" } : {}),
+  };
+}
+
+function slottedItems(el) {
+  return [
+    ...el.querySelectorAll(
+      ":scope > slate-bottom-nav-item, :scope > .slate-bottom-nav-row > slate-bottom-nav-item"
+    ),
+  ];
+}
+
+function select(el, api, value) {
+  if (el.hasAttribute("disabled")) return;
+  const entries = parseEntries(api.attr("options", ""));
+  const fromSlots = slottedItems(el);
+  let label = value;
+  let index = -1;
+  if (entries.length) {
+    index = entries.findIndex((o) => o.value === value);
+    if (index < 0) return;
+    label = entries[index].label;
+  } else {
+    index = fromSlots.findIndex(
+      (n) => (n.getAttribute("value") || n.getAttribute("text") || "") === value
+    );
+    if (index < 0) return;
+    label = fromSlots[index].getAttribute("text") || value;
+  }
+  if (value === api.attr("selected", "")) return;
+  el.setAttribute("selected", value);
+  api.emit("selectionchanged", { value, label, index });
+}
+
+export default defineUmc({
+  tag: "slate-bottom-nav",
+  attrs: {
+    options: "",
+    selected: "",
+    kind: "",
+    labels: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "tablist");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bnavBound) return;
+    el._bnavBound = true;
+
+    el.addEventListener("clicked", (event) => {
+      const item = event.target?.closest?.("slate-bottom-nav-item");
+      if (!item || !el.contains(item) || item.hasAttribute("disabled")) return;
+      const value = item.getAttribute("value") || item.getAttribute("text") || "";
+      select(el, api, value);
+    });
+
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      const entries = parseEntries(api.attr("options", ""));
+      const items = entries.length
+        ? entries
+        : slottedItems(el).map((n) => ({
+            value: n.getAttribute("value") || n.getAttribute("text") || "",
+            label: n.getAttribute("text") || "",
+          }));
+      if (!items.length) return;
+      const current = items.findIndex((o) => o.value === api.attr("selected", ""));
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        const next = current < 0 ? 0 : Math.min(items.length - 1, current + 1);
+        select(el, api, items[next].value);
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const next = current < 0 ? items.length - 1 : Math.max(0, current - 1);
+        select(el, api, items[next].value);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        select(el, api, items[0].value);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        select(el, api, items[items.length - 1].value);
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const selected = attr("selected", "");
+    const labels = attr("labels", "");
+    const entries = parseEntries(attr("options", ""));
+    const key =
+      entries.map((o) => `${o.value}:${o.label}:${o.icon}:${o.badge}`).join("\u0001") +
+      `\u0002${selected}\u0003${labels}`;
+
+    if (entries.length && el._bnavKey !== key) {
+      el._bnavKey = key;
+      el.set(...entries.map((entry) => itemSpec(entry, selected, labels)));
+    } else if (!entries.length) {
+      for (const item of slottedItems(el)) {
+        const value = item.getAttribute("value") || item.getAttribute("text") || "";
+        item.toggleAttribute("selected", value === selected && selected !== "");
+        if (labels === "hide" || labels === "false") item.setAttribute("labels", "hide");
+        else item.removeAttribute("labels");
+      }
+    }
+
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+  },
+});
+
+--- preview ---
+<canvaspanel width="360" height="200" kind="stage">
+  <border kind="panel" padding="0" anchors="fill" top="16" left="16" right="16" bottom="16">
+    <overlay fill>
+      <scrollbox anchors="fill" padding="12 12 64">
+        <verticalbox gap="8">
+          <textblock text="Scroll under the bar — elevated uses shadow, not a top rule."></textblock>
+          <textblock text="Second line."></textblock>
+          <textblock text="Third line."></textblock>
+          <textblock text="Fourth line."></textblock>
+        </verticalbox>
+      </scrollbox>
+      <slate-bottom-nav
+        selected="home"
+        kind="elevated"
+        anchors="bottom"
+        left="0"
+        right="0"
+        bottom="0"
+      >
+        <slate-bottom-nav-item value="home" text="Home" icon="house" selected></slate-bottom-nav-item>
+        <slate-bottom-nav-item value="search" text="Search" icon="search"></slate-bottom-nav-item>
+        <slate-bottom-nav-item value="alerts" text="Alerts" icon="bell" badge="2"></slate-bottom-nav-item>
+        <slate-bottom-nav-item value="me" text="Profile" icon="user"></slate-bottom-nav-item>
+      </slate-bottom-nav>
+    </overlay>
+  </border>
+</canvaspanel>

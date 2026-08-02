@@ -1,0 +1,417 @@
+--- html ---
+<span class="slate-menu-target" data-trigger></span>
+<border class="slate-menu-panel" data-menu-root hidden role="menu"></border>
+
+--- style ---
+self {
+  position: relative; /* umc-layout-ok */
+  display: block; /* umc-layout-ok, wrap the target */
+  max-width: 100%; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+}
+
+.slate-menu-target {
+  display: contents;
+}
+
+.slate-menu-panel {
+  display: none;
+  position: fixed; /* umc-layout-ok, float at cursor */
+  top: 0; /* umc-layout-ok */
+  left: 0; /* umc-layout-ok */
+  z-index: var(--popup-z, 80); /* umc-layout-ok */
+  box-sizing: border-box;
+  min-width: 160px; /* umc-layout-ok */
+  max-width: min(320px, calc(100vw - 16px)); /* umc-layout-ok */
+  max-height: min(420px, calc(100vh - 16px)); /* umc-layout-ok */
+  /* No overflow:auto by default — it paints a scrollbar even when content fits. */
+  overflow: hidden;
+  color: var(--ink, inherit);
+  --widget-background: var(--bg-channels, color-mix(in srgb, Canvas 92%, CanvasText 8%));
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  --widget-radius: var(--radius-md, 8px);
+  --widget-padding: 4px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+}
+
+.slate-menu-panel[data-scroll] {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+self[open] > .slate-menu-panel {
+  display: block;
+}
+
+.slate-menu-panel[hidden] {
+  display: none;
+}
+
+--- script ---
+import { create } from "slatehtml/umc";
+import { parseOptions } from "./input/parse-options.js";
+
+/**
+ * Context menu (right-click) over a target region.
+ *
+ *   <slate-menu>
+ *     <border kind="panel" padding="24">Right-click me</border>
+ *     <slate-menu-item value="cut" text="Cut" icon="scissors"></slate-menu-item>
+ *     <slate-menu-item value="copy" text="Copy" icon="copy"></slate-menu-item>
+ *     <slate-menu-item separator></slate-menu-item>
+ *     <slate-menu-item value="delete" text="Delete" icon="trash-2" destructive></slate-menu-item>
+ *   </slate-menu>
+ *
+ * Or compact: options="cut|Cut|scissors, copy|Copy|copy, ---, delete|Delete|trash-2"
+ *
+ * Attrs: options, open, disabled, trigger (contextmenu | click | both)
+ * Events: selectionchanged { value, label, index }, opened, closed
+ */
+
+function scoop(el) {
+  const trigger = [];
+  const items = [];
+  for (const child of [...el.childNodes]) {
+    if (child.nodeType !== 1) {
+      if (child.nodeType === 3 && child.textContent.trim()) trigger.push(child);
+      continue;
+    }
+    const tag = child.localName || "";
+    if (
+      tag === "slate-menu-item" ||
+      child.hasAttribute("data-menu") ||
+      child.hasAttribute("data-popup")
+    ) {
+      items.push(child);
+    } else if (
+      child.classList?.contains("slate-menu-target") ||
+      child.classList?.contains("slate-menu-panel") ||
+      child.hasAttribute("data-trigger") ||
+      child.hasAttribute("data-menu-root")
+    ) {
+      /* stamped chrome */
+    } else {
+      trigger.push(child);
+    }
+  }
+  return { trigger, items };
+}
+
+function clampPanel(panel, x, y, pad = 8) {
+  const w = panel.offsetWidth || 180;
+  const h = panel.offsetHeight || 120;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let left = x;
+  let top = y;
+  if (left + w > vw - pad) left = Math.max(pad, vw - pad - w);
+  if (top + h > vh - pad) top = Math.max(pad, vh - pad - h);
+  if (left < pad) left = pad;
+  if (top < pad) top = pad;
+  panel.style.left = `${Math.round(left)}px`;
+  panel.style.top = `${Math.round(top)}px`;
+}
+
+/** Enable scrolling only when the menu is taller than the viewport budget. */
+function syncPanelScroll(panel) {
+  if (!panel) return;
+  panel.removeAttribute("data-scroll");
+  // Force natural height measure without a scrollbar occupying width.
+  panel.style.overflow = "hidden";
+  const maxH = Math.min(420, window.innerHeight - 16);
+  const needsScroll = panel.scrollHeight > maxH + 1;
+  panel.style.overflow = "";
+  panel.toggleAttribute("data-scroll", needsScroll);
+}
+
+function removeListeners(el) {
+  if (el._onMenuOutside) {
+    document.removeEventListener("pointerdown", el._onMenuOutside, true);
+    el._onMenuOutside = null;
+  }
+  if (el._onMenuKey) {
+    document.removeEventListener("keydown", el._onMenuKey, true);
+    el._onMenuKey = null;
+  }
+  if (el._onMenuUp) {
+    document.removeEventListener("pointerup", el._onMenuUp, true);
+    el._onMenuUp = null;
+  }
+  if (el._onMenuMove) {
+    document.removeEventListener("pointermove", el._onMenuMove, true);
+    el._onMenuMove = null;
+  }
+  clearActiveItem(el);
+}
+
+function clearActiveItem(el) {
+  const panel = el.querySelector?.("[data-menu-root]");
+  if (!panel) return;
+  for (const node of panel.querySelectorAll("[data-active]")) {
+    node.removeAttribute("data-active");
+  }
+}
+
+function itemFromPoint(panel, x, y) {
+  if (!panel) return null;
+  const under = document.elementFromPoint(x, y);
+  const item = under?.closest?.("slate-menu-item");
+  if (!item || !panel.contains(item)) return null;
+  if (item.hasAttribute("separator") || item.hasAttribute("disabled")) return null;
+  return item;
+}
+
+function closeMenu(el, api) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  el.querySelector("[data-menu-root]")?.setAttribute("hidden", "");
+  removeListeners(el);
+  api.emit("closed", { open: false });
+}
+
+function openAt(el, api, x, y, { fromHold = false } = {}) {
+  if (el.hasAttribute("disabled")) return;
+  const panel = el.querySelector("[data-menu-root]");
+  if (!panel) return;
+  const already = el.hasAttribute("open");
+  el.setAttribute("open", "");
+  panel.removeAttribute("hidden");
+
+  if (!el._onMenuOutside) {
+    el._onMenuOutside = (event) => {
+      // Opening long-press still has the pointer down; ignore until after lift.
+      if (el._holdPointerId != null && event.pointerId === el._holdPointerId) {
+        return;
+      }
+      if (panel.contains(event.target)) return;
+      closeMenu(el, api);
+    };
+    document.addEventListener("pointerdown", el._onMenuOutside, true);
+  }
+  if (!el._onMenuKey) {
+    el._onMenuKey = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMenu(el, api);
+      }
+    };
+    document.addEventListener("keydown", el._onMenuKey, true);
+  }
+
+  // Touch / pen long-press: finger is still down. Highlight on move, select on up
+  // (synthetic click stays on the trigger, not the item under the lift).
+  if (fromHold) {
+    if (!el._onMenuMove) {
+      el._onMenuMove = (event) => {
+        if (!el.hasAttribute("open")) return;
+        if (event.pointerType === "mouse") return;
+        const item = itemFromPoint(panel, event.clientX, event.clientY);
+        clearActiveItem(el);
+        item?.setAttribute("data-active", "");
+      };
+      document.addEventListener("pointermove", el._onMenuMove, true);
+    }
+    if (!el._onMenuUp) {
+      el._onMenuUp = (event) => {
+        if (!el.hasAttribute("open")) return;
+        // Mouse right-click uses a normal click to choose; only touch/pen lift-selects.
+        if (event.pointerType === "mouse") {
+          el._holdPointerId = null;
+          return;
+        }
+        if (el._holdPointerId != null && event.pointerId !== el._holdPointerId) {
+          return;
+        }
+        const item = itemFromPoint(panel, event.clientX, event.clientY);
+        el._holdPointerId = null;
+        el._suppressClick = true;
+        queueMicrotask(() => {
+          el._suppressClick = false;
+        });
+        if (item) {
+          event.preventDefault();
+          event.stopPropagation();
+          selectItem(el, api, item);
+          return;
+        }
+        // Lifted outside the menu after a hold — dismiss.
+        if (!panel.contains(document.elementFromPoint(event.clientX, event.clientY))) {
+          closeMenu(el, api);
+        }
+      };
+      document.addEventListener("pointerup", el._onMenuUp, true);
+    }
+  }
+
+  requestAnimationFrame(() => {
+    syncPanelScroll(panel);
+    clampPanel(panel, x, y);
+    if (!fromHold) {
+      const first = panel.querySelector(
+        "slate-menu-item:not([separator]):not([disabled])"
+      );
+      first?.focus?.();
+    }
+  });
+  if (!already) api.emit("opened", { open: true, x, y });
+}
+
+function fillFromOptions(panel, options) {
+  const nodes = [];
+  for (const entry of options) {
+    if (entry.type === "separator") {
+      nodes.push(create({ tag: "slate-menu-item", separator: "" }));
+    } else if (entry.type === "option") {
+      nodes.push(
+        create({
+          tag: "slate-menu-item",
+          value: entry.value,
+          text: entry.label,
+          icon: entry.icon || "",
+        })
+      );
+    }
+  }
+  panel.replaceChildren(...nodes.filter(Boolean));
+}
+
+function menuItems(panel) {
+  return [...panel.querySelectorAll(":scope > slate-menu-item")].filter(
+    (n) => !n.hasAttribute("separator") && !n.hasAttribute("disabled")
+  );
+}
+
+function selectItem(el, api, item) {
+  if (!item || item.hasAttribute("disabled") || item.hasAttribute("separator")) {
+    return;
+  }
+  const value = item.getAttribute("value") || item.getAttribute("text") || "";
+  const label = item.getAttribute("text") || value;
+  const items = menuItems(el.querySelector("[data-menu-root]"));
+  const index = items.indexOf(item);
+  closeMenu(el, api);
+  api.emit("selectionchanged", { value, label, index });
+}
+
+export default defineUmc({
+  tag: "slate-menu",
+  attrs: {
+    options: "",
+    open: "",
+    disabled: "",
+    /** contextmenu | click | both */
+    trigger: "contextmenu",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("contextmenu", (event) => {
+      const mode = (api.attr("trigger", "contextmenu") || "contextmenu").toLowerCase();
+      if (mode !== "contextmenu" && mode !== "both") return;
+      if (el.hasAttribute("disabled")) return;
+      const panel = el.querySelector("[data-menu-root]");
+      if (panel?.contains(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      // Firefox touch long-press fires contextmenu while the finger is still down.
+      const fromHold =
+        event.pointerType === "touch" ||
+        event.pointerType === "pen" ||
+        Boolean(event.sourceCapabilities?.firesTouchEvents);
+      el._holdPointerId =
+        fromHold && event.pointerId != null ? event.pointerId : fromHold ? 1 : null;
+      openAt(el, api, event.clientX, event.clientY, { fromHold });
+    });
+
+    el.addEventListener("click", (event) => {
+      if (el._suppressClick) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      const panel = el.querySelector("[data-menu-root]");
+      if (panel?.contains(event.target)) {
+        const item = event.target?.closest?.("slate-menu-item");
+        if (item && panel.contains(item)) selectItem(el, api, item);
+        return;
+      }
+      const mode = (api.attr("trigger", "contextmenu") || "contextmenu").toLowerCase();
+      if (mode !== "click" && mode !== "both") return;
+      if (el.hasAttribute("disabled")) return;
+      openAt(el, api, event.clientX, event.clientY);
+    });
+
+    el.addEventListener("keydown", (event) => {
+      const panel = el.querySelector("[data-menu-root]");
+      if (!el.hasAttribute("open") || !panel) return;
+      const items = menuItems(panel);
+      if (!items.length) return;
+      const current = items.indexOf(document.activeElement);
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const next = current < 0 ? 0 : (current + 1) % items.length;
+        items[next].focus();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const next = current < 0 ? items.length - 1 : (current - 1 + items.length) % items.length;
+        items[next].focus();
+      } else if (event.key === "Enter" || event.key === " ") {
+        const item = document.activeElement?.closest?.("slate-menu-item");
+        if (item && panel.contains(item)) {
+          event.preventDefault();
+          selectItem(el, api, item);
+        }
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        items[0].focus();
+      } else if (event.key === "End") {
+        event.preventDefault();
+        items[items.length - 1].focus();
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const trigger = el.querySelector("[data-trigger]");
+    const panel = el.querySelector("[data-menu-root]");
+    if (!trigger || !panel) return;
+
+    const { trigger: targets, items } = scoop(el);
+    if (targets.length) trigger.replaceChildren(...targets);
+    if (items.length) panel.replaceChildren(...items);
+
+    const optionsSpec = attr("options", "");
+    const key = `opts:${optionsSpec}`;
+    if (optionsSpec && el._optionsKey !== key) {
+      el._optionsKey = key;
+      fillFromOptions(panel, parseOptions(optionsSpec));
+    }
+
+    if (el.hasAttribute("open")) {
+      panel.removeAttribute("hidden");
+    } else {
+      panel.setAttribute("hidden", "");
+      removeListeners(el);
+    }
+  },
+
+  Destruct(el) {
+    removeListeners(el);
+  },
+});
+
+--- preview ---
+<canvaspanel width="320" height="200" kind="stage">
+  <slate-menu anchors="fill" top="16" left="16" right="16" bottom="16">
+    <border kind="panel" padding="20" anchors="fill">
+      <slate-text kind="body" text="Right-click this panel"></slate-text>
+    </border>
+    <slate-menu-item value="cut" text="Cut" icon="scissors" shortcut="mod+X"></slate-menu-item>
+    <slate-menu-item value="copy" text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+    <slate-menu-item separator></slate-menu-item>
+    <slate-menu-item value="delete" text="Delete" icon="trash-2" destructive></slate-menu-item>
+  </slate-menu>
+</canvaspanel>

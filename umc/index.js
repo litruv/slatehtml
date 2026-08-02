@@ -21,6 +21,13 @@ export {
   WidgetElement,
   emit,
   parseUmc,
+  registerShortcut,
+  unregisterShortcut,
+  parseShortcut,
+  matchShortcut,
+  formatShortcut,
+  clearShortcuts,
+  listShortcuts,
 } from "./runtime.js";
 
 export { applySpec, syncKeyed, createVirtualListState, computeVirtualRange, setVirtualRowHeight, syncVirtual, virtualPrefixHeight, virtualListHeight, findVirtualIndexAtScroll, virtualItemOffset } from "./list-sync.js";

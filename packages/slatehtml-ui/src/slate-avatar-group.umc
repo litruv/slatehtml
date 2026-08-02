@@ -1,0 +1,153 @@
+--- html ---
+<horizontalbox class="slate-avatar-group-row" data-content gap="0" valign="center"></horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  align-items: center; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  max-width: 100%; /* umc-layout-ok */
+}
+
+.slate-avatar-group-row {
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self slate-avatar,
+self .slate-avatar-surplus {
+  box-shadow: 0 0 0 2px var(--bg, Canvas);
+  margin-inline-start: calc(var(--slate-avatar-overlap, 10px) * -1); /* umc-layout-ok */
+  position: relative; /* umc-layout-ok, stack L→R */
+}
+
+self .slate-avatar-group-row > slate-avatar:nth-child(1),
+self .slate-avatar-group-row > .slate-avatar-surplus:nth-child(1) {
+  margin-inline-start: 0; /* umc-layout-ok */
+  z-index: 1; /* umc-layout-ok */
+}
+
+self .slate-avatar-group-row > slate-avatar:nth-child(2) { z-index: 2; /* umc-layout-ok */ }
+self .slate-avatar-group-row > slate-avatar:nth-child(3) { z-index: 3; /* umc-layout-ok */ }
+self .slate-avatar-group-row > slate-avatar:nth-child(4) { z-index: 4; /* umc-layout-ok */ }
+self .slate-avatar-group-row > slate-avatar:nth-child(5) { z-index: 5; /* umc-layout-ok */ }
+self .slate-avatar-group-row > slate-avatar:nth-child(6) { z-index: 6; /* umc-layout-ok */ }
+self .slate-avatar-group-row > slate-avatar:nth-child(n+7),
+self .slate-avatar-group-row > .slate-avatar-surplus {
+  z-index: 8; /* umc-layout-ok */
+}
+
+.slate-avatar-surplus {
+  display: inline-flex; /* umc-layout-ok */
+  align-items: center; /* umc-layout-ok */
+  justify-content: center; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: var(--slate-avatar-size, 40px); /* umc-layout-ok */
+  height: var(--slate-avatar-size, 40px); /* umc-layout-ok */
+  border-radius: var(--slate-avatar-radius, 50%);
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  color: inherit;
+  font-size: calc(var(--slate-avatar-size, 40px) * 0.32);
+  font-weight: 700;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self[variant="rounded"] {
+  --slate-avatar-radius: 8px;
+}
+
+self[variant="square"] {
+  --slate-avatar-radius: 4px;
+}
+
+self[variant="circular"],
+self:not([variant]) {
+  --slate-avatar-radius: 50%;
+}
+
+--- script ---
+/**
+ * Overlapping avatars with optional +N surplus.
+ *
+ *   <slate-avatar-group max="3" size="36">
+ *     <slate-avatar src="…" alt="A"></slate-avatar>
+ *     <slate-avatar text="B"></slate-avatar>
+ *     <slate-avatar text="C"></slate-avatar>
+ *     <slate-avatar text="D"></slate-avatar>
+ *   </slate-avatar-group>
+ *
+ * Attrs: max, size, spacing (overlap px), variant (circular | rounded | square)
+ */
+
+function parsePositive(raw, fallback) {
+  const n = Number.parseInt(String(raw ?? "").trim(), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function normalizeVariant(raw) {
+  const v = String(raw || "circular").trim().toLowerCase();
+  if (v === "rounded" || v === "square") return v;
+  return "circular";
+}
+
+export default defineUmc({
+  tag: "slate-avatar-group",
+  attrs: {
+    max: "5",
+    size: "40",
+    spacing: "10",
+    variant: "circular",
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const row = el.querySelector(".slate-avatar-group-row") || el;
+    const max = parsePositive(attr("max", "5"), 5);
+    const size = parsePositive(attr("size", "40"), 40);
+    const spacing = parsePositive(attr("spacing", "10"), 10);
+    const variant = normalizeVariant(attr("variant", "circular"));
+
+    el.setAttribute("variant", variant);
+    el.style.setProperty("--slate-avatar-size", `${size}px`);
+    el.style.setProperty("--slate-avatar-overlap", `${spacing}px`);
+
+    for (const a of [...el.querySelectorAll(":scope > slate-avatar")]) {
+      if (a.parentElement === el) row.append(a);
+    }
+
+    const all = [...row.querySelectorAll(":scope > slate-avatar")];
+    for (const a of all) {
+      a.setAttribute("size", String(size));
+      // Group shape wins unless the child set an explicit variant already
+      // and the group is default circular — always sync group variant down.
+      a.setAttribute("variant", variant);
+    }
+
+    row.querySelector(":scope > .slate-avatar-surplus")?.remove();
+
+    const total = all.length;
+    all.forEach((a, i) => {
+      const hide = i >= max;
+      a.toggleAttribute("hidden", hide);
+      a.style.display = hide ? "none" : "";
+    });
+
+    if (total > max) {
+      const node = document.createElement("span");
+      node.className = "slate-avatar-surplus";
+      node.textContent = `+${total - max}`;
+      node.setAttribute("aria-label", `${total - max} more`);
+      row.append(node);
+    }
+  },
+});
+
+--- preview ---
+<horizontalbox gap="16" padding="16" valign="center">
+  <slate-avatar-group max="3" size="36">
+    <slate-avatar src="https://i.pravatar.cc/72?img=1" alt="A"></slate-avatar>
+    <slate-avatar src="https://i.pravatar.cc/72?img=2" alt="B"></slate-avatar>
+    <slate-avatar text="C"></slate-avatar>
+    <slate-avatar text="D"></slate-avatar>
+    <slate-avatar text="E"></slate-avatar>
+  </slate-avatar-group>
+</horizontalbox>

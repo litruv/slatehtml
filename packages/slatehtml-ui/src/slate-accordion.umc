@@ -1,0 +1,162 @@
+--- html ---
+<verticalbox class="slate-accordion-shell" data-content gap="0" width="100%"></verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 0;
+  --widget-radius: 8px;
+  --widget-background: transparent;
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border: var(--widget-border);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+  overflow: hidden; /* umc-layout-ok */
+}
+
+self[kind="plain"] {
+  --widget-border: none;
+  border-radius: 0;
+}
+
+self:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * Expandable sections.
+ *
+ *   <slate-accordion open="account">
+ *     <slate-accordion-item name="account" title="Account">…</slate-accordion-item>
+ *     <slate-accordion-item name="billing" title="Billing">…</slate-accordion-item>
+ *   </slate-accordion>
+ *
+ * Attrs:
+ *   open — active panel name(s). Single value, or comma list when multiple.
+ *   multiple — allow several panels open at once
+ *   kind — "" | plain
+ *
+ * Events: selectionchanged { value, open: string[] }
+ */
+
+function itemsOf(el) {
+  return [
+    ...el.querySelectorAll(
+      ":scope > slate-accordion-item, :scope > .slate-accordion-shell > slate-accordion-item"
+    ),
+  ];
+}
+
+function itemKey(item, index) {
+  return (
+    item.getAttribute("name") ||
+    item.getAttribute("title") ||
+    `item-${index}`
+  ).trim();
+}
+
+function parseOpen(spec) {
+  return String(spec ?? "")
+    .split(/[,\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function openSet(el) {
+  return new Set(parseOpen(el.getAttribute("open") || ""));
+}
+
+function setOpen(el, api, next) {
+  const values = [...next];
+  const joined = values.join(",");
+  if (joined === (el.getAttribute("open") || "")) return;
+  if (joined) el.setAttribute("open", joined);
+  else el.removeAttribute("open");
+  api.emit("selectionchanged", { value: values[0] || "", open: values });
+}
+
+function toggle(el, api, key) {
+  if (el.hasAttribute("disabled")) return;
+  const multiple = el.hasAttribute("multiple");
+  const next = openSet(el);
+  if (next.has(key)) next.delete(key);
+  else {
+    if (!multiple) next.clear();
+    next.add(key);
+  }
+  setOpen(el, api, next);
+}
+
+export default defineUmc({
+  tag: "slate-accordion",
+  attrs: {
+    open: "",
+    multiple: "",
+    kind: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "presentation");
+    if (el._accBound) return;
+    el._accBound = true;
+
+    el.addEventListener("click", (event) => {
+      const header = event.target?.closest?.(".slate-accordion-item-header");
+      if (!header || !el.contains(header)) return;
+      const item = header.closest("slate-accordion-item");
+      if (!item || item.hasAttribute("disabled")) return;
+      const items = itemsOf(el);
+      const index = items.indexOf(item);
+      if (index < 0) return;
+      toggle(el, api, itemKey(item, index));
+    });
+
+    el.addEventListener("keydown", (event) => {
+      const header = event.target?.closest?.(".slate-accordion-item-header");
+      if (!header || !el.contains(header)) return;
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      const item = header.closest("slate-accordion-item");
+      if (!item || item.hasAttribute("disabled")) return;
+      const items = itemsOf(el);
+      const index = items.indexOf(item);
+      if (index < 0) return;
+      toggle(el, api, itemKey(item, index));
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const open = openSet(el);
+    const items = itemsOf(el);
+    for (let i = 0; i < items.length; i++) {
+      const key = itemKey(items[i], i);
+      if (!items[i].getAttribute("name") && key) items[i].setAttribute("name", key);
+      items[i].toggleAttribute("open", open.has(key));
+    }
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+  },
+});
+
+--- preview ---
+<canvaspanel width="360" height="220" kind="stage">
+  <border kind="panel" padding="12" anchors="fill" top="12" left="12" right="12" bottom="12">
+    <slate-accordion open="general" width="100%">
+      <slate-accordion-item name="general" title="General">
+        <textblock text="Name, language, and defaults."></textblock>
+      </slate-accordion-item>
+      <slate-accordion-item name="notifications" title="Notifications">
+        <textblock text="Email and push preferences."></textblock>
+      </slate-accordion-item>
+      <slate-accordion-item name="security" title="Security">
+        <textblock text="Password and sessions."></textblock>
+      </slate-accordion-item>
+    </slate-accordion>
+  </border>
+</canvaspanel>

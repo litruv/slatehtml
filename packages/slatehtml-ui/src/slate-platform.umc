@@ -1,0 +1,135 @@
+--- style ---
+self {
+  display: contents; /* umc-layout-ok, invisible switch */
+}
+
+/* Hide non-matching branches; matching ones participate in parent layout. */
+self > :not([data-platform-active]) {
+  display: none !important;
+}
+
+self > [data-platform-active] {
+  display: contents; /* umc-layout-ok, unwrap branch chrome */
+}
+
+--- script ---
+import {
+  platform,
+  platformMatches,
+  onPlatform,
+} from "./platform.js";
+
+/**
+ * Show children for the current OS.
+ *
+ *   <slate-platform>
+ *     <windows>Ctrl+C copy</windows>
+ *     <mac>⌘C copy</mac>
+ *     <linux>Ctrl+C copy</linux>
+ *   </slate-platform>
+ *
+ * Branch tags: mac | windows | linux (aliases: osx, darwin, win).
+ * Or any element with data-platform="mac". A <default> / data-platform="default"
+ * branch is used when nothing else matches.
+ *
+ * Attrs: force ("mac" | "windows" | "linux" | "auto") — overrides detection
+ *         for this host only when set (does not change global configure).
+ */
+
+const BRANCH_TAGS = new Set([
+  "mac",
+  "macos",
+  "osx",
+  "darwin",
+  "windows",
+  "win",
+  "linux",
+  "default",
+  "other",
+  "fallback",
+]);
+
+function branchName(node) {
+  if (!(node instanceof Element)) return "";
+  const fromAttr = (node.getAttribute("data-platform") || "").trim();
+  if (fromAttr) return fromAttr.toLowerCase();
+  const tag = (node.localName || "").toLowerCase();
+  if (BRANCH_TAGS.has(tag)) return tag;
+  return "";
+}
+
+function apply(el) {
+  const force = (el.getAttribute("force") || "").trim().toLowerCase();
+  const active =
+    force && force !== "auto"
+      ? force === "mac" || force === "windows" || force === "linux"
+        ? force
+        : platform()
+      : platform();
+
+  el.setAttribute("data-os", active);
+
+  const kids = [...el.children];
+  let matched = false;
+  const defaults = [];
+
+  for (const child of kids) {
+    const name = branchName(child);
+    if (!name) {
+      // Non-branch children always show.
+      child.setAttribute("data-platform-active", "");
+      continue;
+    }
+    const isDefault =
+      name === "default" || name === "other" || name === "fallback";
+    if (isDefault) {
+      defaults.push(child);
+      child.removeAttribute("data-platform-active");
+      continue;
+    }
+    const on = platformMatches(name, active);
+    child.toggleAttribute("data-platform-active", on);
+    if (on) matched = true;
+  }
+
+  for (const child of defaults) {
+    child.toggleAttribute("data-platform-active", !matched);
+  }
+}
+
+export default defineUmc({
+  tag: "slate-platform",
+  attrs: {
+    force: "",
+  },
+
+  Construct(el) {
+    if (el._platformBound) return;
+    el._platformBound = true;
+    el._offPlatform = onPlatform(() => apply(el));
+  },
+
+  SynchronizeProperties(el) {
+    apply(el);
+  },
+
+  Destruct(el) {
+    el._offPlatform?.();
+    el._offPlatform = null;
+  },
+});
+
+// Re-export helpers for demos / script blocks.
+export { platform, platformMatches };
+
+--- preview ---
+<canvaspanel width="320" height="120" kind="stage">
+  <verticalbox gap="8" padding="16" anchors="fill">
+    <slate-platform>
+      <mac><slate-text kind="body" text="You're on macOS"></slate-text></mac>
+      <windows><slate-text kind="body" text="You're on Windows"></slate-text></windows>
+      <linux><slate-text kind="body" text="You're on Linux"></slate-text></linux>
+      <default><slate-text kind="body" text="Unknown platform"></slate-text></default>
+    </slate-platform>
+  </verticalbox>
+</canvaspanel>

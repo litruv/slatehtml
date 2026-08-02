@@ -1,0 +1,817 @@
+--- html ---
+<canvaspanel class="slate-drawer-root" clip="false">
+  <border class="slate-drawer-backdrop" anchors="fill" top="0" left="0" right="0" bottom="0"></border>
+  <border class="slate-drawer-panel" kind="panel" padding="0">
+    <verticalbox class="slate-drawer-chrome" gap="0" fill height="100%">
+      <horizontalbox class="slate-drawer-header" gap="8" valign="center" width="100%" padding="12 14">
+        <textblock class="slate-drawer-title" data-umc="title" fill min-width="0"></textblock>
+        <slate-icon class="slate-drawer-close" name="x" size="16"></slate-icon>
+      </horizontalbox>
+      <scrollbox class="slate-drawer-body" data-content fill padding="8 12 16"></scrollbox>
+    </verticalbox>
+  </border>
+</canvaspanel>
+
+--- style ---
+self:not([open]) > .slate-drawer-root {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+self[open] > .slate-drawer-root {
+  display: block !important; /* umc-layout-ok */
+  position: fixed !important; /* umc-layout-ok */
+  z-index: var(--drawer-z, 210); /* umc-layout-ok */
+  overflow: hidden; /* umc-layout-ok */
+  max-width: none !important; /* umc-layout-ok */
+  max-height: none !important; /* umc-layout-ok */
+  transition: none !important;
+  overscroll-behavior: none; /* umc-layout-ok — don't pan the page under the drawer */
+}
+
+self[open]:not([sub]) > .slate-drawer-root {
+  top: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  bottom: 0 !important; /* umc-layout-ok */
+  width: auto !important; /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+}
+
+self[open][sub] > .slate-drawer-root {
+  right: auto !important; /* umc-layout-ok */
+  bottom: auto !important; /* umc-layout-ok */
+}
+
+.slate-drawer-root[hidden] {
+  display: none !important;
+}
+
+.slate-drawer-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.45);
+  --widget-border: none;
+  --widget-radius: 0;
+  cursor: pointer;
+  z-index: 0 !important; /* umc-layout-ok — under the panel for hit-testing */
+  touch-action: none; /* umc-layout-ok */
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+self[sub] .slate-drawer-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.28);
+}
+
+.slate-drawer-panel {
+  --widget-background: var(--panel, #eff1f5);
+  --widget-border: none;
+  --widget-radius: 0;
+  --drawer-size: 280px;
+  color: var(--ink, inherit);
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: hidden; /* umc-layout-ok */
+  z-index: 2 !important; /* umc-layout-ok — above fill backdrop */
+  position: absolute !important; /* umc-layout-ok */
+  touch-action: pan-y; /* umc-layout-ok — scroll body, don't drag the page */
+  overscroll-behavior: contain; /* umc-layout-ok */
+}
+
+self[placement="left"] .slate-drawer-panel,
+self:not([placement]) .slate-drawer-panel {
+  top: 0 !important; /* umc-layout-ok */
+  bottom: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: auto !important; /* umc-layout-ok */
+  width: var(--drawer-size, 280px) !important; /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+  max-width: min(92vw, 420px); /* umc-layout-ok */
+  max-height: none !important; /* umc-layout-ok */
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22);
+}
+
+self[placement="right"] .slate-drawer-panel {
+  top: 0 !important; /* umc-layout-ok */
+  bottom: 0 !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  left: auto !important; /* umc-layout-ok */
+  width: var(--drawer-size, 280px) !important; /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+  max-width: min(92vw, 420px); /* umc-layout-ok */
+  max-height: none !important; /* umc-layout-ok */
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.22);
+}
+
+self[placement="top"] .slate-drawer-panel {
+  top: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  bottom: auto !important; /* umc-layout-ok */
+  width: auto !important; /* umc-layout-ok */
+  height: var(--drawer-size, 240px) !important; /* umc-layout-ok */
+  max-width: none !important; /* umc-layout-ok */
+  max-height: min(72vh, 420px); /* umc-layout-ok */
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+}
+
+self[placement="bottom"] .slate-drawer-panel {
+  bottom: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  top: auto !important; /* umc-layout-ok */
+  width: auto !important; /* umc-layout-ok */
+  height: var(--drawer-size, 240px) !important; /* umc-layout-ok */
+  max-width: none !important; /* umc-layout-ok */
+  max-height: min(72vh, 420px); /* umc-layout-ok */
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.22);
+}
+
+/* Sub fills its portaled root (shifted toward center over the parent). */
+self[sub] .slate-drawer-panel {
+  top: 0 !important; /* umc-layout-ok */
+  left: 0 !important; /* umc-layout-ok */
+  right: 0 !important; /* umc-layout-ok */
+  bottom: 0 !important; /* umc-layout-ok */
+  width: auto !important; /* umc-layout-ok */
+  height: auto !important; /* umc-layout-ok */
+  max-width: none !important; /* umc-layout-ok */
+  max-height: none !important; /* umc-layout-ok */
+  border-radius: 10px 0 0 10px;
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.35);
+}
+
+self[sub][data-sub-from="right"] .slate-drawer-panel {
+  border-radius: 0 10px 10px 0;
+  box-shadow: 8px 0 28px rgba(0, 0, 0, 0.35);
+}
+
+self[sub][data-sub-from="top"] .slate-drawer-panel {
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.35);
+}
+
+self[sub][data-sub-from="bottom"] .slate-drawer-panel {
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.slate-drawer-chrome {
+  min-width: 0; /* umc-layout-ok */
+  min-height: 0; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+}
+
+.slate-drawer-header {
+  border-bottom: 1px solid var(--line, color-mix(in srgb, currentColor 14%, transparent));
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-drawer-title {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  min-width: 0; /* umc-layout-ok */
+}
+
+.slate-drawer-title[hidden] {
+  display: none !important;
+}
+
+.slate-drawer-close {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.75;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-drawer-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.slate-drawer-body {
+  min-height: 0; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * Modal drawer pinned to a screen edge.
+ * Nested / stack → sub-drawer portaled over the parent, shifted toward center.
+ */
+
+const PLACEMENTS = new Set(["left", "right", "top", "bottom"]);
+const BASE_Z = 210;
+
+function attrOn(el, name, fallback = true) {
+  if (!el.hasAttribute(name)) return fallback;
+  const v = String(el.getAttribute(name) ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "" || v === "true" || v === "1" || v === "on") return true;
+  if (v === "false" || v === "0" || v === "off") return false;
+  return fallback;
+}
+
+function cssExtent(value, fallback) {
+  const v = String(value ?? "").trim();
+  if (!v) return fallback;
+  return /^-?[\d.]+$/.test(v) ? `${v}px` : v;
+}
+
+function extentPx(value, fallback) {
+  const v = String(value ?? "").trim();
+  if (!v) return fallback;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function emitClosed(el, reason, detail = {}) {
+  const payload = { reason: reason || "dismiss", ...detail };
+  if (typeof el.emit === "function") el.emit("closed", payload);
+  else {
+    el.dispatchEvent(
+      new CustomEvent("closed", { bubbles: true, composed: true, detail: payload })
+    );
+  }
+}
+
+function drawerRoot(el) {
+  return el._drawerRoot || el.querySelector(":scope > .slate-drawer-root");
+}
+
+function drawerPanel(el) {
+  return drawerRoot(el)?.querySelector(".slate-drawer-panel");
+}
+
+function closeDrawer(el, reason, detail = {}) {
+  if (!el.hasAttribute("open")) return;
+  for (const child of [...liveDrawers]) {
+    if (child._drawerParent === el) closeDrawer(child, "parent", detail);
+  }
+  el.removeAttribute("open");
+  emitClosed(el, reason, detail);
+}
+
+function normalizePlacement(el) {
+  const raw = (el.getAttribute("placement") || "left").trim().toLowerCase();
+  const side = PLACEMENTS.has(raw) ? raw : "left";
+  if (el.getAttribute("placement") !== side) el.setAttribute("placement", side);
+  return side;
+}
+
+function syncRootLayer(el) {
+  const root = drawerRoot(el);
+  if (!root) return;
+  // Host width/height are for the panel — strip them from the scrim root.
+  // Sub-drawers intentionally size the root to the parent panel box; keep those.
+  for (const name of [
+    "width",
+    "height",
+    "min-width",
+    "max-width",
+    "min-height",
+    "max-height",
+  ]) {
+    root.removeAttribute(name);
+  }
+  if (el.hasAttribute("sub")) return;
+  for (const name of [
+    "width",
+    "height",
+    "min-width",
+    "max-width",
+    "min-height",
+    "max-height",
+    "top",
+    "left",
+    "right",
+    "bottom",
+  ]) {
+    root.style.removeProperty(name);
+  }
+}
+
+function syncPlacement(el) {
+  syncRootLayer(el);
+  const side = normalizePlacement(el);
+  const panel = drawerPanel(el);
+  if (!panel) return;
+  const width = cssExtent(el.getAttribute("width"), "280px");
+  const height = cssExtent(el.getAttribute("height"), "240px");
+  const size = side === "top" || side === "bottom" ? height : width;
+  el.style.setProperty("--drawer-size", size);
+  panel.style.setProperty("--drawer-size", size);
+}
+
+const liveDrawers = new Set();
+let drawerDocBound = false;
+let drawerStackSeq = 0;
+
+function openDrawers() {
+  return [...liveDrawers].filter((d) => d.hasAttribute("open"));
+}
+
+function syncScrollLock() {
+  const root = document.documentElement;
+  if (openDrawers().length) {
+    if (root.dataset.slateDrawerScrollLock == null) {
+      root.dataset.slateDrawerScrollLock = root.style.overflow || "";
+      root.style.overflow = "hidden";
+    }
+    return;
+  }
+  if (root.dataset.slateDrawerScrollLock == null) return;
+  root.style.overflow = root.dataset.slateDrawerScrollLock;
+  delete root.dataset.slateDrawerScrollLock;
+}
+
+function topOpenDrawer() {
+  let top = null;
+  for (const d of openDrawers()) {
+    if (!top || (d._drawerStackOrder || 0) > (top._drawerStackOrder || 0)) top = d;
+  }
+  return top;
+}
+
+function markupParentDrawer(el) {
+  let node = el.parentElement;
+  while (node) {
+    if (node !== el && node.localName === "slate-drawer") return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function clearSubGeometry(el) {
+  const root = drawerRoot(el);
+  if (!root) return;
+  for (const prop of [
+    "top",
+    "left",
+    "width",
+    "height",
+    "right",
+    "bottom",
+    "display",
+    "position",
+    "z-index",
+  ]) {
+    root.style.removeProperty(prop);
+  }
+  root.style.removeProperty("--drawer-sub-offset");
+}
+
+function restoreDrawerHome(el) {
+  const home = el._drawerHome;
+  if (!home?.parent?.isConnected) {
+    el._drawerHome = null;
+    return;
+  }
+  el._drawerPortaling = true;
+  if (home.next && home.next.parentNode === home.parent) {
+    home.parent.insertBefore(el, home.next);
+  } else {
+    home.parent.appendChild(el);
+  }
+  el._drawerPortaling = false;
+  el._drawerHome = null;
+}
+
+function portalDrawer(el) {
+  if (!el._drawerHome) {
+    el._drawerHome = { parent: el.parentNode, next: el.nextSibling };
+  }
+  if (el.parentNode === document.body) return;
+  el._drawerPortaling = true;
+  document.body.appendChild(el);
+  el._drawerPortaling = false;
+  el._drawerRoot = el.querySelector(":scope > .slate-drawer-root");
+}
+
+function releaseSubDrawer(el) {
+  const hadSub =
+    el._drawerParent || el.hasAttribute("sub") || el.hasAttribute("data-sub-from");
+  el._drawerParent = null;
+  el._drawerSubOffset = 0;
+  el.removeAttribute("sub");
+  el.removeAttribute("data-sub-from");
+  el.style.removeProperty("--drawer-sub-offset");
+  if (hadSub) clearSubGeometry(el);
+  // Remount after paint so close stays snappy. Skip if still open (re-portaled).
+  if (!el._drawerHome) return;
+  const home = el._drawerHome;
+  queueMicrotask(() => {
+    if (el.hasAttribute("open")) return;
+    if (el._drawerHome !== home) return;
+    restoreDrawerHome(el);
+  });
+}
+
+function adoptAsSubDrawer(el, parent) {
+  const root = drawerRoot(el);
+  const parentPanel = drawerPanel(parent);
+  if (!root || !parentPanel || parent === el) return false;
+
+  const rect = parentPanel.getBoundingClientRect();
+  if (rect.width < 8 || rect.height < 8) return false;
+
+  const side = normalizePlacement(parent);
+  // Sit at the far edge of the parent (toward screen center), with a small overlap.
+  const overlap = 12;
+  const subW = extentPx(el.getAttribute("width"), Math.max(260, Math.round(rect.width)));
+  const subH = extentPx(el.getAttribute("height"), Math.max(220, Math.round(rect.height * 0.55)));
+
+  let top = rect.top;
+  let left = rect.left;
+  let width = rect.width;
+  let height = rect.height;
+  let peek = 0;
+
+  if (side === "left") {
+    peek = Math.max(0, rect.width - overlap);
+    left = rect.right - overlap;
+    width = subW;
+    height = rect.height;
+  } else if (side === "right") {
+    peek = Math.max(0, rect.width - overlap);
+    width = subW;
+    height = rect.height;
+    left = rect.left + overlap - width;
+  } else if (side === "top") {
+    peek = Math.max(0, rect.height - overlap);
+    top = rect.bottom - overlap;
+    width = rect.width;
+    height = subH;
+  } else {
+    peek = Math.max(0, rect.height - overlap);
+    width = rect.width;
+    height = subH;
+    top = rect.top + overlap - height;
+  }
+
+  // Portal out of the parent tree — otherwise overflow:hidden clips the sub.
+  // Mark portaling so Destroyed (from the brief disconnect) does not clear open.
+  portalDrawer(el);
+
+  el._drawerParent = parent;
+  el._drawerSubOffset = peek;
+  el.setAttribute("sub", "");
+  el.setAttribute("data-sub-from", side);
+  el.style.setProperty("--drawer-sub-offset", `${peek}px`);
+
+  // Re-resolve root after possible reconnect.
+  el._drawerRoot = el.querySelector(":scope > .slate-drawer-root") || root;
+  const liveRoot = drawerRoot(el);
+  if (!liveRoot) return false;
+
+  syncPlacement(el);
+
+  liveRoot.style.setProperty("--drawer-sub-offset", `${peek}px`);
+  liveRoot.style.setProperty("display", "block", "important");
+  liveRoot.style.setProperty("position", "fixed", "important");
+  liveRoot.style.setProperty("top", `${Math.round(top)}px`, "important");
+  liveRoot.style.setProperty("left", `${Math.round(left)}px`, "important");
+  liveRoot.style.setProperty("width", `${Math.round(width)}px`, "important");
+  liveRoot.style.setProperty("height", `${Math.round(height)}px`, "important");
+  liveRoot.style.setProperty("right", "auto", "important");
+  liveRoot.style.setProperty("bottom", "auto", "important");
+  liveRoot.style.setProperty("z-index", String(BASE_Z + 20), "important");
+  liveRoot.removeAttribute("hidden");
+  liveRoot.inert = false;
+  return true;
+}
+
+function beginOpen(el) {
+  const nestedParent = markupParentDrawer(el) || el._drawerParent;
+  const wantSub = el.hasAttribute("stack") || Boolean(nestedParent);
+  const parent =
+    (nestedParent?.hasAttribute("open") ? nestedParent : null) ||
+    (wantSub
+      ? openDrawers()
+          .filter((d) => d !== el && !d.hasAttribute("sub"))
+          .sort((a, b) => (a._drawerStackOrder || 0) - (b._drawerStackOrder || 0))
+          .at(-1)
+      : null);
+
+  if (wantSub && parent) {
+    const tryAdopt = () => adoptAsSubDrawer(el, parent);
+    if (!tryAdopt()) {
+      requestAnimationFrame(() => {
+        if (el.hasAttribute("open")) tryAdopt();
+      });
+    }
+    el._drawerStackOrder = ++drawerStackSeq;
+    return;
+  }
+
+  for (const other of openDrawers()) {
+    if (other === el) continue;
+    closeDrawer(other, "replaced");
+  }
+  releaseSubDrawer(el);
+  // Leave the gallery scrollbox — otherwise wheel/drag scrolls the page under us.
+  portalDrawer(el);
+  el._drawerStackOrder = ++drawerStackSeq;
+  drawerRoot(el)?.style.setProperty("z-index", String(BASE_Z));
+  syncPlacement(el);
+}
+
+function findDrawerById(id) {
+  if (!id) return null;
+  for (const d of liveDrawers) {
+    if (d.id === id || d.getAttribute("name") === id) return d;
+  }
+  const byId = document.getElementById(id);
+  if (byId?.localName === "slate-drawer") return byId;
+  for (const d of document.querySelectorAll("slate-drawer")) {
+    if (d.id === id || d.getAttribute("name") === id) return d;
+  }
+  return null;
+}
+
+function openFromTrigger(trigger) {
+  if (!(trigger instanceof Element)) return false;
+  const el = findDrawerById(trigger.getAttribute("drawer"));
+  if (!el) return false;
+  if (trigger.closest("slate-drawer") === el && el.hasAttribute("open")) return false;
+  const title = trigger.getAttribute("drawer-title");
+  if (title != null) el.setAttribute("title", title);
+  const placement = trigger.getAttribute("drawer-placement");
+  if (placement != null) el.setAttribute("placement", placement);
+  if (el.hasAttribute("open")) el.removeAttribute("open");
+  el.setAttribute("open", "");
+  return true;
+}
+
+function clickPath(event) {
+  return typeof event.composedPath === "function" ? event.composedPath() : [];
+}
+
+function pathHasDrawerTrigger(path) {
+  for (const node of path) {
+    if (node instanceof Element && node.hasAttribute("drawer")) return true;
+  }
+  return false;
+}
+
+function pathHitsNode(path, node) {
+  if (!node) return false;
+  for (const entry of path) {
+    if (entry === node) return true;
+    if (entry instanceof Node && node.contains(entry)) return true;
+  }
+  return false;
+}
+
+function drawerOwningNode(node) {
+  if (!node) return null;
+  let best = null;
+  for (const d of openDrawers()) {
+    const root = drawerRoot(d);
+    if (!root?.contains(node)) continue;
+    if (!best || (d._drawerStackOrder || 0) > (best._drawerStackOrder || 0)) best = d;
+  }
+  return best;
+}
+
+function stopDrawerEvent(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+}
+
+/** True when pointerdown started on the top drawer panel — ignore the following click for backdrop dismiss (text select / drag). */
+let suppressBackdropClose = false;
+
+function onDrawerPointerDown(event) {
+  if (event.button != null && event.button !== 0) {
+    suppressBackdropClose = false;
+    return;
+  }
+  const top = topOpenDrawer();
+  if (!top) {
+    suppressBackdropClose = false;
+    return;
+  }
+  const path = clickPath(event);
+  const panel = drawerPanel(top);
+  suppressBackdropClose = pathHitsNode(path, panel);
+  // Touches on the scrim should not scroll/pan the page underneath.
+  if (!suppressBackdropClose && pathHitsNode(path, drawerRoot(top))) {
+    const t = event.target;
+    if (t instanceof Element && t.closest?.(".slate-drawer-backdrop")) {
+      event.preventDefault();
+    }
+  }
+}
+
+function onDrawerWheel(event) {
+  const top = topOpenDrawer();
+  if (!top) return;
+  const path = clickPath(event);
+  const root = drawerRoot(top);
+  if (!pathHitsNode(path, root)) return;
+  // Always stop page scroll. Apply the wheel to the drawer body when relevant.
+  event.preventDefault();
+  const body = root.querySelector(".slate-drawer-body");
+  if (body && pathHitsNode(path, drawerPanel(top))) {
+    body.scrollTop += event.deltaY;
+  }
+}
+
+function onDrawerTouchMove(event) {
+  const top = topOpenDrawer();
+  if (!top || event.touches?.length !== 1) return;
+  const path = clickPath(event);
+  const root = drawerRoot(top);
+  if (!pathHitsNode(path, root)) return;
+  // Portaled drawers are off the page scrollbox; still block default to avoid
+  // browser gestures scrolling something behind on some platforms.
+  let inBody = false;
+  for (const node of path) {
+    if (node instanceof Element && node.classList?.contains("slate-drawer-body")) {
+      inBody = true;
+      break;
+    }
+  }
+  if (!inBody) event.preventDefault();
+}
+
+function onDrawerDocClick(event) {
+  const path = clickPath(event);
+
+  let trigger = null;
+  for (const node of path) {
+    if (node instanceof Element && node.hasAttribute("drawer")) {
+      trigger = node;
+      break;
+    }
+  }
+  if (!trigger) {
+    const t = event.target;
+    trigger =
+      t instanceof Element
+        ? t.closest("[drawer]")
+        : t?.parentElement?.closest?.("[drawer]") || null;
+  }
+  if (trigger) {
+    suppressBackdropClose = false;
+    if (openFromTrigger(trigger)) stopDrawerEvent(event);
+    return;
+  }
+
+  const closeIcon = path.find(
+    (node) => node instanceof Element && node.classList?.contains("slate-drawer-close")
+  );
+  if (closeIcon) {
+    suppressBackdropClose = false;
+    const owner = drawerOwningNode(closeIcon);
+    if (owner) {
+      stopDrawerEvent(event);
+      closeDrawer(owner, "close");
+      return;
+    }
+  }
+
+  const top = topOpenDrawer();
+  if (!top || !attrOn(top, "close-backdrop", true)) {
+    suppressBackdropClose = false;
+    return;
+  }
+  if (pathHasDrawerTrigger(path)) {
+    suppressBackdropClose = false;
+    return;
+  }
+  if (pathHitsNode(path, drawerPanel(top))) {
+    suppressBackdropClose = false;
+    return;
+  }
+  // Drag/select started on the panel then released outside — not a backdrop dismiss.
+  if (suppressBackdropClose) {
+    suppressBackdropClose = false;
+    return;
+  }
+  stopDrawerEvent(event);
+  closeDrawer(top, "backdrop");
+}
+
+function onDrawerDocClicked(event) {
+  const t = event.target;
+  const trigger =
+    t instanceof Element
+      ? t.hasAttribute("drawer")
+        ? t
+        : t.closest("[drawer]")
+      : null;
+  if (!trigger) return;
+  if (openFromTrigger(trigger)) stopDrawerEvent(event);
+}
+
+function onDrawerDocKey(event) {
+  if (event.key !== "Escape") return;
+  const top = topOpenDrawer();
+  if (!top || !attrOn(top, "close-escape", true)) return;
+  event.preventDefault();
+  closeDrawer(top, "escape");
+}
+
+export default defineUmc({
+  tag: "slate-drawer",
+  attrs: {
+    open: "",
+    title: "",
+    placement: "left",
+    width: "",
+    height: "",
+    stack: "",
+    sub: "",
+    "close-backdrop": "",
+    "close-escape": "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+    if (!el.hasAttribute("placement")) el.setAttribute("placement", "left");
+    el._drawerRoot = el.querySelector(":scope > .slate-drawer-root");
+    liveDrawers.add(el);
+    if (!drawerDocBound) {
+      drawerDocBound = true;
+      document.addEventListener("pointerdown", onDrawerPointerDown, true);
+      document.addEventListener("click", onDrawerDocClick, true);
+      document.addEventListener("clicked", onDrawerDocClicked, true);
+      document.addEventListener("keydown", onDrawerDocKey, true);
+      document.addEventListener("wheel", onDrawerWheel, { capture: true, passive: false });
+      document.addEventListener("touchmove", onDrawerTouchMove, {
+        capture: true,
+        passive: false,
+      });
+    }
+  },
+
+  Destroyed(el) {
+    // Moving to document.body for sub-drawer layering briefly disconnects.
+    if (el._drawerPortaling) {
+      liveDrawers.add(el); // stay registered across the move
+      return;
+    }
+    liveDrawers.delete(el);
+    if (!liveDrawers.size && drawerDocBound) {
+      drawerDocBound = false;
+      document.removeEventListener("pointerdown", onDrawerPointerDown, true);
+      document.removeEventListener("click", onDrawerDocClick, true);
+      document.removeEventListener("clicked", onDrawerDocClicked, true);
+      document.removeEventListener("keydown", onDrawerDocKey, true);
+      document.removeEventListener("wheel", onDrawerWheel, true);
+      document.removeEventListener("touchmove", onDrawerTouchMove, true);
+    }
+    closeDrawer(el, "destroy");
+    releaseSubDrawer(el);
+    el._drawerRoot = null;
+    syncScrollLock();
+  },
+
+  SynchronizeProperties(el, api) {
+    const { attr, bind } = api;
+    bind();
+    if (!el._drawerRoot) {
+      el._drawerRoot = el.querySelector(":scope > .slate-drawer-root");
+    }
+
+    if (el.hasAttribute("open") && el.hasAttribute("sub") && el._drawerParent) {
+      adoptAsSubDrawer(el, el._drawerParent);
+    } else {
+      syncPlacement(el);
+    }
+
+    const open = el.hasAttribute("open");
+    const root = drawerRoot(el);
+    const titleEl = root?.querySelector(".slate-drawer-title");
+    root?.toggleAttribute("hidden", !open);
+    if (root) root.inert = !open;
+    el.setAttribute("aria-hidden", open ? "false" : "true");
+    titleEl?.toggleAttribute("hidden", !(attr("title", "") || "").trim());
+
+    if (open && !el._wasOpen) {
+      el._wasOpen = true;
+      beginOpen(el);
+      syncScrollLock();
+      api.emit("opened", {});
+    } else if (!open) {
+      el._wasOpen = false;
+      releaseSubDrawer(el);
+      syncScrollLock();
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="420" height="260" kind="stage">
+  <slate-drawer open title="Menu" placement="left" width="200">
+    <slate-list
+      kind="plain"
+      options="home|Home|house, search|Search|search, settings|Settings|settings"
+      selected="home"
+    ></slate-list>
+  </slate-drawer>
+</canvaspanel>

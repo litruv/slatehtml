@@ -425,7 +425,8 @@
 :is(widgetswitcher, umc-widgetswitcher) {
   display: contents;
 }
-:is(widgetswitcher, umc-widgetswitcher) > [hidden] {
+:is(widgetswitcher, umc-widgetswitcher) > [hidden],
+[data-umc-extends="widgetswitcher"] > [hidden] {
   display: none !important;
 }
 

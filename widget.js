@@ -219,6 +219,18 @@ function applyLeafAttrs(el) {
   }
 }
 
+/**
+ * Builtin panel/leaf role for an element.
+ * Honors `@parent` / `extends` via `__umcExtends` or `data-umc-extends`
+ * so e.g. `<slate-tabs @parent widgetswitcher>` gets switcher behavior.
+ */
+function panelRole(el) {
+  if (!(el instanceof Element)) return "";
+  const ext = el.__umcExtends || el.getAttribute?.("data-umc-extends");
+  if (ext) return baseTag(ext);
+  return baseTag(el.localName);
+}
+
 /** Builtin leaf role, honors `extends: "textblock"` widgets via __umcExtends. */
 function leafRole(el) {
   const tag = baseTag(el.localName);
@@ -232,9 +244,7 @@ function leafRole(el) {
   ) {
     return tag;
   }
-  const ext = el.__umcExtends || el.getAttribute?.("data-umc-extends");
-  if (ext) return baseTag(ext);
-  return tag;
+  return panelRole(el);
 }
 
 function bindLeafInteractions(el) {
@@ -423,7 +433,7 @@ function isDisplayContents(el) {
 function canvasLayoutParent(el) {
   let p = el.parentElement;
   while (p) {
-    if (baseTag(p.localName) === "canvaspanel") return p;
+    if (panelRole(p) === "canvaspanel") return p;
     if (isDisplayContents(p)) {
       p = p.parentElement;
       continue;
@@ -445,7 +455,7 @@ function applyCanvasChild(el) {
     el.hasAttribute("right") ||
     el.hasAttribute("bottom");
   const directCanvasChild =
-    el.parentElement && baseTag(el.parentElement.localName) === "canvaspanel";
+    el.parentElement && panelRole(el.parentElement) === "canvaspanel";
   // Forwarded roots (under display:contents) must carry canvas attrs.
   if (!directCanvasChild && !hasAttrs) return;
 
@@ -526,7 +536,7 @@ function applyCanvasChild(el) {
 }
 
 function applyGrid(el) {
-  if (baseTag(el.localName) !== "gridpanel") return;
+  if (panelRole(el) !== "gridpanel") return;
   if (el.hasAttribute("masonry")) {
     if (el.hasAttribute("columns")) {
       el.style.setProperty("--widget-columns", el.getAttribute("columns"));
@@ -556,7 +566,7 @@ function applyGrid(el) {
 }
 
 function applyUniformGrid(el) {
-  if (baseTag(el.localName) !== "uniformgridpanel") return;
+  if (panelRole(el) !== "uniformgridpanel") return;
   const columns = el.getAttribute("columns") || "2";
   const rows = el.getAttribute("rows") || "2";
   el.style.setProperty("--widget-columns", columns);
@@ -568,11 +578,13 @@ function switcherPageId(node) {
 }
 
 function applyWidgetSwitcher(el) {
-  if (baseTag(el.localName) !== "widgetswitcher") return;
+  if (panelRole(el) !== "widgetswitcher") return;
   const active = el.getAttribute("active") || "";
   for (const child of el.children) {
     const id = switcherPageId(child);
-    child.toggleAttribute("hidden", !(id !== "" && id === active));
+    // No page= → chrome (e.g. slate-tabs strip), leave visibility alone.
+    if (id === "") continue;
+    child.toggleAttribute("hidden", id !== active);
   }
   if (!el._switcherObs) {
     el._switcherObs = new MutationObserver(() => applyWidgetSwitcher(el));
@@ -581,7 +593,7 @@ function applyWidgetSwitcher(el) {
 }
 
 function applyBackgroundBlur(el) {
-  if (baseTag(el.localName) !== "backgroundblur") return;
+  if (panelRole(el) !== "backgroundblur") return;
   const blur = el.getAttribute("blur");
   if (blur != null && blur !== "") {
     const value = LENGTH.test(String(blur).trim()) ? `${blur}px` : blur;
@@ -592,7 +604,7 @@ function applyBackgroundBlur(el) {
 }
 
 function applyScaleBox(el) {
-  if (baseTag(el.localName) !== "scalebox") return;
+  if (panelRole(el) !== "scalebox") return;
   const child = el.firstElementChild;
   if (!child) return;
 
@@ -711,7 +723,7 @@ function panelSizeObserver() {
 /** Observe layout panels and fire `sizechanged` when their box changes. */
 function bindPanelSize(el) {
   if (!(el instanceof Element)) return;
-  if (!SIZE_EVENT_TAGS.has(baseTag(el.localName))) return;
+  if (!SIZE_EVENT_TAGS.has(panelRole(el))) return;
   if (el._sizeObserved) return;
   el._sizeObserved = true;
   panelSizeObserver()?.observe(el);
@@ -730,7 +742,7 @@ function enhance(el) {
   applyWidgetSwitcher(el);
   applyBackgroundBlur(el);
   applyScaleBox(el);
-  if (baseTag(el.localName) === "scrollbox") {
+  if (panelRole(el) === "scrollbox") {
     bindDragScroll(el, { enabled: dragScrollEnabled });
   }
 }
@@ -764,7 +776,7 @@ function registerPrefixedElements() {
     attributeChangedCallback() {
       if (!this.isConnected) return;
       enhance(this);
-      if (baseTag(this.localName) === "canvaspanel") {
+      if (panelRole(this) === "canvaspanel") {
         for (const child of this.children) {
           applyCanvasChild(child);
           if (isDisplayContents(child)) {
@@ -806,7 +818,7 @@ function boot() {
       ) {
         for (const root of el.children) applyCanvasChild(root);
       }
-      if (baseTag(el.parentElement?.localName) === "canvaspanel") {
+      if (panelRole(el.parentElement) === "canvaspanel") {
         applyCanvasChild(el);
         if (isDisplayContents(el)) {
           for (const root of el.children) applyCanvasChild(root);

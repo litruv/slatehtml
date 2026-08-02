@@ -1,0 +1,150 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Platform"></slate-text>
+          <slate-text kind="hint" text="Branch markup by OS. Shortcuts: formatShortcut("mod+C") / menu shortcut="mod+C". Override with configure({ platform }) or force=."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Auto (this device)"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-platform>
+                    <mac><slate-text kind="body" text="Branch: macOS (⌘ shortcuts)"></slate-text></mac>
+                    <windows><slate-text kind="body" text="Branch: Windows (Ctrl shortcuts)"></slate-text></windows>
+                    <linux><slate-text kind="body" text="Branch: Linux (Ctrl shortcuts)"></slate-text></linux>
+                    <default><slate-text kind="body" text="Branch: default / unknown"></slate-text></default>
+                  </slate-platform>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-platform>
+  <mac><slate-text kind="body" text="Branch: macOS (⌘ shortcuts)"></slate-text></mac>
+  <windows><slate-text kind="body" text="Branch: Windows (Ctrl shortcuts)"></slate-text></windows>
+  <linux><slate-text kind="body" text="Branch: Linux (Ctrl shortcuts)"></slate-text></linux>
+  <default><slate-text kind="body" text="Branch: default / unknown"></slate-text></default>
+</slate-platform>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Force each OS"></slate-text>
+                <verticalbox gap="12" valign="center" data-demo-mount>
+                  <slate-platform force="mac">
+                    <mac><slate-text kind="hint" text="forced mac → ⌘"></slate-text></mac>
+                    <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+                    <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+                  </slate-platform>
+                  <slate-platform force="windows">
+                    <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+                    <windows><slate-text kind="hint" text="forced windows → Ctrl"></slate-text></windows>
+                    <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+                  </slate-platform>
+                  <slate-platform force="linux">
+                    <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+                    <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+                    <linux><slate-text kind="hint" text="forced linux → Ctrl"></slate-text></linux>
+                  </slate-platform>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-platform force="mac">
+  <mac><slate-text kind="hint" text="forced mac → ⌘"></slate-text></mac>
+  <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+  <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+</slate-platform>
+<slate-platform force="windows">
+  <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+  <windows><slate-text kind="hint" text="forced windows → Ctrl"></slate-text></windows>
+  <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+</slate-platform>
+<slate-platform force="linux">
+  <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+  <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+  <linux><slate-text kind="hint" text="forced linux → Ctrl"></slate-text></linux>
+</slate-platform>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Shortcut labels"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <verticalbox gap="8">
+                    <slate-menu-item text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+                    <slate-menu-item text="Save as" icon="save" shortcut="mod+shift+S"></slate-menu-item>
+                    <slate-text kind="hint" text="Same mod+… → ⌘ on Mac, Ctrl+ on Windows/Linux. Shortcuts are global while the item is connected."></slate-text>
+                  </verticalbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<verticalbox gap="8">
+  <slate-menu-item text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+  <slate-menu-item text="Save as" icon="save" shortcut="mod+shift+S"></slate-menu-item>
+  <slate-text kind="hint" text="Same mod+… → ⌘ on Mac, Ctrl+ on Windows/Linux. Shortcuts are global while the item is connected."></slate-text>
+</verticalbox>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="registerShortcut"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button ref="save" text="Save" shortcut="mod+S" kind="soft"></slate-button>
+                  <slate-text ref="hint" kind="hint" text="Press mod+S or click Save"></slate-text>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button ref="save" text="Save" shortcut="mod+S" kind="soft"></slate-button>
+<slate-text ref="hint" kind="hint" text="Press mod+S or click Save"></slate-text>
+            </script>
+            <script type="text/plain" data-demo-script>
+on(self.save, "click", () => {
+  self.hint.setAttribute("text", "mod+S / click at " + new Date().toLocaleTimeString());
+});
+on(self.save, "shortcut", () => {
+  self.hint.setAttribute("text", "shortcut event at " + new Date().toLocaleTimeString());
+});
+registerShortcut("mod+K", (ev) => {
+  ev.preventDefault();
+  self.hint.setAttribute("text", "mod+K (imperative) at " + new Date().toLocaleTimeString());
+});
+            </script>
+          </wrapbox>
+        </verticalbox>

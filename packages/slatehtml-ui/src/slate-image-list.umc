@@ -1,0 +1,150 @@
+--- style ---
+/* Host *is* the image grid (MUI ImageList-style variants). */
+self {
+  display: grid; /* umc-layout-ok */
+  grid-template-columns: repeat(var(--slate-il-cols, 2), minmax(0, 1fr)); /* umc-layout-ok */
+  grid-auto-rows: var(--slate-il-row-height, 164px); /* umc-layout-ok */
+  gap: var(--slate-il-gap, 4px); /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  min-width: 0; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  list-style: none;
+}
+
+self[variant="quilted"] {
+  grid-auto-rows: var(--slate-il-row-height, 121px); /* umc-layout-ok */
+}
+
+self[variant="woven"] {
+  grid-auto-rows: auto; /* umc-layout-ok */
+}
+
+self[variant="woven"] > slate-image-list-item {
+  height: auto; /* umc-layout-ok */
+  aspect-ratio: 1 / 1; /* umc-layout-ok */
+}
+
+self[variant="woven"] > slate-image-list-item:nth-of-type(odd) {
+  aspect-ratio: 3 / 4; /* umc-layout-ok */
+}
+
+self[variant="woven"] > slate-image-list-item:nth-of-type(even) {
+  aspect-ratio: 4 / 5; /* umc-layout-ok */
+}
+
+self[variant="masonry"] {
+  display: block; /* umc-layout-ok */
+  column-count: var(--slate-il-cols, 2); /* umc-layout-ok */
+  column-gap: var(--slate-il-gap, 4px); /* umc-layout-ok */
+  grid-template-columns: none; /* umc-layout-ok */
+  grid-auto-rows: auto; /* umc-layout-ok */
+}
+
+self[variant="masonry"] > slate-image-list-item {
+  display: inline-block; /* umc-layout-ok, pack in columns */
+  width: 100%; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+  margin-bottom: var(--slate-il-gap, 4px); /* umc-layout-ok */
+  aspect-ratio: var(--slate-ili-aspect, 4 / 3); /* umc-layout-ok */
+  break-inside: avoid;
+}
+
+--- script ---
+/**
+ * Image collection grid with MUI-style quilt variants.
+ *
+ *   <slate-image-list variant="quilted" cols="4" row-height="121" gap="4">
+ *     <slate-image-list-item src="…" title="Breakfast" cols="2" rows="2"></slate-image-list-item>
+ *     <slate-image-list-item src="…" title="Burger"></slate-image-list-item>
+ *   </slate-image-list>
+ *
+ * Variants: standard | quilted | woven | masonry
+ * Attrs: variant, cols, gap, row-height
+ * Events: itemactivated { value, title, src } (from clickable items)
+ */
+
+const VARIANTS = new Set(["standard", "quilted", "woven", "masonry"]);
+
+function parsePositiveInt(raw, fallback) {
+  const n = Number.parseInt(String(raw ?? "").trim(), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function parseRowHeight(raw, variant) {
+  const s = String(raw ?? "").trim().toLowerCase();
+  if (!s || s === "auto") {
+    if (variant === "quilted") return 121;
+    if (variant === "standard") return 164;
+    return null;
+  }
+  const n = Number.parseFloat(s);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function normalizeVariant(raw) {
+  const v = String(raw || "standard").trim().toLowerCase();
+  return VARIANTS.has(v) ? v : "standard";
+}
+
+export default defineUmc({
+  tag: "slate-image-list",
+  attrs: {
+    /** standard | quilted | woven | masonry */
+    variant: "standard",
+    cols: "2",
+    gap: "4",
+    /** px row track; auto uses variant default (standard 164, quilted 121) */
+    "row-height": "",
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const variant = normalizeVariant(attr("variant", "standard"));
+    if ((el.getAttribute("variant") || "") !== variant) {
+      el.setAttribute("variant", variant);
+    }
+
+    const cols = parsePositiveInt(attr("cols", "2"), 2);
+    const gap = parsePositiveInt(attr("gap", "4"), 4);
+    const rowHeight = parseRowHeight(attr("row-height", ""), variant);
+
+    el.style.setProperty("--slate-il-cols", String(cols));
+    el.style.setProperty("--slate-il-gap", `${gap}px`);
+    if (rowHeight != null) {
+      el.style.setProperty("--slate-il-row-height", `${rowHeight}px`);
+    } else {
+      el.style.removeProperty("--slate-il-row-height");
+    }
+
+    // Mirror gap onto the layout attr so enhance/panel CSS stay in sync.
+    if ((el.getAttribute("gap") || "") !== String(gap)) {
+      el.setAttribute("gap", String(gap));
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="360" height="280" kind="stage">
+  <slate-image-list
+    variant="quilted"
+    cols="4"
+    row-height="64"
+    gap="4"
+    anchors="fill"
+    top="12"
+    left="12"
+    right="12"
+    bottom="12"
+  >
+    <slate-image-list-item
+      src="https://picsum.photos/seed/q1/240/240"
+      title="A"
+      cols="2"
+      rows="2"
+    ></slate-image-list-item>
+    <slate-image-list-item src="https://picsum.photos/seed/q2/120/120" title="B"></slate-image-list-item>
+    <slate-image-list-item src="https://picsum.photos/seed/q3/120/120" title="C"></slate-image-list-item>
+    <slate-image-list-item src="https://picsum.photos/seed/q4/240/120" title="D" cols="2"></slate-image-list-item>
+  </slate-image-list>
+</canvaspanel>

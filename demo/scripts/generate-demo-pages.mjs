@@ -8,10 +8,11 @@ import { fileURLToPath } from "node:url";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "../pages");
 
-function exampleBlock({ title, events, mount, code, script }) {
+function exampleBlock({ title, events, mount, code, script, gap }) {
   const mountTag = mount;
   const html = code.trim();
   const js = script ? script.trim() : "";
+  const mountGap = gap != null ? gap : 10;
   // Keep JS in a sibling text/plain script so a nested </script> cannot
   // prematurely close data-demo-snippet. demo/main.js merges them for display.
   const scriptBlock = js
@@ -32,7 +33,7 @@ ${js}
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="${title}"></slate-text>
-                <${mountTag} gap="10" valign="center" data-demo-mount>
+                <${mountTag} gap="${mountGap}" valign="center" data-demo-mount>
 ${html.split("\n").map((l) => `                  ${l}`).join("\n")}
                 </${mountTag}>
               </verticalbox>
@@ -56,7 +57,8 @@ function page({ title, hint, events = "", mount = "verticalbox", label, variants
       exampleBlock({
         title: v.name,
         events,
-        mount,
+        mount: v.mount || mount,
+        gap: v.gap,
         code: v.code,
         script: v.script,
       })
@@ -355,29 +357,35 @@ const pages = {
 
   "tabs.html": page({
     title: "Tabs",
-    hint: "Edit the UMC on the right, blur or Ctrl+Enter applies it.",
+    hint: "Extends widgetswitcher (@parent). Children are normal pages (page=\"…\", optional label).",
     events: "selectionchanged",
     mount: "verticalbox",
     variants: [
       {
         name: "Basic",
-        code: `<slate-tabs>
-  <slate-tab name="basic" label="Basic">
-    <slate-text kind="body" text="First panel."></slate-text>
-  </slate-tab>
-  <slate-tab name="email" label="Email">
-    <slate-text kind="body" text="Second panel."></slate-text>
-  </slate-tab>
-  <slate-tab name="bio" label="Bio">
-    <slate-text kind="body" text="Third panel."></slate-text>
-  </slate-tab>
+        code: `<slate-tabs active="email" height="140">
+  <border page="basic" label="Basic" kind="panel" padding="12">
+    <slate-text kind="body" text="Profile basics."></slate-text>
+  </border>
+  <border page="email" label="Email" kind="panel" padding="12">
+    <slate-text-field label="Email" type="email" value="hi@example.com"></slate-text-field>
+  </border>
+  <border page="bio" label="Bio" kind="panel" padding="12">
+    <slate-text kind="body" text="Optional biography panel."></slate-text>
+  </border>
 </slate-tabs>`,
       },
       {
-        name: "Attr tabs",
-        code: `<slate-tabs tabs="one, two, three" active="two">
-  <border kind="panel" padding="12">
-    <slate-text kind="body" text="Active tab body (attr-driven list)."></slate-text>
+        name: "Tabs attr",
+        code: `<slate-tabs tabs="day|Day, week|Week, month|Month" active="week" height="120">
+  <border page="day" kind="panel" padding="12">
+    <slate-text text="Day view"></slate-text>
+  </border>
+  <border page="week" kind="panel" padding="12">
+    <slate-text text="Week view"></slate-text>
+  </border>
+  <border page="month" kind="panel" padding="12">
+    <slate-text text="Month view"></slate-text>
   </border>
 </slate-tabs>`,
       },
@@ -960,6 +968,217 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
     ],
   }),
 
+  "accordion.html": page({
+    title: "Accordion",
+    hint: "slate-accordion + slate-accordion-item. open selects panel(s); multiple allows several open. Events: selectionchanged.",
+    events: "selectionchanged",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-accordion open="general" width="100%">
+  <slate-accordion-item name="general" title="General">
+    <slate-text kind="body" text="Profile name and language."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="notifications" title="Notifications">
+    <slate-text kind="body" text="Email and push preferences."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="security" title="Security">
+    <slate-text kind="body" text="Password and active sessions."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>`,
+      },
+      {
+        name: "Multiple",
+        code: `<slate-accordion multiple open="a,b" width="100%">
+  <slate-accordion-item name="a" title="Shipping">
+    <slate-text kind="body" text="Address book."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="b" title="Billing">
+    <slate-text kind="body" text="Cards on file."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="c" title="Tax">
+    <slate-text kind="body" text="VAT ID."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>`,
+      },
+      {
+        name: "Plain",
+        code: `<slate-accordion kind="plain" open="faq1" width="100%">
+  <slate-accordion-item name="faq1" title="What is SlateHTML?">
+    <slate-text kind="body" text="UMG-style panels in the browser."></slate-text>
+  </slate-accordion-item>
+  <slate-accordion-item name="faq2" title="What is UMC?">
+    <slate-text kind="body" text="HTML + style + script widgets."></slate-text>
+  </slate-accordion-item>
+</slate-accordion>`,
+      },
+    ],
+  }),
+
+  "app-bar.html": page({
+    title: "App Bar",
+    hint: "Top bar with title / subtitle. Leading via slot-leading; bare children go trailing. kind: elevated, transparent. dense.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-app-bar title="Inbox" width="100%">
+  <slot-leading>
+    <slate-icon name="menu" size="20"></slate-icon>
+  </slot-leading>
+  <slate-icon name="search" size="18"></slate-icon>
+  <slate-icon name="bell" size="18"></slate-icon>
+</slate-app-bar>`,
+      },
+      {
+        name: "Subtitle + elevated",
+        code: `<slate-app-bar
+  title="Messages"
+  subtitle="Design system"
+  kind="elevated"
+  width="100%"
+>
+  <slot-leading>
+    <slate-icon name="arrow-left" size="20"></slate-icon>
+  </slot-leading>
+  <slate-button text="Compose"></slate-button>
+</slate-app-bar>`,
+      },
+      {
+        name: "Dense transparent",
+        code: `<border kind="well" padding="0" width="100%">
+  <slate-app-bar title="Gallery" kind="transparent" dense width="100%">
+    <slot-leading>
+      <slate-icon name="menu" size="18"></slate-icon>
+    </slot-leading>
+    <slate-icon name="more-vertical" size="16"></slate-icon>
+  </slate-app-bar>
+</border>`,
+      },
+    ],
+  }),
+
+  "bottom-nav.html": page({
+    title: "Bottom Nav",
+    hint: "Destination bar via slate-bottom-nav-item children. Optional options shorthand: value|Label|icon|badge. kind: elevated / transparent. labels=hide. Events: selectionchanged.",
+    events: "selectionchanged",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-bottom-nav selected="home" width="100%">
+  <slate-bottom-nav-item value="home" text="Home" icon="house" selected></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="search" text="Search" icon="search"></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="alerts" text="Alerts" icon="bell" badge="2"></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="me" text="Profile" icon="user"></slate-bottom-nav-item>
+</slate-bottom-nav>`,
+      },
+      {
+        name: "Elevated",
+        code: `<border kind="well" padding="0" width="100%" height="180">
+  <overlay fill>
+    <scrollbox anchors="fill" top="0" left="0" right="0" bottom="0" padding="12 12 64">
+      <verticalbox gap="8">
+        <slate-text kind="label" text="Inbox"></slate-text>
+        <slate-text text="Elevated floats the bar over scrolling content — shadow instead of a top rule."></slate-text>
+        <slate-text text="Line two."></slate-text>
+        <slate-text text="Line three."></slate-text>
+        <slate-text text="Line four."></slate-text>
+        <slate-text text="Line five."></slate-text>
+      </verticalbox>
+    </scrollbox>
+    <slate-bottom-nav selected="search" kind="elevated" anchors="bottom" left="0" right="0" bottom="0">
+      <slate-bottom-nav-item value="home" text="Home" icon="house"></slate-bottom-nav-item>
+      <slate-bottom-nav-item value="search" text="Search" icon="search" selected></slate-bottom-nav-item>
+      <slate-bottom-nav-item value="me" text="Profile" icon="user"></slate-bottom-nav-item>
+    </slate-bottom-nav>
+  </overlay>
+</border>`,
+      },
+      {
+        name: "Icons only",
+        code: `<slate-bottom-nav selected="me" labels="hide" width="100%">
+  <slate-bottom-nav-item value="home" text="Home" icon="house"></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="search" text="Search" icon="search"></slate-bottom-nav-item>
+  <slate-bottom-nav-item value="me" text="Profile" icon="user" selected></slate-bottom-nav-item>
+</slate-bottom-nav>`,
+      },
+      {
+        name: "Options string",
+        code: `<slate-bottom-nav
+  options="home|Home|house, search|Search|search, alerts|Alerts|bell|2, me|Profile|user"
+  selected="home"
+  width="100%"
+></slate-bottom-nav>`,
+      },
+    ],
+  }),
+
+  "drawer.html": page({
+    title: "Drawer",
+    hint: "Pinned to left / right / top / bottom of the screen. Nested stack opens a sub-drawer toward the center. Declarative: drawer=\"id\". Events: opened, closed.",
+    events: "opened,closed",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Open",
+        code: `<slate-button drawer="demo-drawer" text="Open drawer"></slate-button>
+<slate-drawer id="demo-drawer" title="Menu" placement="left" width="300">
+  <verticalbox gap="10">
+    <slate-list
+      kind="plain"
+      options="home|Home|house, search|Search|search, settings|Settings|settings"
+      selected="home"
+    ></slate-list>
+    <slate-button drawer="demo-drawer-sub" text="Open details"></slate-button>
+  </verticalbox>
+  <slate-drawer id="demo-drawer-sub" title="Details" stack width="280">
+    <slate-text text="Stacked toward the center — close to return to the menu."></slate-text>
+  </slate-drawer>
+</slate-drawer>`,
+      },
+      {
+        name: "Placements",
+        code: `<wrapbox gap="8">
+  <slate-button drawer="demo-drawer-edge" drawer-placement="left" text="Left"></slate-button>
+  <slate-button drawer="demo-drawer-edge" drawer-placement="right" text="Right"></slate-button>
+  <slate-button drawer="demo-drawer-edge" drawer-placement="top" text="Top"></slate-button>
+  <slate-button drawer="demo-drawer-edge" drawer-placement="bottom" text="Bottom"></slate-button>
+</wrapbox>
+<slate-drawer id="demo-drawer-edge" title="Drawer" placement="left" width="280" height="200">
+  <slate-text text="Same drawer — edge comes from the trigger."></slate-text>
+</slate-drawer>`,
+      },
+      {
+        name: "Replace (default)",
+        code: `<horizontalbox gap="8">
+  <slate-button drawer="demo-drawer-a" text="Open A"></slate-button>
+  <slate-button drawer="demo-drawer-b" text="Open B"></slate-button>
+</horizontalbox>
+<slate-drawer id="demo-drawer-a" title="Drawer A" placement="left" width="260">
+  <slate-text text="Opening B closes this one."></slate-text>
+</slate-drawer>
+<slate-drawer id="demo-drawer-b" title="Drawer B" placement="right" width="260">
+  <slate-text text="Opening A closes this one."></slate-text>
+</slate-drawer>`,
+      },
+      {
+        name: "From script",
+        code: `<slate-button ref="show" text="Open drawer"></slate-button>
+<slate-drawer ref="drawer" title="Menu" width="280">
+  <verticalbox gap="8" padding="4 0">
+    <slate-text text="Slotted body content."></slate-text>
+    <slate-text kind="hint" text="Dismiss with the X, backdrop, or Escape."></slate-text>
+  </verticalbox>
+</slate-drawer>`,
+        script: `on(self.show, e.clicked, () => bump(self.drawer));
+on(self.drawer, e.closed, (ev) => console.log("closed", ev.detail));`,
+      },
+    ],
+  }),
+
   "breadcrumb.html": page({
     title: "Breadcrumb",
     hint: "Hierarchical trail, Overview › category › page.",
@@ -980,6 +1199,281 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
   separator="chevrons-right"
   items="Docs|#/, Panel|#/panel, Box"
 ></slate-breadcrumb>`,
+      },
+    ],
+  }),
+
+  "pagination.html": page({
+    title: "Pagination",
+    hint: "Page strip with prev/next. Optional first/last and ellipses for long ranges.",
+    events: "pagechanged",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-pagination count="10" page="3"></slate-pagination>`,
+      },
+      {
+        name: "First / last",
+        code: `<slate-pagination count="24" page="12" show-first show-last></slate-pagination>`,
+      },
+      {
+        name: "Compact siblings",
+        code: `<slate-pagination
+  count="20"
+  page="10"
+  sibling-count="0"
+  boundary-count="1"
+></slate-pagination>`,
+      },
+      {
+        name: "Disabled",
+        code: `<slate-pagination count="8" page="2" disabled></slate-pagination>`,
+      },
+      {
+        name: "From script",
+        code: `<verticalbox gap="10">
+  <slate-pagination ref="pager" count="6" page="1"></slate-pagination>
+  <slate-text ref="label" kind="hint" text="Page 1 / 6"></slate-text>
+</verticalbox>`,
+        script: `on(self.pager, e.pagechanged, (ev) => {
+  self.label.set({ text: \`Page \${ev.detail.page} / 6\` });
+});`,
+      },
+    ],
+  }),
+
+  "menu.html": page({
+    title: "Menu",
+    hint: "Context menu (right-click) over a target. Shortcuts use mod+… (⌘ on Mac, Ctrl elsewhere).",
+    events: "selectionchanged,opened,closed",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Right-click",
+        code: `<slate-menu>
+  <border kind="panel" padding="20" width="280" height="100">
+    <slate-text kind="body" text="Right-click this panel"></slate-text>
+  </border>
+  <slate-menu-item value="cut" text="Cut" icon="scissors" shortcut="mod+X"></slate-menu-item>
+  <slate-menu-item value="copy" text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+  <slate-menu-item value="paste" text="Paste" icon="clipboard" shortcut="mod+V"></slate-menu-item>
+  <slate-menu-item separator></slate-menu-item>
+  <slate-menu-item value="delete" text="Delete" icon="trash-2" destructive></slate-menu-item>
+</slate-menu>`,
+      },
+      {
+        name: "From options",
+        code: `<slate-menu
+  options="cut|Cut|scissors, copy|Copy|copy, ---, delete|Delete|trash-2"
+>
+  <border kind="well" padding="16" width="280">
+    <slate-text kind="hint" text="Right-click — options= grammar"></slate-text>
+  </border>
+</slate-menu>`,
+      },
+      {
+        name: "Click trigger",
+        code: `<slate-menu trigger="click">
+  <slate-button text="Open menu" kind="soft"></slate-button>
+  <slate-menu-item value="edit" text="Edit" icon="pencil"></slate-menu-item>
+  <slate-menu-item value="share" text="Share" icon="share-2"></slate-menu-item>
+  <slate-menu-item separator></slate-menu-item>
+  <slate-menu-item value="archive" text="Archive" icon="archive"></slate-menu-item>
+</slate-menu>`,
+      },
+    ],
+  }),
+
+  "platform.html": page({
+    title: "Platform",
+    hint: "Branch markup by OS. Shortcuts: formatShortcut(\"mod+C\") / menu shortcut=\"mod+C\". Override with configure({ platform }) or force=.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Auto (this device)",
+        code: `<slate-platform>
+  <mac><slate-text kind="body" text="Branch: macOS (⌘ shortcuts)"></slate-text></mac>
+  <windows><slate-text kind="body" text="Branch: Windows (Ctrl shortcuts)"></slate-text></windows>
+  <linux><slate-text kind="body" text="Branch: Linux (Ctrl shortcuts)"></slate-text></linux>
+  <default><slate-text kind="body" text="Branch: default / unknown"></slate-text></default>
+</slate-platform>`,
+      },
+      {
+        name: "Force each OS",
+        gap: 12,
+        code: `<slate-platform force="mac">
+  <mac><slate-text kind="hint" text="forced mac → ⌘"></slate-text></mac>
+  <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+  <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+</slate-platform>
+<slate-platform force="windows">
+  <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+  <windows><slate-text kind="hint" text="forced windows → Ctrl"></slate-text></windows>
+  <linux><slate-text kind="hint" text="linux"></slate-text></linux>
+</slate-platform>
+<slate-platform force="linux">
+  <mac><slate-text kind="hint" text="mac"></slate-text></mac>
+  <windows><slate-text kind="hint" text="windows"></slate-text></windows>
+  <linux><slate-text kind="hint" text="forced linux → Ctrl"></slate-text></linux>
+</slate-platform>`,
+      },
+      {
+        name: "Shortcut labels",
+        code: `<verticalbox gap="8">
+  <slate-menu-item text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+  <slate-menu-item text="Save as" icon="save" shortcut="mod+shift+S"></slate-menu-item>
+  <slate-text kind="hint" text="Same mod+… → ⌘ on Mac, Ctrl+ on Windows/Linux. Shortcuts are global while the item is connected."></slate-text>
+</verticalbox>`,
+      },
+      {
+        name: "registerShortcut",
+        code: `<slate-button ref="save" text="Save" shortcut="mod+S" kind="soft"></slate-button>
+<slate-text ref="hint" kind="hint" text="Press mod+S or click Save"></slate-text>`,
+        script: `on(self.save, "click", () => {
+  self.hint.setAttribute("text", "mod+S / click at " + new Date().toLocaleTimeString());
+});
+on(self.save, "shortcut", () => {
+  self.hint.setAttribute("text", "shortcut event at " + new Date().toLocaleTimeString());
+});
+registerShortcut("mod+K", (ev) => {
+  ev.preventDefault();
+  self.hint.setAttribute("text", "mod+K (imperative) at " + new Date().toLocaleTimeString());
+});
+`,
+      },
+    ],
+  }),
+
+  "avatar.html": page({
+    title: "Avatar",
+    hint: "Image or initials (initials hide once the photo loads). Groups stack left→right; variant sets circular / rounded / square.",
+    events: "",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Image + initials",
+        code: `<slate-avatar src="https://i.pravatar.cc/80?img=5" alt="Ada" size="40"></slate-avatar>
+<slate-avatar text="Grace Hopper" size="40"></slate-avatar>
+<slate-avatar text="Babbage" size="48" variant="rounded"></slate-avatar>
+<slate-avatar text="X" size="32" variant="square"></slate-avatar>`,
+      },
+      {
+        name: "Sizes",
+        code: `<slate-avatar text="S" size="24"></slate-avatar>
+<slate-avatar text="M" size="40"></slate-avatar>
+<slate-avatar text="L" size="56"></slate-avatar>`,
+      },
+      {
+        name: "Groups (shapes)",
+        mount: "verticalbox",
+        gap: 16,
+        code: `<slate-avatar-group variant="circular" max="4" size="40" spacing="12">
+  <slate-avatar src="https://i.pravatar.cc/80?img=1" alt="A"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=2" alt="B"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=3" alt="C"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=4" alt="D"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="E"></slate-avatar>
+</slate-avatar-group>
+<slate-avatar-group variant="rounded" max="4" size="40" spacing="12">
+  <slate-avatar src="https://i.pravatar.cc/80?img=11" alt="F"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=12" alt="G"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=13" alt="H"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=14" alt="I"></slate-avatar>
+  <slate-avatar text="J"></slate-avatar>
+</slate-avatar-group>
+<slate-avatar-group variant="square" max="4" size="40" spacing="12">
+  <slate-avatar src="https://i.pravatar.cc/80?img=21" alt="K"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=22" alt="L"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=23" alt="M"></slate-avatar>
+  <slate-avatar text="N"></slate-avatar>
+  <slate-avatar text="O"></slate-avatar>
+</slate-avatar-group>`,
+      },
+      {
+        name: "Group + surplus",
+        code: `<slate-avatar-group max="3" size="44" spacing="14">
+  <slate-avatar src="https://i.pravatar.cc/80?img=31" alt="A"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=32" alt="B"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=33" alt="C"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=34" alt="D"></slate-avatar>
+  <slate-avatar src="https://i.pravatar.cc/80?img=35" alt="E"></slate-avatar>
+  <slate-avatar text="F"></slate-avatar>
+</slate-avatar-group>`,
+      },
+    ],
+  }),
+
+  "progress.html": page({
+    title: "Progress",
+    hint: "Linear and circular. Use indeterminate for unknown duration. Leaf progressbar remains for UMG panels.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Linear",
+        code: `<slate-progress value="20"></slate-progress>
+<slate-progress value="55"></slate-progress>
+<slate-progress value="90"></slate-progress>`,
+      },
+      {
+        name: "Circular",
+        code: `<horizontalbox gap="14" valign="center">
+  <slate-progress variant="circular" value="25" size="40"></slate-progress>
+  <slate-progress variant="circular" value="60" size="48"></slate-progress>
+  <slate-progress variant="circular" value="90" size="56"></slate-progress>
+</horizontalbox>`,
+      },
+      {
+        name: "Indeterminate",
+        code: `<slate-progress indeterminate></slate-progress>
+<horizontalbox gap="14" valign="center">
+  <slate-progress variant="circular" indeterminate size="40"></slate-progress>
+  <slate-progress variant="circular" indeterminate size="48"></slate-progress>
+</horizontalbox>`,
+      },
+    ],
+  }),
+
+  "rich-link.html": page({
+    title: "Rich Link",
+    hint: "Unfurl card with title, description, image, and site. Optional globalThis.slateLinkResolve(href) fills metadata when only href is set.",
+    events: "clicked",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Card",
+        code: `<slate-rich-link
+  href="https://example.com"
+  title="Example Domain"
+  description="This domain is for use in documentation examples without needing permission. Avoid use in operational systems."
+  site="example.com"
+></slate-rich-link>`,
+      },
+      {
+        name: "With image",
+        code: `<slate-rich-link
+  href="https://picsum.photos"
+  title="Lorem Picsum"
+  description="Easy placeholder images for demos and mockups."
+  image="https://picsum.photos/seed/richlink/320/200"
+  site="picsum.photos"
+></slate-rich-link>`,
+      },
+      {
+        name: "Compact",
+        code: `<slate-rich-link
+  href="https://example.com/docs"
+  title="API docs"
+  description="Short unfurl for chat-style layouts."
+  site="example.com"
+  compact
+></slate-rich-link>`,
+      },
+      {
+        name: "Href only",
+        code: `<slate-rich-link href="https://example.com/bare"></slate-rich-link>`,
       },
     ],
   }),
@@ -1013,6 +1507,95 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
         code: `<slate-image src="https://i.pravatar.cc/64?img=1" width="48" height="48" fit="cover"></slate-image>
 <slate-image src="https://i.pravatar.cc/64?img=2" width="48" height="48" fit="cover"></slate-image>
 <slate-image src="https://i.pravatar.cc/64?img=3" width="48" height="48" fit="cover"></slate-image>`,
+      },
+    ],
+  }),
+
+  "image-list.html": page({
+    title: "Image List",
+    hint: "Grid of images with standard, quilted, woven, and masonry layouts. Quilted items use cols/rows spans.",
+    events: "itemactivated",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Standard",
+        code: `<slate-image-list cols="3" row-height="100" gap="6" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-s1/200/200" title="Breakfast"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s2/200/200" title="Burger"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s3/200/200" title="Camera"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s4/200/200" title="Coffee"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s5/200/200" title="Hats"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-s6/200/200" title="Honey"></slate-image-list-item>
+</slate-image-list>`,
+      },
+      {
+        name: "Quilted",
+        code: `<slate-image-list variant="quilted" cols="4" row-height="80" gap="4" width="360">
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-q1/320/320"
+    title="Breakfast"
+    cols="2"
+    rows="2"
+  ></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q2/160/160" title="Burger"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q3/160/160" title="Camera"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q4/320/160" title="Coffee" cols="2"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q5/320/160" title="Hats" cols="2"></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-q6/320/320"
+    title="Honey"
+    subtitle="@slate"
+    cols="2"
+    rows="2"
+  ></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q7/160/160" title="Basketball"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-q8/160/160" title="Fern"></slate-image-list-item>
+</slate-image-list>`,
+      },
+      {
+        name: "Woven",
+        code: `<slate-image-list variant="woven" cols="3" gap="8" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-w1/200/260" title="Sea star"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w2/200/240" title="Bike"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w3/200/260" title="Mushrooms"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w4/200/240" title="Tomato"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w5/200/260" title="Fern"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-w6/200/240" title="Hats"></slate-image-list-item>
+</slate-image-list>`,
+      },
+      {
+        name: "Masonry",
+        code: `<slate-image-list variant="masonry" cols="3" gap="8" width="360">
+  <slate-image-list-item src="https://picsum.photos/seed/il-m1/240/180" aspect="4/3" title="A"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m2/240/320" aspect="3/4" title="B"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m3/240/200" aspect="6/5" title="C"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m4/240/280" aspect="5/6" title="D"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m5/240/160" aspect="3/2" title="E"></slate-image-list-item>
+  <slate-image-list-item src="https://picsum.photos/seed/il-m6/240/300" aspect="4/5" title="F"></slate-image-list-item>
+</slate-image-list>`,
+      },
+      {
+        name: "Clickable",
+        code: `<slate-image-list cols="3" row-height="96" gap="6" width="320">
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c1/200/200"
+    title="One"
+    value="one"
+    clickable
+  ></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c2/200/200"
+    title="Two"
+    value="two"
+    clickable
+  ></slate-image-list-item>
+  <slate-image-list-item
+    src="https://picsum.photos/seed/il-c3/200/200"
+    title="Three"
+    value="three"
+    clickable
+  ></slate-image-list-item>
+</slate-image-list>`,
       },
     ],
   }),

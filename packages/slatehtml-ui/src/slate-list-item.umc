@@ -38,6 +38,11 @@ self[selected] {
   background: var(--widget-background);
 }
 
+self[selected]:hover:not([disabled]) {
+  --widget-background: color-mix(in srgb, var(--accent, currentColor) 22%, transparent);
+  background: var(--widget-background);
+}
+
 self[disabled] {
   opacity: 0.45;
   pointer-events: none;

@@ -1,0 +1,184 @@
+--- html ---
+<overlay class="slate-ili-stage" width="100%" height="100%">
+  <slate-image class="slate-ili-image" fit="cover" width="100%" height="100%"></slate-image>
+  <verticalbox class="slate-ili-bar" width="100%" valign="bottom" padding="8 10" gap="2" hidden>
+    <textblock class="slate-ili-title" data-umc="title"></textblock>
+    <textblock class="slate-ili-subtitle" data-umc="subtitle"></textblock>
+  </verticalbox>
+</overlay>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok, grid/masonry cell */
+  position: relative; /* umc-layout-ok, stage fill */
+  overflow: hidden;
+  box-sizing: border-box;
+  min-width: 0; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok, fill grid area */
+  border-radius: var(--widget-radius, 4px);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  break-inside: avoid;
+  cursor: default;
+}
+
+self[clickable] {
+  cursor: pointer;
+}
+
+self[clickable]:hover {
+  filter: brightness(1.05);
+}
+
+self[clickable]:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.slate-ili-stage {
+  --widget-padding: 0;
+  position: absolute; /* umc-layout-ok, fill cell */
+  inset: 0; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+}
+
+.slate-ili-image {
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+}
+
+.slate-ili-bar {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+  color: #fff;
+  pointer-events: none;
+}
+
+.slate-ili-title {
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.slate-ili-subtitle {
+  font-size: 11px;
+  opacity: 0.85;
+  line-height: 1.2;
+}
+
+.slate-ili-subtitle:empty {
+  display: none; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * Cell inside slate-image-list.
+ *
+ *   <slate-image-list-item
+ *     src="…"
+ *     title="Breakfast"
+ *     cols="2"
+ *     rows="2"
+ *   ></slate-image-list-item>
+ *
+ * Attrs: src, title, subtitle, cols, rows, fit, aspect, value, clickable
+ * Events (bubble): itemactivated { value, title, src }
+ */
+
+function parseSpan(raw, fallback = 1) {
+  const n = Number.parseInt(String(raw ?? "").trim(), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function applySpan(el, attr) {
+  const cols = parseSpan(attr("cols", "1"), 1);
+  const rows = parseSpan(attr("rows", "1"), 1);
+  el.style.gridColumn = cols > 1 ? `span ${cols}` : "";
+  el.style.gridRow = rows > 1 ? `span ${rows}` : "";
+}
+
+export default defineUmc({
+  tag: "slate-image-list-item",
+  attrs: {
+    src: "",
+    title: "",
+    subtitle: "",
+    cols: "1",
+    rows: "1",
+    fit: "cover",
+    /** Masonry aspect hint, e.g. "3/4" or "1.5" */
+    aspect: "",
+    value: "",
+    clickable: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+    el.addEventListener("click", () => {
+      if (!el.hasAttribute("clickable")) return;
+      const value = api.attr("value", "") || api.attr("src", "");
+      el.dispatchEvent(
+        new CustomEvent("itemactivated", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            value,
+            title: api.attr("title", ""),
+            src: api.attr("src", ""),
+          },
+        })
+      );
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const img = el.querySelector(":scope .slate-ili-image");
+    const bar = el.querySelector(":scope .slate-ili-bar");
+    const src = (attr("src", "") || "").trim();
+    const title = attr("title", "");
+    const subtitle = attr("subtitle", "");
+    const fit = attr("fit", "cover") === "contain" ? "contain" : "cover";
+    const aspect = (attr("aspect", "") || "").trim();
+
+    if (img) {
+      if (src) img.setAttribute("src", src);
+      else img.removeAttribute("src");
+      img.setAttribute("fit", fit);
+      if (title) img.setAttribute("alt", title);
+    }
+
+    if (bar) {
+      bar.toggleAttribute("hidden", !(title || subtitle));
+    }
+
+    if (aspect) {
+      el.style.setProperty(
+        "--slate-ili-aspect",
+        aspect.includes("/") ? aspect.replace(/\s+/g, "") : aspect
+      );
+    } else {
+      el.style.removeProperty("--slate-ili-aspect");
+    }
+
+    if (el.hasAttribute("clickable") && !el.hasAttribute("tabindex")) {
+      el.setAttribute("tabindex", "0");
+    }
+
+    applySpan(el, attr);
+  },
+});
+
+--- preview ---
+<canvaspanel width="200" height="160" kind="stage">
+  <slate-image-list-item
+    anchors="fill"
+    top="8"
+    left="8"
+    right="8"
+    bottom="8"
+    src="https://picsum.photos/seed/ili-preview/320/240"
+    title="Preview"
+    subtitle="@slate"
+  ></slate-image-list-item>
+</canvaspanel>

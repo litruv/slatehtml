@@ -17,6 +17,7 @@
     "./widget.css": "./widget.css",
     "./widget.js": "./widget.js",
     "./umc": "./umc/index.js",
+    "./umc/shortcuts": "./umc/shortcuts.js",
     "./umc/vite": "./umc/vite.js",
     "./package.json": "./package.json"
   },

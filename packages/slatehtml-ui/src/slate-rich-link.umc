@@ -1,0 +1,278 @@
+--- html ---
+<a class="slate-rich-link-face" href="#" target="_blank" rel="noopener noreferrer">
+  <horizontalbox class="slate-rich-link-row" gap="0" width="100%" valign="stretch">
+    <border class="slate-rich-link-media" width="96" min-height="72" hidden>
+      <slate-image class="slate-rich-link-image" fit="cover" width="96" height="72"></slate-image>
+    </border>
+    <verticalbox class="slate-rich-link-copy" gap="4" padding="10 12" fill min-width="0">
+      <textblock class="slate-rich-link-site" data-umc="site"></textblock>
+      <textblock class="slate-rich-link-title" data-umc="title"></textblock>
+      <textblock class="slate-rich-link-desc" data-umc="description"></textblock>
+      <textblock class="slate-rich-link-url" data-umc="href"></textblock>
+    </verticalbox>
+  </horizontalbox>
+</a>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  max-width: 420px; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+}
+
+.slate-rich-link-face {
+  display: block; /* umc-layout-ok */
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border-radius: var(--widget-radius, 8px);
+  overflow: hidden;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+}
+
+.slate-rich-link-face:hover {
+  filter: brightness(1.04);
+}
+
+.slate-rich-link-face:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.slate-rich-link-media {
+  --widget-padding: 0;
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-background: color-mix(in srgb, currentColor 8%, transparent);
+  flex: 0 0 auto; /* umc-layout-ok */
+  overflow: hidden;
+}
+
+.slate-rich-link-media[hidden] {
+  display: none !important;
+}
+
+.slate-rich-link-image {
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  min-height: 72px; /* umc-layout-ok */
+}
+
+.slate-rich-link-site {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  line-height: 1.2;
+}
+
+.slate-rich-link-title {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.slate-rich-link-desc {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.8;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.slate-rich-link-url {
+  font-size: 11px;
+  opacity: 0.55;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slate-rich-link-site:empty,
+.slate-rich-link-title:empty,
+.slate-rich-link-desc:empty,
+.slate-rich-link-url:empty {
+  display: none; /* umc-layout-ok */
+}
+
+self[loading] .slate-rich-link-title::before {
+  content: "Loading…";
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+self[compact] {
+  max-width: 280px; /* umc-layout-ok */
+}
+
+self[compact] .slate-rich-link-media {
+  width: 64px; /* umc-layout-ok */
+}
+
+self[failed] .slate-rich-link-face {
+  border-style: dashed;
+}
+
+--- script ---
+/**
+ * Rich link / unfurl card (Open Graph–style metadata).
+ *
+ * Plain MUI Link is just styled <a>; this shows title, description, image, site.
+ *
+ *   <slate-rich-link
+ *     href="https://example.com"
+ *     title="Example"
+ *     description="A demo site"
+ *     image="https://…"
+ *     site="example.com"
+ *   ></slate-rich-link>
+ *
+ * If only `href` is set, calls `globalThis.slateLinkResolve(href)` when present:
+ *   async (url) => ({ title, description, image, site })
+ *
+ * Attrs: href, title, description, image, site, compact
+ * Events: clicked { href }
+ */
+
+function hostnameOf(href) {
+  try {
+    return new URL(href).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function displayUrl(href) {
+  try {
+    const u = new URL(href);
+    return `${u.hostname}${u.pathname === "/" ? "" : u.pathname}`.replace(
+      /^www\./,
+      ""
+    );
+  } catch {
+    return href;
+  }
+}
+
+async function resolveMeta(href) {
+  const resolve = globalThis.slateLinkResolve;
+  if (typeof resolve !== "function") return null;
+  try {
+    return (await resolve(href)) || null;
+  } catch {
+    return null;
+  }
+}
+
+export default defineUmc({
+  tag: "slate-rich-link",
+  attrs: {
+    href: "",
+    title: "",
+    description: "",
+    image: "",
+    site: "",
+    compact: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+    el.addEventListener("click", (event) => {
+      const href = (api.attr("href", "") || "").trim();
+      api.emit("clicked", { href });
+      // Allow default navigation on the inner <a>.
+      if (!href) event.preventDefault();
+    });
+  },
+
+  async SynchronizeProperties(el, { attr }) {
+    const href = (attr("href", "") || "").trim();
+    const face = el.querySelector(".slate-rich-link-face");
+    const media = el.querySelector(".slate-rich-link-media");
+    const img = el.querySelector(".slate-rich-link-image");
+
+    let title = attr("title", "");
+    let description = attr("description", "");
+    let image = (attr("image", "") || "").trim();
+    let site = attr("site", "");
+
+    const needsFetch =
+      href &&
+      !title &&
+      !description &&
+      !image &&
+      typeof globalThis.slateLinkResolve === "function";
+
+    if (needsFetch && el._resolvedFor !== href) {
+      el.setAttribute("loading", "");
+      el.removeAttribute("failed");
+      const gen = (el._resolveGen = (el._resolveGen || 0) + 1);
+      const meta = await resolveMeta(href);
+      if (gen !== el._resolveGen) return;
+      el._resolvedFor = href;
+      el.removeAttribute("loading");
+      if (meta) {
+        title = meta.title || title;
+        description = meta.description || description;
+        image = meta.image || image;
+        site = meta.site || site;
+        if (meta.title) el.setAttribute("title", meta.title);
+        if (meta.description) el.setAttribute("description", meta.description);
+        if (meta.image) el.setAttribute("image", meta.image);
+        if (meta.site) el.setAttribute("site", meta.site);
+      } else {
+        el.setAttribute("failed", "");
+      }
+    }
+
+    if (face) {
+      if (href) face.setAttribute("href", href);
+      else face.setAttribute("href", "#");
+    }
+
+    // data-umc bind handles title/description/site/href text nodes when attrs set.
+    // Fill URL line + site fallback manually for display helpers.
+    const siteNode = el.querySelector(".slate-rich-link-site");
+    const urlNode = el.querySelector(".slate-rich-link-url");
+    const titleNode = el.querySelector(".slate-rich-link-title");
+    const descNode = el.querySelector(".slate-rich-link-desc");
+
+    const siteText = site || hostnameOf(href);
+    if (siteNode) siteNode.setAttribute("text", siteText);
+    if (titleNode) titleNode.setAttribute("text", title || (href ? displayUrl(href) : ""));
+    if (descNode) descNode.setAttribute("text", description);
+    if (urlNode) urlNode.setAttribute("text", href ? displayUrl(href) : "");
+
+    if (media && img) {
+      if (image) {
+        img.setAttribute("src", image);
+        media.removeAttribute("hidden");
+      } else {
+        img.removeAttribute("src");
+        media.setAttribute("hidden", "");
+      }
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="400" height="140" kind="stage">
+  <slate-rich-link
+    anchors="fill"
+    top="12"
+    left="12"
+    right="12"
+    bottom="12"
+    href="https://example.com"
+    title="Example Domain"
+    description="This domain is for use in documentation examples without needing permission."
+    site="example.com"
+  ></slate-rich-link>
+</canvaspanel>

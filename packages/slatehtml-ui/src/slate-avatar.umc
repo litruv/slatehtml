@@ -1,0 +1,210 @@
+--- html ---
+<overlay class="slate-avatar-face" width="100%" height="100%">
+  <slate-image class="slate-avatar-image" fit="cover" resize="crop" width="100%" height="100%" hidden></slate-image>
+  <textblock class="slate-avatar-fallback" halign="center" valign="center"></textblock>
+</overlay>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  align-items: center; /* umc-layout-ok */
+  justify-content: center; /* umc-layout-ok */
+  position: relative; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: var(--slate-avatar-size, 40px); /* umc-layout-ok */
+  height: var(--slate-avatar-size, 40px); /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+  overflow: hidden;
+  border-radius: var(--slate-avatar-radius, 50%);
+  background: transparent;
+  color: var(--slate-avatar-fg, #fff);
+  font: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+}
+
+/* Initials / empty only — hide chrome once the photo is showing. */
+self[show-fallback] {
+  background: var(--slate-avatar-bg, var(--accent, #5865f2));
+}
+
+self[variant="rounded"] {
+  --slate-avatar-radius: 8px;
+}
+
+self[variant="square"] {
+  --slate-avatar-radius: 4px;
+}
+
+self[variant="circular"],
+self:not([variant]) {
+  --slate-avatar-radius: 50%;
+}
+
+.slate-avatar-face {
+  --widget-padding: 0;
+  position: absolute; /* umc-layout-ok */
+  inset: 0; /* umc-layout-ok */
+}
+
+.slate-avatar-image {
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+}
+
+.slate-avatar-image[hidden] {
+  display: none !important;
+}
+
+.slate-avatar-fallback {
+  font-size: calc(var(--slate-avatar-size, 40px) * 0.38);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.slate-avatar-fallback[hidden] {
+  display: none !important;
+}
+
+--- script ---
+import { serverAccent } from "./accent.js";
+
+/**
+ * User / entity avatar (image or initials).
+ *
+ *   <slate-avatar src="…" alt="Ada"></slate-avatar>
+ *   <slate-avatar text="Ada Lovelace" size="48"></slate-avatar>
+ *
+ * Initials only show when there is no loaded image (or the image failed).
+ *
+ * Attrs: src, text, alt, size, variant (circular | rounded | square), color
+ */
+
+function initials(text) {
+  const parts = String(text || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (!parts.length) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function parseSize(raw) {
+  const n = Number.parseFloat(String(raw || "").trim());
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 40;
+}
+
+function normalizeVariant(raw) {
+  const v = String(raw || "circular").trim().toLowerCase();
+  if (v === "rounded" || v === "square") return v;
+  return "circular";
+}
+
+function imageBrush(el) {
+  return (
+    el.querySelector(".slate-avatar-image .slate-image-face")?.getAttribute("brush") ||
+    ""
+  );
+}
+
+function paintFallback(el) {
+  const imageHost = el.querySelector(".slate-avatar-image");
+  const fallback = el.querySelector(".slate-avatar-fallback");
+  const src = (el.getAttribute("src") || "").trim();
+  const hasPicture = Boolean(imageBrush(el));
+  const failed = imageHost?.hasAttribute("failed");
+  const showFallback = !src || failed || !hasPicture;
+
+  el.toggleAttribute("show-fallback", showFallback);
+  el.toggleAttribute("empty", !src || (failed && !hasPicture));
+  if (fallback) fallback.toggleAttribute("hidden", !showFallback);
+}
+
+function watchImage(el) {
+  const imageHost = el.querySelector(".slate-avatar-image");
+  if (!imageHost || el._avatarObs) return;
+
+  const paint = () => paintFallback(el);
+  el._avatarObs = new MutationObserver(paint);
+  el._avatarObs.observe(imageHost, {
+    attributes: true,
+    attributeFilter: ["failed", "empty", "hidden"],
+  });
+  const inner = imageHost.querySelector(".slate-image-face");
+  if (inner) {
+    el._avatarObs.observe(inner, {
+      attributes: true,
+      attributeFilter: ["brush"],
+    });
+  }
+}
+
+export default defineUmc({
+  tag: "slate-avatar",
+  attrs: {
+    src: "",
+    text: "",
+    alt: "",
+    size: "40",
+    variant: "circular",
+    color: "",
+  },
+
+  Construct(el) {
+    watchImage(el);
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const src = (attr("src", "") || "").trim();
+    const text = attr("text", "");
+    const alt = attr("alt", "") || text;
+    const size = parseSize(attr("size", "40"));
+    const variant = normalizeVariant(attr("variant", "circular"));
+    const color =
+      (attr("color", "") || "").trim() || serverAccent(text || alt || "avatar");
+
+    el.setAttribute("variant", variant);
+    el.style.setProperty("--slate-avatar-size", `${size}px`);
+    el.style.setProperty("--slate-avatar-bg", color);
+    el.setAttribute("width", String(size));
+    el.setAttribute("height", String(size));
+    if (alt) el.setAttribute("aria-label", alt);
+    el.setAttribute("role", "img");
+
+    const img = el.querySelector(".slate-avatar-image");
+    const fallback = el.querySelector(".slate-avatar-fallback");
+    if (fallback) fallback.setAttribute("text", initials(text || alt));
+
+    if (img) {
+      if (src) {
+        img.setAttribute("src", src);
+        img.setAttribute("width", String(size));
+        img.setAttribute("height", String(size));
+        if (alt) img.setAttribute("alt", alt);
+        img.removeAttribute("hidden");
+      } else {
+        img.removeAttribute("src");
+        img.setAttribute("hidden", "");
+      }
+    }
+
+    watchImage(el);
+    paintFallback(el);
+  },
+
+  Destruct(el) {
+    el._avatarObs?.disconnect();
+    el._avatarObs = null;
+  },
+});
+
+--- preview ---
+<horizontalbox gap="10" padding="16" valign="center">
+  <slate-avatar src="https://i.pravatar.cc/80?img=5" alt="Ada" size="40"></slate-avatar>
+  <slate-avatar text="Grace Hopper" size="40"></slate-avatar>
+  <slate-avatar text="Babbage" size="48" variant="rounded"></slate-avatar>
+  <slate-avatar text="X" size="32" variant="square"></slate-avatar>
+</horizontalbox>

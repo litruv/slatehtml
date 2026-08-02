@@ -450,22 +450,37 @@ Without a `--- preview ---` section it renders a bare `<your-tag></your-tag>`, s
 </verticalbox>
 ```
 
-## Runtime imports (plain JS)
+## Global shortcuts
 
-Outside `.umc` scripts:
+Register once; handled on `document` keydown (capture). Specs match menu labels: `mod+S`, `mod+shift+P`, `alt+F`, `⌘C`.
 
 ```js
-import {
-  defineUmc,
-  emit,
-  create,
-  WidgetElement,
-  installWidgetApi,
-  stamp,
-  bind,
-  parseUmc,
-} from "slatehtml/umc";
+import { registerShortcut, formatShortcut } from "slatehtml/umc";
+
+const stop = registerShortcut("mod+S", (ev) => {
+  ev.preventDefault();
+  save();
+});
+// stop() to unregister
 ```
+
+**In `defineUmc`:**
+
+```js
+export default defineUmc({
+  tag: "doc-editor",
+  shortcuts: {
+    "mod+S": (el, api, ev) => api.emit("saved"),
+    "mod+Enter": "submitted", // emit event name
+  },
+});
+```
+
+**Host attr** (any widget): `shortcut="mod+S"` fires `shortcut` and a synthetic `click` while connected.
+
+**Imperative in Construct:** `api.shortcut("mod+K", handler)` — auto-removed on disconnect.
+
+Skipped while focus is in an input / textarea / contenteditable (pass `{ allowInInputs: true }` to override).
 
 Inside `.umc` scripts, **do not** import `defineUmc`, the loader injects it.
 

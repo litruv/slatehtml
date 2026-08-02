@@ -8,6 +8,8 @@
  * Skips pointer-owned controls (fields, sliders, menus). For selectable text
  * (`user-select: text|all`, `pre`/`code`/`[selectable]`), skips only when a
  * glyph is under the pointer — empty padding in those boxes still scrolls.
+ *
+ * Release after a flick keeps coasting with decelerating velocity.
  */
 
 /** Controls that own the pointer gesture, don't steal for scroll. */
@@ -25,6 +27,14 @@ const SELECTABLE_MARK = "pre,code,[selectable],[data-selectable]";
 const THRESHOLD_PX = 3;
 const GLYPH_HIT_PAD = 3;
 const SCROLLBOX_SEL = "scrollbox, umc-scrollbox";
+/** Keep recent pointer samples for flick velocity (ms). */
+const VELOCITY_WINDOW_MS = 100;
+/** px/ms — below this, stop coasting. */
+const VELOCITY_STOP = 0.02;
+/** Per-frame multiply (~60fps → settles in ~300–500ms). */
+const FRICTION = 0.95;
+/** Cap release speed so a wild flick doesn't fly forever (px/ms). */
+const VELOCITY_MAX = 3.5;
 
 /** @type {{ enabled: (el: Element) => boolean } | null} */
 let apiRef = null;
@@ -38,8 +48,18 @@ let docBound = false;
  *   top: number,
  *   moved: boolean,
  *   scrollbox: Element,
+ *   samples: { t: number, x: number, y: number }[],
  * }} */
 let gesture = null;
+
+/** @type {null | {
+ *   scrollbox: Element,
+ *   vx: number,
+ *   vy: number,
+ *   last: number,
+ *   raf: number,
+ * }} */
+let momentum = null;
 
 /**
  * True when (x,y) lands on a rendered text glyph, not just a text element's box.
@@ -164,14 +184,116 @@ function findScrollbox(node, enabled) {
       if (canScroll(el)) return el;
       if (!fallback) fallback = el;
     }
+    // Fixed overlays (drawers/dialogs) sit in the page tree but must not
+    // climb into the gallery scroller when their own body can't scroll.
+    if (el instanceof Element) {
+      if (
+        el.classList.contains("slate-drawer-root") ||
+        el.classList.contains("slate-dialog-root") ||
+        el.getAttribute("role") === "dialog"
+      ) {
+        break;
+      }
+      const pos = getComputedStyle(el).position;
+      if (pos === "fixed" || pos === "sticky") break;
+    }
     el = el.parentElement;
   }
   return fallback;
 }
 
-function endGesture() {
+function pushSample(g, x, y, t = performance.now()) {
+  g.samples.push({ t, x, y });
+  const cutoff = t - VELOCITY_WINDOW_MS;
+  while (g.samples.length > 2 && g.samples[0].t < cutoff) g.samples.shift();
+}
+
+function velocityFromSamples(samples) {
+  if (!samples || samples.length < 2) return { vx: 0, vy: 0 };
+  const newest = samples[samples.length - 1];
+  let oldest = samples[0];
+  for (let i = samples.length - 2; i >= 0; i--) {
+    if (newest.t - samples[i].t >= 16) {
+      oldest = samples[i];
+      break;
+    }
+  }
+  const dt = newest.t - oldest.t;
+  if (dt < 8) return { vx: 0, vy: 0 };
+  // Pointer moved down → content should keep moving up → scrollTop increases.
+  let vx = (oldest.x - newest.x) / dt;
+  let vy = (oldest.y - newest.y) / dt;
+  const speed = Math.hypot(vx, vy);
+  if (speed > VELOCITY_MAX) {
+    const s = VELOCITY_MAX / speed;
+    vx *= s;
+    vy *= s;
+  }
+  return { vx, vy };
+}
+
+function stopMomentum() {
+  if (!momentum) return;
+  cancelAnimationFrame(momentum.raf);
+  momentum = null;
+}
+
+function clampScroll(el) {
+  const maxL = Math.max(0, el.scrollWidth - el.clientWidth);
+  const maxT = Math.max(0, el.scrollHeight - el.clientHeight);
+  if (el.scrollLeft < 0) el.scrollLeft = 0;
+  else if (el.scrollLeft > maxL) el.scrollLeft = maxL;
+  if (el.scrollTop < 0) el.scrollTop = 0;
+  else if (el.scrollTop > maxT) el.scrollTop = maxT;
+  return {
+    atEdgeX: el.scrollLeft <= 0 || el.scrollLeft >= maxL - 0.5,
+    atEdgeY: el.scrollTop <= 0 || el.scrollTop >= maxT - 0.5,
+  };
+}
+
+function tickMomentum(now) {
+  if (!momentum) return;
+  const m = momentum;
+  const last = m.last ?? now;
+  const dt = Math.min(32, Math.max(0, now - last));
+  m.last = now;
+  if (dt > 0) {
+    m.scrollbox.scrollLeft += m.vx * dt;
+    m.scrollbox.scrollTop += m.vy * dt;
+    const { atEdgeX, atEdgeY } = clampScroll(m.scrollbox);
+    if (atEdgeX) m.vx = 0;
+    if (atEdgeY) m.vy = 0;
+    // Frame-rate independent friction (~FRICTION at 60fps).
+    const decay = Math.pow(FRICTION, dt / (1000 / 60));
+    m.vx *= decay;
+    m.vy *= decay;
+  }
+  if (Math.hypot(m.vx, m.vy) < VELOCITY_STOP) {
+    stopMomentum();
+    return;
+  }
+  m.raf = requestAnimationFrame(tickMomentum);
+}
+
+function startMomentum(scrollbox, vx, vy) {
+  stopMomentum();
+  if (Math.hypot(vx, vy) < VELOCITY_STOP) return;
+  if (!canScroll(scrollbox)) return;
+  momentum = {
+    scrollbox,
+    vx,
+    vy,
+    last: performance.now(),
+    raf: 0,
+  };
+  momentum.raf = requestAnimationFrame(tickMomentum);
+}
+
+function endGesture(opts = {}) {
   if (!gesture) return;
-  const { moved, scrollbox } = gesture;
+  const { moved, scrollbox, samples } = gesture;
+  const launch = opts.momentum !== false && moved;
+  const { vx, vy } = launch ? velocityFromSamples(samples) : { vx: 0, vy: 0 };
   gesture = null;
   scrollbox.classList.remove("umc-drag-scrolling");
   window.removeEventListener("pointermove", onMove);
@@ -189,6 +311,7 @@ function endGesture() {
       once: true,
     });
   }
+  if (launch) startMomentum(scrollbox, vx, vy);
 }
 
 function onMove(e) {
@@ -198,6 +321,7 @@ function onMove(e) {
   if (!gesture.moved) {
     if (Math.hypot(dx, dy) < THRESHOLD_PX) return;
     gesture.moved = true;
+    stopMomentum();
     gesture.scrollbox.classList.add("umc-drag-scrolling");
     try {
       gesture.scrollbox.setPointerCapture?.(e.pointerId);
@@ -206,13 +330,17 @@ function onMove(e) {
     }
   }
   e.preventDefault();
+  pushSample(gesture, e.clientX, e.clientY, e.timeStamp || performance.now());
   gesture.scrollbox.scrollLeft = gesture.left - dx;
   gesture.scrollbox.scrollTop = gesture.top - dy;
 }
 
 function onUp(e) {
   if (!gesture || e.pointerId !== gesture.pointerId) return;
-  endGesture();
+  if (gesture.moved) {
+    pushSample(gesture, e.clientX, e.clientY, e.timeStamp || performance.now());
+  }
+  endGesture({ momentum: true });
 }
 
 function onDragStart(e) {
@@ -222,11 +350,17 @@ function onDragStart(e) {
   if (scrollbox) e.preventDefault();
 }
 
+function onWheelCapture() {
+  // Native wheel should cancel leftover flick.
+  stopMomentum();
+}
+
 function onPointerDownCapture(e) {
   if (!apiRef) return;
   if (e.button !== 0) return;
   if (e.pointerType === "touch") return;
-  if (gesture) endGesture();
+  if (gesture) endGesture({ momentum: false });
+  stopMomentum();
 
   const scrollbox = findScrollbox(e.target, apiRef.enabled);
   if (!scrollbox) return;
@@ -240,6 +374,9 @@ function onPointerDownCapture(e) {
     top: scrollbox.scrollTop,
     moved: false,
     scrollbox,
+    samples: [
+      { t: e.timeStamp || performance.now(), x: e.clientX, y: e.clientY },
+    ],
   };
   window.addEventListener("pointermove", onMove, { passive: false });
   window.addEventListener("pointerup", onUp);
@@ -251,14 +388,20 @@ function bindDocument() {
   docBound = true;
   document.addEventListener("pointerdown", onPointerDownCapture, true);
   document.addEventListener("dragstart", onDragStart, true);
+  document.addEventListener("wheel", onWheelCapture, {
+    capture: true,
+    passive: true,
+  });
 }
 
 function unbindDocument() {
   if (!docBound || typeof document === "undefined") return;
   docBound = false;
-  endGesture();
+  endGesture({ momentum: false });
+  stopMomentum();
   document.removeEventListener("pointerdown", onPointerDownCapture, true);
   document.removeEventListener("dragstart", onDragStart, true);
+  document.removeEventListener("wheel", onWheelCapture, true);
 }
 
 /**

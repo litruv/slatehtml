@@ -348,41 +348,37 @@ slate-combobox {
   line-height: 1.2;
 }
 
-.docs-nav-label {
-  padding: 12px 8px 4px;
+.docs-nav-list {
+  --widget-padding: 0;
+  color: var(--ink);
+}
+
+.docs-nav-list .slate-list-category {
+  padding: 12px 8px 4px; /* umc-layout-ok */
   color: var(--muted);
   font-size: 10px;
-  font-weight: 650;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.2;
 }
 
-.docs-nav-group {
-  display: flex; /* umc-layout-ok, docs chrome stack */
-  flex-direction: column;
-  gap: 1px;
-}
-
-.docs-nav-link {
-  display: block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  color: var(--muted);
+.docs-nav-list slate-list-item {
   font-size: 12px;
   font-weight: 500;
-  text-decoration: none;
-  line-height: 1.35;
+  color: var(--muted);
 }
 
-.docs-nav-link:hover {
+.docs-nav-list slate-list-item:hover:not([selected]) {
   color: var(--ink);
-  background: color-mix(in srgb, var(--ctp-surface1) 70%, transparent);
 }
 
-.docs-nav-link.is-active {
+.docs-nav-list slate-list-item[selected] {
   color: var(--ctp-base);
+  --widget-background: var(--accent);
   background: var(--accent);
+}
+
+.docs-nav-list slate-list-item[selected] .slate-list-item-label,
+.docs-nav-list slate-list-item[selected] .slate-list-item-icon {
+  color: var(--ctp-base);
 }
 
 .docs-text-link {
@@ -433,6 +429,17 @@ slate-combobox {
   transform-origin: center center; /* umc-layout-ok */
 }
 
+/* Full-bleed miniatures (dialog scrim) — no padded well frame */
+.docs-hub-preview-bleed,
+.docs-hub-preview-bleed[kind="well"] {
+  --widget-padding: 0;
+  --widget-border: 1px solid var(--line);
+}
+
+.docs-hub-preview-bleed .docs-hub-preview-stage {
+  transform: none;
+}
+
 .docs-hub-snack-fake {
   --widget-background: var(--hud);
   --widget-border: none;
@@ -442,24 +449,25 @@ slate-combobox {
 }
 
 .docs-hub-dialog-fake {
-  --widget-background: transparent;
-  --widget-border: 1px solid var(--line);
-  --widget-radius: 8px;
-  overflow: hidden; /* umc-layout-ok */
-  background: var(--ctp-crust);
-}
-
-.docs-hub-dialog-scrim {
-  --widget-background: rgba(0, 0, 0, 0.45);
+  --widget-background: rgba(0, 0, 0, 0.55);
   --widget-border: none;
-  --widget-radius: 0;
+  --widget-radius: 6px;
+  --widget-padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  overflow: hidden; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok, scrim fills the tile well */
 }
 
 .docs-hub-dialog-card {
   --widget-background: var(--panel);
   --widget-border: 1px solid var(--line-strong);
-  --widget-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --widget-radius: 6px;
+  --widget-padding: 6px 8px;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   font-size: 11px;
 }
 
@@ -485,6 +493,50 @@ slate-combobox {
 .docs-hub-dialog-btn-accent {
   --widget-background: color-mix(in srgb, var(--accent) 22%, transparent);
   --widget-border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+}
+
+.docs-hub-drawer-fake {
+  --widget-background: rgba(0, 0, 0, 0.45);
+  --widget-border: none;
+  --widget-radius: 6px;
+  --widget-padding: 0;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  overflow: hidden; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  display: flex; /* umc-layout-ok */
+  justify-content: flex-start; /* umc-layout-ok */
+}
+
+.docs-hub-drawer-panel {
+  --widget-background: var(--panel);
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-padding: 6px 8px;
+  background: var(--panel);
+  box-shadow: 4px 0 14px rgba(0, 0, 0, 0.35);
+  width: 58%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  font-size: 11px;
+}
+
+.docs-hub-drawer-title {
+  font-weight: 650;
+  font-size: 11px;
+  margin-bottom: 2px; /* umc-layout-ok */
+}
+
+.docs-hub-drawer-row {
+  font-size: 10px;
+  opacity: 0.75;
+  padding: 2px 4px; /* umc-layout-ok */
+  border-radius: 4px;
+}
+
+.docs-hub-drawer-row-active {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
 }
 

@@ -1,0 +1,163 @@
+--- html ---
+<horizontalbox class="slate-menu-item-row" gap="10" valign="center" width="100%">
+  <slate-icon class="slate-menu-item-icon" name="" size="16" hidden></slate-icon>
+  <textblock class="slate-menu-item-label" data-umc="text" fill></textblock>
+  <textblock class="slate-menu-item-shortcut" data-umc="shortcut" hidden></textblock>
+</horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 7px 10px;
+  --widget-radius: 6px;
+  --widget-background: transparent;
+  padding: var(--widget-padding);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self:hover:not([disabled]):not([separator]),
+self[data-active]:not([disabled]):not([separator]) {
+  --widget-background: color-mix(in srgb, currentColor 10%, transparent);
+  background: var(--widget-background);
+}
+
+self[destructive] {
+  color: var(--danger, #f23f42);
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: default;
+}
+
+self[separator] {
+  --widget-padding: 0;
+  height: 0; /* umc-layout-ok */
+  margin: 4px 6px; /* umc-layout-ok */
+  border: 0;
+  border-top: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  border-radius: 0;
+  pointer-events: none;
+  cursor: default;
+}
+
+self[separator] .slate-menu-item-row {
+  display: none; /* umc-layout-ok */
+}
+
+self:focus-visible:not([separator]) {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: -2px;
+}
+
+.slate-menu-item-label {
+  min-width: 0; /* umc-layout-ok */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slate-menu-item-shortcut {
+  font-size: 11px;
+  opacity: 0.55;
+  flex: 0 0 auto; /* umc-layout-ok */
+  letter-spacing: 0.02em;
+}
+
+.slate-menu-item-icon[hidden],
+.slate-menu-item-shortcut[hidden] {
+  display: none !important;
+}
+
+--- script ---
+import { formatShortcut, onPlatform } from "./platform.js";
+
+/**
+ * Row inside slate-menu.
+ *
+ *   <slate-menu-item value="copy" text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+ *
+ * `shortcut` is platform-aware: mod/cmd/meta → ⌘ on Mac, Ctrl elsewhere.
+ * Literal ⌘… strings are rewritten off-Mac (⌘C → Ctrl+C).
+ */
+function paintShortcut(el, attr) {
+  const shortcut = el.querySelector(".slate-menu-item-shortcut");
+  const sep = el.hasAttribute("separator");
+  const keys = formatShortcut(attr?.("shortcut", "") ?? el.getAttribute("shortcut") ?? "");
+  if (!shortcut) return;
+  if (keys && !sep) {
+    shortcut.setAttribute("text", keys);
+    shortcut.removeAttribute("hidden");
+  } else {
+    shortcut.setAttribute("text", "");
+    shortcut.setAttribute("hidden", "");
+  }
+}
+
+export default defineUmc({
+  tag: "slate-menu-item",
+  attrs: {
+    text: "",
+    value: "",
+    icon: "",
+    shortcut: "",
+    disabled: "",
+    destructive: "",
+    separator: "",
+  },
+
+  Construct(el, api) {
+    if (el.hasAttribute("separator")) {
+      el.setAttribute("role", "separator");
+    } else {
+      el.setAttribute("role", "menuitem");
+      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    }
+    if (!el._platformBound) {
+      el._platformBound = true;
+      el._offPlatform = onPlatform(() => paintShortcut(el, api.attr));
+    }
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const sep = el.hasAttribute("separator");
+    el.setAttribute("role", sep ? "separator" : "menuitem");
+
+    const icon = el.querySelector(".slate-menu-item-icon");
+    const name = (attr("icon", "") || "").trim();
+    if (icon) {
+      if (name && !sep) {
+        icon.setAttribute("name", name);
+        icon.removeAttribute("hidden");
+      } else {
+        icon.setAttribute("hidden", "");
+      }
+    }
+
+    paintShortcut(el, attr);
+  },
+
+  Destruct(el) {
+    el._offPlatform?.();
+    el._offPlatform = null;
+  },
+});
+
+--- preview ---
+<verticalbox gap="4" padding="8" width="200" kind="panel">
+  <slate-menu-item text="Cut" icon="scissors" shortcut="mod+X"></slate-menu-item>
+  <slate-menu-item text="Copy" icon="copy" shortcut="mod+C"></slate-menu-item>
+  <slate-menu-item separator></slate-menu-item>
+  <slate-menu-item text="Delete" icon="trash-2" destructive></slate-menu-item>
+</verticalbox>

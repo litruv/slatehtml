@@ -1,0 +1,135 @@
+--- html ---
+<horizontalbox class="slate-accordion-item-header" gap="8" valign="center" width="100%" padding="10 12">
+  <textblock class="slate-accordion-item-title" data-umc="title" fill min-width="0"></textblock>
+  <slate-icon class="slate-accordion-item-chevron" name="chevron-down" size="16"></slate-icon>
+</horizontalbox>
+<verticalbox class="slate-accordion-item-body" data-content gap="6" padding="0 12 12" hidden></verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-background: transparent;
+  --widget-border: none;
+  --widget-radius: 0;
+  border-bottom: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  color: inherit;
+  font: inherit;
+}
+
+self:last-child {
+  border-bottom: none;
+}
+
+self .slate-accordion-item-header {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self .slate-accordion-item-header:hover {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+self .slate-accordion-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  min-width: 0; /* umc-layout-ok */
+}
+
+self .slate-accordion-item-chevron {
+  flex: 0 0 auto; /* umc-layout-ok */
+  opacity: 0.7;
+  transition: transform 140ms ease;
+}
+
+self[open] .slate-accordion-item-chevron {
+  transform: rotate(180deg);
+}
+
+self .slate-accordion-item-body {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+self .slate-accordion-item-body[hidden] {
+  display: none !important;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self:focus-visible .slate-accordion-item-header,
+self .slate-accordion-item-header:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: -2px;
+}
+
+--- script ---
+/**
+ * One expandable section in a slate-accordion.
+ *
+ *   <slate-accordion-item name="a" title="Account" open>
+ *     <slate-text kind="body" text="Profile settings…"></slate-text>
+ *   </slate-accordion-item>
+ *
+ * Attrs: name, title, open, disabled
+ */
+export default defineUmc({
+  tag: "slate-accordion-item",
+  attrs: {
+    name: "",
+    title: "",
+    open: "",
+    disabled: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "presentation");
+    const header = el.querySelector(".slate-accordion-item-header");
+    if (header) {
+      header.setAttribute("role", "button");
+      if (!header.hasAttribute("tabindex")) header.setAttribute("tabindex", "0");
+    }
+    const body = el.querySelector(".slate-accordion-item-body");
+    if (body) body.setAttribute("role", "region");
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const open = el.hasAttribute("open");
+    const disabled = el.hasAttribute("disabled");
+    const name = attr("name", "") || attr("title", "") || "";
+    const header = el.querySelector(".slate-accordion-item-header");
+    const body = el.querySelector(".slate-accordion-item-body");
+
+    if (header) {
+      header.setAttribute("aria-expanded", open ? "true" : "false");
+      header.setAttribute("aria-disabled", disabled ? "true" : "false");
+      if (name) header.id = `slate-accordion-h-${name}`;
+      header.tabIndex = disabled ? -1 : 0;
+    }
+    if (body) {
+      body.toggleAttribute("hidden", !open);
+      if (name) {
+        body.id = `slate-accordion-p-${name}`;
+        body.setAttribute("aria-labelledby", `slate-accordion-h-${name}`);
+      }
+    }
+  },
+});
+
+--- preview ---
+<verticalbox width="320" padding="12">
+  <slate-accordion-item name="one" title="Section one" open>
+    <textblock text="Expanded body copy."></textblock>
+  </slate-accordion-item>
+  <slate-accordion-item name="two" title="Section two">
+    <textblock text="Hidden until opened."></textblock>
+  </slate-accordion-item>
+</verticalbox>

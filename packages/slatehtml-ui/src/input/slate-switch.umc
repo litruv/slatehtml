@@ -24,7 +24,7 @@ self[disabled] {
 
 self .slate-switch-track {
   --widget-background: color-mix(in srgb, currentColor 18%, transparent);
-  --widget-border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  --widget-border: none;
   --widget-radius: 999px;
   --widget-padding: 0;
   padding: 0; /* umc-layout-ok, inset via thumb offsets, not chip padding */
@@ -41,8 +41,9 @@ self .slate-switch-thumb {
   --widget-padding: 0;
   padding: 0; /* umc-layout-ok, pip is a solid disc */
   position: absolute; /* umc-layout-ok, thumb travel */
-  top: 2px; /* umc-layout-ok */
+  top: 50%; /* umc-layout-ok */
   left: 2px; /* umc-layout-ok */
+  transform: translateY(-50%);
   box-sizing: border-box;
   transition: left 120ms ease;
 }
