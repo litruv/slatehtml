@@ -713,37 +713,21 @@ const pages = {
       },
       {
         name: "Border · Kinds",
-        code: `<verticalbox gap="8" width="100%">
-  <border kind="panel" padding="12" width="100%">
-    <slate-text kind="mono" text='kind="panel"'></slate-text>
-  </border>
-  <border kind="well" padding="12" width="100%">
-    <slate-text kind="mono" text='kind="well"'></slate-text>
-  </border>
-  <border kind="chip" padding="12" width="100%">
-    <slate-text kind="mono" text='kind="chip"'></slate-text>
-  </border>
-  <border kind="slot" padding="12" width="100%">
-    <slate-text kind="mono" text='kind="slot"'></slate-text>
-  </border>
-  <border kind="hud" padding="12" width="100%">
-    <slate-text kind="mono" text='kind="hud"'></slate-text>
-  </border>
-</verticalbox>`,
+        code: `<wrapbox gap="8">
+  <border kind="panel" padding="12"><slate-text kind="mono" text="panel"></slate-text></border>
+  <border kind="well" padding="12"><slate-text kind="mono" text="well"></slate-text></border>
+  <border kind="chip"><slate-text kind="mono" text="chip"></slate-text></border>
+  <border kind="slot"><slate-text kind="mono" text="slot"></slate-text></border>
+  <border kind="hud"><slate-text kind="mono" text="hud"></slate-text></border>
+</wrapbox>`,
       },
       {
         name: "Border · Padding",
-        code: `<verticalbox gap="8" width="100%">
-  <border kind="panel" padding="4" width="100%">
-    <slate-text kind="mono" text='padding="4"'></slate-text>
-  </border>
-  <border kind="panel" padding="8 20" width="100%">
-    <slate-text kind="mono" text='padding="8 20"'></slate-text>
-  </border>
-  <border kind="panel" padding="16" width="100%">
-    <slate-text kind="mono" text='padding="16"'></slate-text>
-  </border>
-</verticalbox>`,
+        code: `<horizontalbox gap="8" valign="center">
+  <border kind="chip" padding="4"><slate-text kind="mono" text="4"></slate-text></border>
+  <border kind="chip" padding="8 16"><slate-text kind="mono" text="8 16"></slate-text></border>
+  <border kind="chip" padding="16"><slate-text kind="mono" text="16"></slate-text></border>
+</horizontalbox>`,
       },
     ],
   }),
