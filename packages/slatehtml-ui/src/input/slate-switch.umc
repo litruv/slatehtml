@@ -77,7 +77,7 @@ self:focus-visible {
 export default defineUmc({
   tag: "slate-switch",
   attrs: {
-    label: "Switch",
+    label: "",
     checked: "",
     disabled: "",
   },
