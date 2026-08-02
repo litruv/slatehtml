@@ -715,13 +715,13 @@ const pages = {
   }),
 
   "overlay.html": page({
-    title: "Overlay",
-    hint: "Stack children, alignment via halign / valign.",
+    title: "Overlay & Canvas",
+    hint: "Overlay stacks with halign/valign. Canvas pins with anchors + offsets.",
     events: "",
     mount: "verticalbox",
     variants: [
       {
-        name: "Center",
+        name: "Overlay · Center",
         code: `<overlay kind="stage" height="160" padding="12">
   <border kind="backdrop" halign="fill" valign="fill"></border>
   <border kind="chip" halign="center" valign="center">
@@ -730,7 +730,7 @@ const pages = {
 </overlay>`,
       },
       {
-        name: "Corners",
+        name: "Overlay · Corners",
         code: `<overlay kind="stage" height="160" padding="12">
   <border kind="backdrop" halign="fill" valign="fill"></border>
   <border kind="hud" halign="left" valign="top">
@@ -740,6 +740,40 @@ const pages = {
     <slate-text kind="hud" text="right · bottom"></slate-text>
   </border>
 </overlay>`,
+      },
+      {
+        name: "Canvas · Pins",
+        code: `<canvaspanel kind="stage" height="220">
+  <border kind="pin" anchors="top-left" top="12" left="12">
+    <slate-text kind="hud" text="top-left"></slate-text>
+  </border>
+  <border kind="pin" anchors="center">
+    <slate-text kind="hud" text="center"></slate-text>
+  </border>
+  <border kind="pin" anchors="bottom-right" bottom="12" right="12">
+    <slate-text kind="hud" text="bottom-right"></slate-text>
+  </border>
+</canvaspanel>`,
+      },
+      {
+        name: "Canvas · Fill",
+        code: `<canvaspanel kind="stage" height="220">
+  <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
+    <verticalbox gap="6" height="100%" valign="center" halign="center">
+      <slate-text kind="label" text='anchors="fill"'></slate-text>
+      <progressbar percent="70" width="150"></progressbar>
+    </verticalbox>
+  </border>
+</canvaspanel>`,
+      },
+      {
+        name: "Canvas · Edges",
+        code: `<canvaspanel kind="stage" height="220">
+  <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
+  <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
+  <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
+  <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
+</canvaspanel>`,
       },
     ],
   }),
@@ -814,49 +848,6 @@ const pages = {
     <border kind="slot" min-height="56"><slate-text kind="mono" text="D4"></slate-text></border>
   </gridpanel>
 </scrollbox>`,
-      },
-    ],
-  }),
-
-  "canvaspanel.html": page({
-    title: "Canvaspanel",
-    hint: "anchors + top / left / right / bottom.",
-    events: "",
-    mount: "verticalbox",
-    variants: [
-      {
-        name: "Pins",
-        code: `<canvaspanel kind="stage" height="220">
-  <border kind="pin" anchors="top-left" top="12" left="12">
-    <slate-text kind="hud" text="top-left"></slate-text>
-  </border>
-  <border kind="pin" anchors="center">
-    <slate-text kind="hud" text="center"></slate-text>
-  </border>
-  <border kind="pin" anchors="bottom-right" bottom="12" right="12">
-    <slate-text kind="hud" text="bottom-right"></slate-text>
-  </border>
-</canvaspanel>`,
-      },
-      {
-        name: "Fill",
-        code: `<canvaspanel kind="stage" height="220">
-  <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
-    <verticalbox gap="6" height="100%" valign="center" halign="center">
-      <slate-text kind="label" text='anchors="fill"'></slate-text>
-      <progressbar percent="70" width="150"></progressbar>
-    </verticalbox>
-  </border>
-</canvaspanel>`,
-      },
-      {
-        name: "Edges",
-        code: `<canvaspanel kind="stage" height="220">
-  <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
-  <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
-  <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
-  <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
-</canvaspanel>`,
       },
     ],
   }),

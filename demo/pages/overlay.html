@@ -1,13 +1,13 @@
         <verticalbox gap="8">
-          <slate-text kind="section" text="Overlay"></slate-text>
-          <slate-text kind="hint" text="Stack children, alignment via halign / valign."></slate-text>
+          <slate-text kind="section" text="Overlay & Canvas"></slate-text>
+          <slate-text kind="hint" text="Overlay stacks with halign/valign. Canvas pins with anchors + offsets."></slate-text>
         </verticalbox>
 
         <verticalbox gap="22" data-demo-examples>
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Center"></slate-text>
+                <slate-text kind="label" text="Overlay · Center"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
                   <overlay kind="stage" height="160" padding="12">
                     <border kind="backdrop" halign="fill" valign="fill"></border>
@@ -42,7 +42,7 @@
           <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Corners"></slate-text>
+                <slate-text kind="label" text="Overlay · Corners"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
                   <overlay kind="stage" height="160" padding="12">
                     <border kind="backdrop" halign="fill" valign="fill"></border>
@@ -77,6 +77,125 @@
     <slate-text kind="hud" text="right · bottom"></slate-text>
   </border>
 </overlay>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Canvas · Pins"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <canvaspanel kind="stage" height="220">
+                    <border kind="pin" anchors="top-left" top="12" left="12">
+                      <slate-text kind="hud" text="top-left"></slate-text>
+                    </border>
+                    <border kind="pin" anchors="center">
+                      <slate-text kind="hud" text="center"></slate-text>
+                    </border>
+                    <border kind="pin" anchors="bottom-right" bottom="12" right="12">
+                      <slate-text kind="hud" text="bottom-right"></slate-text>
+                    </border>
+                  </canvaspanel>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<canvaspanel kind="stage" height="220">
+  <border kind="pin" anchors="top-left" top="12" left="12">
+    <slate-text kind="hud" text="top-left"></slate-text>
+  </border>
+  <border kind="pin" anchors="center">
+    <slate-text kind="hud" text="center"></slate-text>
+  </border>
+  <border kind="pin" anchors="bottom-right" bottom="12" right="12">
+    <slate-text kind="hud" text="bottom-right"></slate-text>
+  </border>
+</canvaspanel>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Canvas · Fill"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <canvaspanel kind="stage" height="220">
+                    <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
+                      <verticalbox gap="6" height="100%" valign="center" halign="center">
+                        <slate-text kind="label" text='anchors="fill"'></slate-text>
+                        <progressbar percent="70" width="150"></progressbar>
+                      </verticalbox>
+                    </border>
+                  </canvaspanel>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<canvaspanel kind="stage" height="220">
+  <border kind="inset" anchors="fill" top="24" left="24" right="24" bottom="24">
+    <verticalbox gap="6" height="100%" valign="center" halign="center">
+      <slate-text kind="label" text='anchors="fill"'></slate-text>
+      <progressbar percent="70" width="150"></progressbar>
+    </verticalbox>
+  </border>
+</canvaspanel>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Canvas · Edges"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <canvaspanel kind="stage" height="220">
+                    <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
+                    <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
+                    <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
+                    <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
+                  </canvaspanel>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<canvaspanel kind="stage" height="220">
+  <border kind="pin" anchors="top" top="12"><slate-text kind="hud" text="top"></slate-text></border>
+  <border kind="pin" anchors="left" left="12"><slate-text kind="hud" text="left"></slate-text></border>
+  <border kind="pin" anchors="right" right="12"><slate-text kind="hud" text="right"></slate-text></border>
+  <border kind="pin" anchors="bottom" bottom="12"><slate-text kind="hud" text="bottom"></slate-text></border>
+</canvaspanel>
             </script>
           </wrapbox>
         </verticalbox>

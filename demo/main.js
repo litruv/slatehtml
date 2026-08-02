@@ -37,9 +37,8 @@ const NAV = [
         blurb: "Layout containers, boxes, grids, overlays, and stages.",
         items: [
           { id: "box", title: "Box", icon: "box" },
-          { id: "overlay", title: "Overlay", icon: "layers" },
+          { id: "overlay", title: "Overlay & Canvas", icon: "layers" },
           { id: "scrollbox", title: "Scroll Box", icon: "scroll-text" },
-          { id: "canvaspanel", title: "Canvas Panel", icon: "frame" },
           { id: "wrapbox", title: "Wrap Box", icon: "wrap-text" },
           { id: "gridpanel", title: "Grid Panel", icon: "layout-grid" },
           { id: "widgetswitcher", title: "Widget Switcher", icon: "panels-top-left" },
