@@ -1,0 +1,119 @@
+--- html ---
+<verticalbox class="slate-slider-field" gap="6">
+  <horizontalbox gap="8" valign="center">
+    <textblock class="slate-slider-label" data-umc="label" fill></textblock>
+    <textblock class="slate-slider-value" kind="mono"></textblock>
+  </horizontalbox>
+  <slider class="slate-slider-input" height="16"></slider>
+</verticalbox>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+  min-width: 140px; /* umc-layout-ok, usable track */
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self .slate-slider-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+self .slate-slider-value {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Track must keep a definite height, `fill` collapses to 0 (thumb is abs-pos). */
+self .slate-slider-input {
+  width: 100%; /* umc-layout-ok, span the field */
+  min-height: 16px; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok, don't participate in column grow */
+}
+
+--- script ---
+/**
+ * Labeled slider (0-100 percent, or min/max mapped).
+ *
+ *   <slate-slider label="Volume" value="40"></slate-slider>
+ *   <slate-slider label="Zoom" value="1.5" min="0.5" max="3" step="0.1"></slate-slider>
+ *
+ * Events: changed { value, percent }
+ */
+function toPercent(value, min, max) {
+  if (max === min) return 0;
+  return ((Number(value) - min) / (max - min)) * 100;
+}
+
+function fromPercent(percent, min, max, step) {
+  let raw = min + (Number(percent) / 100) * (max - min);
+  if (step > 0) raw = Math.round(raw / step) * step;
+  const decimals = String(step).includes(".") ? String(step).split(".")[1].length : 0;
+  return Number(raw.toFixed(decimals));
+}
+
+export default defineUmc({
+  tag: "slate-slider",
+  attrs: {
+    label: "Slider",
+    value: "0",
+    min: "0",
+    max: "100",
+    step: "1",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener(
+      "percentchanged",
+      (e) => {
+        const slider = el.querySelector(".slate-slider-input");
+        if (e.target !== slider) return;
+        e.stopPropagation();
+        if (el.hasAttribute("disabled")) return;
+        const min = Number(api.attr("min", "0")) || 0;
+        const max = Number(api.attr("max", "100"));
+        const step = Number(api.attr("step", "1")) || 1;
+        const percent = Number(e.detail?.percent ?? slider.getAttribute("percent") ?? 0);
+        const value = fromPercent(percent, min, max, step);
+        if (String(value) === api.attr("value", "0")) return;
+        el.setAttribute("value", String(value));
+        api.emit("changed", { value, percent });
+      },
+      true
+    );
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const min = Number(attr("min", "0")) || 0;
+    const max = Number(attr("max", "100"));
+    const value = Number(attr("value", "0")) || 0;
+    const percent = toPercent(value, min, max);
+    const slider = el.querySelector(".slate-slider-input");
+    if (slider) {
+      const rounded = String(Math.round(percent));
+      if (slider.getAttribute("percent") !== rounded) {
+        slider.setAttribute("percent", rounded);
+      }
+      slider.style.setProperty("--widget-percent", String(percent));
+      if (el.hasAttribute("disabled")) slider.setAttribute("disabled", "");
+      else slider.removeAttribute("disabled");
+    }
+    const readout = el.querySelector(".slate-slider-value");
+    if (readout) readout.setAttribute("text", String(value));
+  },
+});
+
+--- preview ---
+<verticalbox gap="14" padding="16" width="280">
+  <slate-slider label="Volume" value="40"></slate-slider>
+  <slate-slider label="Zoom" value="1.5" min="0.5" max="3" step="0.1"></slate-slider>
+</verticalbox>

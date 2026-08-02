@@ -1,0 +1,82 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "UI: demo",
+      "type": "npm",
+      "script": "ui",
+      "detail": "Vite gallery (demo/) — slatehtml-ui widgets",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "(Local:|ready in)\\s"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "demo"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Layout: demo",
+      "type": "npm",
+      "script": "demo",
+      "detail": "Static serve of root index.html layout gallery",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "serve",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "(Accepting connections|Local:)"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "demo"
+      }
+    },
+    {
+      "label": "Build: slatehtml-ui",
+      "type": "npm",
+      "script": "build:ui",
+      "detail": "Vite build packages/slatehtml-ui → dist/",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Test",
+      "type": "npm",
+      "script": "test",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "UMC: link extension",
+      "type": "npm",
+      "script": "umc:link-vscode",
+      "detail": "Symlink editors/vscode-umc into Cursor / VS Code",
+      "problemMatcher": []
+    },
+    {
+      "label": "UMC: unlink extension",
+      "type": "npm",
+      "script": "umc:unlink-vscode",
+      "problemMatcher": []
+    }
+  ]
+}

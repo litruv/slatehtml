@@ -1,6 +1,6 @@
 /**
  * Keyed list reconciliation for dynamic UMC content.
- * Updates in place instead of replaceChildren() — avoids flicker on live data.
+ * Updates in place instead of replaceChildren(), avoids flicker on live data.
  */
 
 import { create } from "./runtime.js";
@@ -321,7 +321,7 @@ function ensureVirtualChrome(parent, state) {
 }
 
 /**
- * Windowed keyed sync — only mounts rows in the visible range plus spacers.
+ * Windowed keyed sync, only mounts rows in the visible range plus spacers.
  *
  *   syncVirtual(parent, items, state, handlers, {
  *     scrollTop, viewport,

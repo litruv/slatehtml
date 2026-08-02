@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SlateHTML, docs</title>
+  <style>html:not([data-ready]){visibility:hidden}</style>
+  <link rel="stylesheet" href="./gallery.css" />
+</head>
+<body>
+  <canvaspanel height="100%">
+    <horizontalbox class="docs-shell" anchors="fill" top="0" left="0" right="0" bottom="0">
+      <border class="docs-nav" width="200" min-width="180" padding="0" height="100%">
+        <verticalbox gap="0" height="100%">
+          <verticalbox class="docs-nav-brand" gap="2" padding="14 12 8">
+            <a class="docs-brand" href="#/">SlateHTML</a>
+            <span class="docs-brand-sub">Docs</span>
+          </verticalbox>
+          <scrollbox class="docs-nav-scroll" fill padding="4 8 16">
+            <verticalbox gap="0" data-docs-nav></verticalbox>
+          </scrollbox>
+        </verticalbox>
+      </border>
+
+      <scrollbox class="gallery-scroll docs-content" fill>
+        <verticalbox
+          class="gallery-column"
+          data-docs-page
+          padding="28"
+          gap="22"
+          width="100%"
+          max-width="1100"
+          min-width="320"
+        ></verticalbox>
+      </scrollbox>
+    </horizontalbox>
+
+    <slate-shadowbox
+      kind="image"
+      src="https://i.pravatar.cc/800?img=12"
+      title="Preview, long titles ellipsize beside the close control"
+      anchors="fill"
+      top="0"
+      left="0"
+      right="0"
+      bottom="0"
+    ></slate-shadowbox>
+  </canvaspanel>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

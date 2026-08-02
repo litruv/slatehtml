@@ -1,0 +1,122 @@
+--- html ---
+<horizontalbox class="slate-switch-row" gap="10" valign="center">
+  <border class="slate-switch-track" width="40" height="22">
+    <border class="slate-switch-thumb" width="18" height="18"></border>
+  </border>
+  <textblock class="slate-switch-label" data-umc="label"></textblock>
+</horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+self .slate-switch-track {
+  --widget-background: color-mix(in srgb, currentColor 18%, transparent);
+  --widget-border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  --widget-radius: 999px;
+  --widget-padding: 0;
+  padding: 0; /* umc-layout-ok, inset via thumb offsets, not chip padding */
+  position: relative; /* umc-layout-ok, thumb offset */
+  overflow: hidden; /* umc-layout-ok, keep pip inside the track */
+  flex: 0 0 auto; /* umc-layout-ok */
+  box-sizing: border-box;
+}
+
+self .slate-switch-thumb {
+  --widget-background: #fff;
+  --widget-border: none;
+  --widget-radius: 999px;
+  --widget-padding: 0;
+  padding: 0; /* umc-layout-ok, pip is a solid disc */
+  position: absolute; /* umc-layout-ok, thumb travel */
+  top: 2px; /* umc-layout-ok */
+  left: 2px; /* umc-layout-ok */
+  box-sizing: border-box;
+  transition: left 120ms ease;
+}
+
+self[checked] .slate-switch-track {
+  --widget-background: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* Track 40 − inset 2 − thumb 18 = travel ends at left: 20 */
+self[checked] .slate-switch-thumb {
+  left: 20px; /* umc-layout-ok */
+}
+
+self .slate-switch-label {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * On/off switch.
+ *
+ *   <slate-switch label="Notifications" checked></slate-switch>
+ *
+ * Events: changed { checked }
+ */
+export default defineUmc({
+  tag: "slate-switch",
+  attrs: {
+    label: "Switch",
+    checked: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "switch");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bound) return;
+    el._bound = true;
+
+    const toggle = () => {
+      if (el.hasAttribute("disabled")) return;
+      if (el.hasAttribute("checked")) el.removeAttribute("checked");
+      else el.setAttribute("checked", "");
+      api.emit("changed", { checked: el.hasAttribute("checked") });
+    };
+
+    el.addEventListener("click", toggle);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  },
+
+  SynchronizeProperties(el) {
+    const disabled = el.hasAttribute("disabled");
+    const checked = el.hasAttribute("checked");
+    el.setAttribute("aria-checked", checked ? "true" : "false");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.tabIndex = disabled ? -1 : 0;
+  },
+});
+
+--- preview ---
+<verticalbox gap="10" padding="16">
+  <slate-switch label="Notifications" checked></slate-switch>
+  <slate-switch label="Dark mode"></slate-switch>
+  <slate-switch label="Locked" disabled checked></slate-switch>
+</verticalbox>

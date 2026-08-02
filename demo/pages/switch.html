@@ -1,0 +1,89 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Switch"></slate-text>
+          <slate-text kind="hint" text="Edit the UMC on the right, blur or Ctrl+Enter applies it."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-switch label="Notifications" checked></slate-switch>
+                  <slate-switch label="Dark mode"></slate-switch>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-switch label="Notifications" checked></slate-switch>
+<slate-switch label="Dark mode"></slate-switch>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Disabled"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-switch label="Forced on" checked disabled></slate-switch>
+                  <slate-switch label="Forced off" disabled></slate-switch>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-switch label="Forced on" checked disabled></slate-switch>
+<slate-switch label="Forced off" disabled></slate-switch>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Settings"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-switch label="Auto-update" checked></slate-switch>
+                  <slate-switch label="Beta channel"></slate-switch>
+                  <slate-switch label="Telemetry" checked></slate-switch>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-switch label="Auto-update" checked></slate-switch>
+<slate-switch label="Beta channel"></slate-switch>
+<slate-switch label="Telemetry" checked></slate-switch>
+            </script>
+          </wrapbox>
+        </verticalbox>

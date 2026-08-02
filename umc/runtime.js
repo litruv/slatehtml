@@ -14,20 +14,21 @@
  *
  * Unreal-style UserWidget lifecycle (PascalCase or camelCase):
  *
- *   Initialize / OnInitialized — once, first time the widget enters the tree
- *   PreConstruct               — each attach, before the template is stamped
- *   Construct                  — each attach, after stamp + data-umc bind
- *   SynchronizeProperties      — after Construct, and whenever attrs change
- *   Destruct / Destroyed       — when removed from the tree
- *   Tick(el, api, dt)          — every animation frame while attached (dt in seconds)
+ *   Initialize / OnInitialized, once, first time the widget enters the tree
+ *   PreConstruct              , each attach, before the template is stamped
+ *   Construct                 , each attach, after stamp + data-umc bind
+ *   SynchronizeProperties     , after Construct, and whenever attrs change
+ *   Destruct / Destroyed      , when removed from the tree
+ *   Tick(el, api, dt)         , every animation frame while attached (dt in seconds)
  */
 
-import { isUserWidgetTag, prefixBuiltinTag } from "./builtin-tags.js";
+import { isUserWidgetTag, prefixBuiltinTag, PREFIX, BUILTIN_TAGS } from "./builtin-tags.js";
 import {
   cancelScheduledFrame,
   disposeBag,
   runDisposeBag,
   scheduleFrame,
+  watchSize as observeSize,
   watchSource,
 } from "./reactivity.js";
 
@@ -35,7 +36,17 @@ const styleIds = new Set();
 
 /** Inject component CSS once per id. */
 export function injectUmcStyles(id, css) {
-  if (typeof document === "undefined" || !css || styleIds.has(id)) return;
+  if (typeof document === "undefined" || !css) return;
+  const existing = [...document.querySelectorAll("style[data-umc]")].find(
+    (node) => node.getAttribute("data-umc") === id
+  );
+  if (existing) {
+    // HMR / re-import: refresh rules in place (ids were sticky forever before).
+    if (existing.textContent !== css) existing.textContent = css;
+    styleIds.add(id);
+    return;
+  }
+  if (styleIds.has(id)) return;
   styleIds.add(id);
   const el = document.createElement("style");
   el.setAttribute("data-umc", id);
@@ -45,7 +56,7 @@ export function injectUmcStyles(id, css) {
 
 /**
  * Default host box model: disappear from layout (`display: contents`) so the
- * stamped panel is the real flex/grid item — same as nesting panels in root
+ * stamped panel is the real flex/grid item, same as nesting panels in root
  * `index.html`. Widgets that *are* the chrome (e.g. slate-button) override
  * `display` on `self` in their own CSS.
  */
@@ -149,7 +160,7 @@ function hook(def, ...names) {
 }
 
 /* ------------------------------------------------------------------ *
- * Content API — add anything to any widget.
+ * Content API, add anything to any widget.
  *
  *   el.add({ tag: "textblock", text: "hi" });   // build + append
  *   el.add(someNode, "plain text", [a, b]);      // nodes / text / arrays
@@ -162,10 +173,10 @@ function hook(def, ...names) {
 
 /**
  * Build a DOM node from a spec.
- *   - Node            → returned as-is
- *   - string / number → text node
- *   - array           → DocumentFragment of built children
- *   - { tag, ...props, children } → element (same prop rules as dom.js:
+ *  , Node            → returned as-is
+ *  , string / number → text node
+ *  , array           → DocumentFragment of built children
+ *  , { tag, ...props, children } → element (same prop rules as dom.js:
  *       class→className, style object→assign, onX→listener, true→bool attr,
  *       null/false/undefined→skip, text→`text` attr, else setAttribute)
  */
@@ -221,10 +232,124 @@ export function contentTarget(host) {
     const t = host.getContentTarget();
     if (t instanceof Element) return t;
   }
+  const named = resolveSlotTarget(host, "default");
+  if (named) return named;
   for (const node of host.querySelectorAll("[data-content]")) {
     if (ownsNode(host, node)) return node;
   }
   return host;
+}
+
+/**
+ * Unreal-style Named Slot target inside a stamped widget.
+ *
+ * Parent template markers (any of):
+ *   <namedslot></namedslot>           → default
+ *   <namedslot name="footer">
+ *   <verticalbox data-slot="footer">
+ *   <verticalbox data-content>        → default (legacy)
+ *
+ * Child markup is only `<slot-*>` wrappers (no bare siblings):
+ *   <slot-default><slate-text text="body"></slate-text></slot-default>
+ *   <slot-footer><slate-button text="OK"></slate-button></slot-footer>
+ *
+ * Bare children / `slot="…"` still fall through to default / named for convenience.
+ */
+export function resolveSlotTarget(host, name = "default") {
+  if (!(host instanceof Element)) return null;
+  const want = String(name || "default").toLowerCase() || "default";
+
+  for (const node of host.querySelectorAll(
+    "namedslot, umc-namedslot, [data-slot], [data-content]"
+  )) {
+    if (!ownsNode(host, node)) continue;
+    const tag = node.localName?.toLowerCase() || "";
+    const isNamed = tag === "namedslot" || tag === "umc-namedslot";
+    const hasDataSlot = node.hasAttribute("data-slot");
+    const hasContent = node.hasAttribute("data-content");
+
+    let slotName = "default";
+    if (isNamed) {
+      slotName = (node.getAttribute("name") || "default").toLowerCase() || "default";
+    } else if (hasDataSlot) {
+      slotName = (node.getAttribute("data-slot") || "default").toLowerCase() || "default";
+    } else if (hasContent) {
+      slotName = "default";
+    } else {
+      continue;
+    }
+
+    if (slotName === want) return node;
+  }
+  return null;
+}
+
+/** `slot-footer` → `"footer"`; `slot-default` → `"default"`; else null. */
+export function slotWrapperName(node) {
+  if (!(node instanceof Element)) return null;
+  const tag = node.localName?.toLowerCase() || "";
+  const m = /^slot-(.+)$/.exec(tag);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/** Pull light-DOM children off the host before stamp (so they survive innerHTML). */
+export function scoopLightChildren(host) {
+  if (!(host instanceof Element)) return [];
+  const nodes = [];
+  for (const child of [...host.childNodes]) {
+    if (child.nodeType === 1) {
+      nodes.push(child);
+      child.remove();
+    } else if (child.nodeType === 3 && String(child.textContent || "").trim()) {
+      nodes.push(child);
+      child.remove();
+    }
+  }
+  return nodes;
+}
+
+/**
+ * Place scooped nodes into matching `<namedslot>` / `[data-slot]` targets.
+ *
+ * Intended children are only `<slot-*>` wrappers, each unwraps into that slot.
+ * Bare children / `slot="name"` still route as a fallback.
+ */
+export function distributeSlots(host, nodes) {
+  if (!(host instanceof Element) || !nodes?.length) return;
+  const buckets = new Map();
+
+  const push = (name, node) => {
+    const key = String(name || "default").toLowerCase() || "default";
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(node);
+  };
+
+  for (const node of nodes) {
+    if (node.nodeType !== 1) {
+      push("default", node);
+      continue;
+    }
+    const wrapped = slotWrapperName(node);
+    if (wrapped) {
+      // Unwrap: slot chrome is authoring sugar, not kept in the tree.
+      for (const child of [...node.childNodes]) {
+        if (child.nodeType === 1 || (child.nodeType === 3 && String(child.textContent || "").trim())) {
+          push(wrapped === "default" ? "default" : wrapped, child);
+        }
+      }
+      continue;
+    }
+    const attr = node.getAttribute("slot");
+    push(attr || "default", node);
+  }
+
+  for (const [name, list] of buckets) {
+    const target =
+      resolveSlotTarget(host, name) ||
+      (name === "default" ? contentTarget(host) : null) ||
+      host;
+    for (const node of list) target.appendChild(node);
+  }
 }
 
 /** Append built items to a host's content region; returns the added element(s). */
@@ -253,6 +378,10 @@ const widgetApi = {
   clear() {
     contentTarget(this).replaceChildren();
     return this;
+  },
+  /** Named slot element (`namedSlot("footer")`), or the default content target. */
+  namedSlot(name = "default") {
+    return resolveSlotTarget(this, name) || (name === "default" ? contentTarget(this) : null);
   },
   /** Fire a bubbling CustomEvent from this widget. */
   emit(type, detail, options) {
@@ -347,6 +476,14 @@ Object.assign(WidgetElement.prototype, widgetApi);
  *
  * Lifecycle mirrors UMG UserWidget. Prefer PascalCase; camelCase aliases work.
  *
+ * Extends (optional):
+ *
+ *   extends: "textblock"   // subclass umc-textblock, host *is* the leaf
+ *
+ * Use when the widget should parent a builtin panel/leaf instead of wrapping
+ * one inside a display:contents host. Requires `import "slatehtml"` first so
+ * `umc-*` builtins are registered.
+ *
  * Events (optional):
  *
  *   events: {
@@ -367,11 +504,18 @@ Object.assign(WidgetElement.prototype, widgetApi);
 export function defineUmc(def) {
   if (!def?.tag) throw new Error("defineUmc: missing tag");
 
-  injectUmcStyles(`${def.tag}__shell`, hostShellCss(def.tag));
+  const extendsBare = normalizeExtends(def.extends ?? def.base);
+  const Base = resolveExtendsClass(extendsBare);
+  const html = def.html ?? "";
+
+  // Wrapping widgets (template stamped into host) use display:contents.
+  // Extended builtins *are* the layout/leaf node, no shell.
+  if (!extendsBare) {
+    injectUmcStyles(`${def.tag}__shell`, hostShellCss(def.tag));
+  }
   if (def.css) injectUmcStyles(def.cssId ?? def.tag, def.css);
 
   const { names, defaults } = normalizeAttrs(def.attrs);
-  const html = def.html ?? "";
   const eventMap = normalizeEvents(def.events);
 
   const Initialize = hook(def, "Initialize", "initialize", "OnInitialized", "onInitialized");
@@ -398,12 +542,28 @@ export function defineUmc(def) {
   // Legacy full-control path (re-run on connect + attr change)
   const legacyRender = hook(def, "render");
 
-  class UmcElement extends HTMLElement {
+  class UmcElement extends Base {
     static get observedAttributes() {
-      return [...new Set([...names, ...HOST_LAYOUT_ATTRS])];
+      const inherited =
+        typeof Base.observedAttributes !== "undefined"
+          ? Base.observedAttributes
+          : [];
+      return [...new Set([...names, ...HOST_LAYOUT_ATTRS, ...inherited])];
+    }
+
+    constructor() {
+      super();
+      if (extendsBare) {
+        this.__umcExtends = extendsBare;
+      }
     }
 
     connectedCallback() {
+      if (extendsBare) {
+        this.__umcExtends = extendsBare;
+        this.setAttribute("data-umc-extends", extendsBare);
+      }
+
       this.__umcHtml = html;
       this.__umcDefaults = defaults;
       const api = makeApi(this, html, defaults);
@@ -418,12 +578,31 @@ export function defineUmc(def) {
 
       if (legacyRender) {
         legacyRender.call(this, this, api);
-      } else {
-        if (html) stamp(this, html);
+      } else if (html && !this.__umcStamped) {
+        // Stamp once. Re-stamping on reconnect would scoop the previous
+        // template root as "light DOM" and append it again (duplicate trees).
+        const scooped = scoopLightChildren(this);
+        stamp(this, html);
+        this.__umcStamped = true;
         bind(this, defaults);
+        syncExtendedLeaf(this, extendsBare);
+        if (scooped?.length) distributeSlots(this, scooped);
         Construct?.call(this, this, api);
         SynchronizeProperties?.call(this, this, api);
         forwardHostLayout(this);
+      } else {
+        bind(this, defaults);
+        syncExtendedLeaf(this, extendsBare);
+        Construct?.call(this, this, api);
+        SynchronizeProperties?.call(this, this, api);
+        forwardHostLayout(this);
+      }
+
+      // Builtin parent: enhance() for layout + leaf attrs (text → textContent).
+      if (typeof super.connectedCallback === "function") {
+        super.connectedCallback();
+      } else {
+        syncExtendedLeaf(this, extendsBare);
       }
 
       startTick(this, Tick, () => makeApi(this, html, defaults));
@@ -434,21 +613,31 @@ export function defineUmc(def) {
       const api = makeApi(this, html, defaults);
       Destruct?.call(this, this, api);
       runDisposeBag(this);
+      if (typeof super.disconnectedCallback === "function") {
+        super.disconnectedCallback();
+      }
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-      if (!this.isConnected || oldValue === newValue) return;
+      // Upgrade fires attr callbacks before connectedCallback / stamp, ignore
+      // until the first connect has initialized (otherwise Sync paints into a
+      // missing tree and may latch keys that skip the real first Sync).
+      if (!this.__umcInitialized || !this.isConnected || oldValue === newValue) return;
       const api = makeApi(this, html, defaults);
 
       if (legacyRender) {
         legacyRender.call(this, this, api);
-        return;
+      } else {
+        // Keep the tree; refresh bindings (like SynchronizeProperties in UMG)
+        bind(this, defaults);
+        syncExtendedLeaf(this, extendsBare);
+        SynchronizeProperties?.call(this, this, api);
+        forwardHostLayout(this);
       }
 
-      // Keep the tree; refresh bindings (like SynchronizeProperties in UMG)
-      bind(this, defaults);
-      SynchronizeProperties?.call(this, this, api);
-      forwardHostLayout(this);
+      if (typeof super.attributeChangedCallback === "function") {
+        super.attributeChangedCallback(name, oldValue, newValue);
+      }
     }
   }
 
@@ -456,10 +645,84 @@ export function defineUmc(def) {
   Object.assign(UmcElement.prototype, widgetApi);
 
   if (!customElements.get(def.tag)) {
-    customElements.define(def.tag, UmcElement);
+    if (defineDeferDepth > 0) {
+      pendingDefines.push({ tag: def.tag, Class: UmcElement });
+    } else {
+      customElements.define(def.tag, UmcElement);
+    }
   }
 
   return UmcElement;
+}
+
+/** Nested depth for {@link deferCustomElementDefines}. */
+let defineDeferDepth = 0;
+const pendingDefines = [];
+
+function flushPendingDefines() {
+  if (!pendingDefines.length) return;
+  const batch = pendingDefines.splice(0);
+  for (const { tag, Class } of batch) {
+    if (!customElements.get(tag)) customElements.define(tag, Class);
+  }
+}
+
+/**
+ * Queue `customElements.define` until the (async) callback finishes, then
+ * register in one flush. Cuts staggered upgrades / layout thrash when a kit
+ * loads many `.umc` modules (e.g. `import "slatehtml-ui"`).
+ *
+ *   await deferCustomElementDefines(async () => {
+ *     await Promise.all(Object.values(import.meta.glob("./*.umc")).map((l) => l()));
+ *   });
+ */
+export async function deferCustomElementDefines(fn) {
+  defineDeferDepth++;
+  try {
+    return await fn();
+  } finally {
+    defineDeferDepth--;
+    if (defineDeferDepth === 0) flushPendingDefines();
+  }
+}
+
+/** Normalize `extends: "textblock"` / `"umc-textblock"` → bare builtin name. */
+function normalizeExtends(value) {
+  if (value == null || value === false || value === "") return "";
+  const t = String(value).trim().toLowerCase();
+  if (!t) return "";
+  if (t.startsWith(PREFIX)) return t.slice(PREFIX.length);
+  return t;
+}
+
+/**
+ * Resolve the custom element class to subclass.
+ * Builtins → `umc-*` panel class (must already be registered via slatehtml).
+ */
+function resolveExtendsClass(bare) {
+  if (!bare || typeof customElements === "undefined") return HTMLElement;
+  const prefixed = PREFIX + bare;
+  if (BUILTIN_TAGS.has(bare) && customElements.get(prefixed)) {
+    return customElements.get(prefixed);
+  }
+  if (customElements.get(bare)) return customElements.get(bare);
+  if (customElements.get(prefixed)) return customElements.get(prefixed);
+  if (typeof console !== "undefined") {
+    console.warn(
+      `[umc] extends "${bare}" is not registered yet; subclassing HTMLElement. Import slatehtml before this widget.`
+    );
+  }
+  return HTMLElement;
+}
+
+/** Leaf builtins sync `text` → textContent (same as widget.js applyLeafAttrs). */
+function syncExtendedLeaf(el, extendsBare) {
+  if (!extendsBare || !(el instanceof Element)) return;
+  if (extendsBare !== "textblock" && extendsBare !== "editabletext") return;
+  if (!el.hasAttribute("text")) return;
+  if (extendsBare === "editabletext" && el === document.activeElement) return;
+  const next = el.getAttribute("text");
+  if (el.textContent !== next) el.textContent = next;
 }
 
 function makeApi(el, html, defaults) {
@@ -476,13 +739,22 @@ function makeApi(el, html, defaults) {
       el.hasAttribute(name) ? el.getAttribute(name) : (defaults[name] ?? fallback),
     attrs: (list) => readAttrs(el, list ?? Object.keys(defaults), defaults),
     emit: (type, detail, options) => emit(el, type, detail, options),
-    /** Register teardown — runs on Destroyed / disconnect. */
+    /** Register teardown, runs on Destroyed / disconnect. */
     dispose(fn) {
       if (typeof fn === "function") disposeBag(el).push(fn);
     },
     /** External source → fn; auto-disposes with the widget. */
     watch(subscribe, fn) {
       const off = watchSource(subscribe, fn);
+      disposeBag(el).push(off);
+      return off;
+    },
+    /**
+     * Layout-box size → fn({ width, height }). Uses ResizeObserver (rAF-coalesced).
+     * Walks `display: contents` to the stamped panel. Auto-disposes on Destroyed.
+     */
+    watchSize(fn) {
+      const off = observeSize(el, fn);
       disposeBag(el).push(off);
       return off;
     },

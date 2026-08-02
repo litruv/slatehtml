@@ -1,6 +1,6 @@
 # UMC components
 
-**UMC** (UMG Markup Component) is SlateHTML's single-file widget format — like Unreal's UserWidget, but plain HTML + CSS + JS in one `.umc` file. Vite compiles it to a custom element with lifecycle hooks, declarative binding, and a content API.
+**UMC** (UMG Markup Component) is SlateHTML's single-file widget format, like Unreal's UserWidget, but plain HTML + CSS + JS in one `.umc` file. Vite compiles it to a custom element with lifecycle hooks, declarative binding, and a content API.
 
 ## File structure
 
@@ -35,7 +35,7 @@ export default defineUmc({
 |---------|---------|---------|
 | `html` | `template` | Markup stamped into the host (light DOM) |
 | `style` | `css` | Component CSS (inlined at build time) |
-| `script` | `js` | `defineUmc({ … })` — `defineUmc` is injected; no import |
+| `script` | `js` | `defineUmc({ … })`, `defineUmc` is injected; no import |
 | `preview` | `demo` | Editor-only demo markup; **stripped from production builds** |
 
 Link external files with a one-line `@` reference:
@@ -49,6 +49,21 @@ Link external files with a one-line `@` reference:
 @ ./face.js
 ```
 
+Subclass a builtin with a file-level `@parent` (alias `@extends`):
+
+```umc
+@parent textblock
+--- style ---
+self[kind="title"] { font-size: 30px; font-weight: 700; }
+--- script ---
+export default defineUmc({
+  tag: "slate-text",
+  attrs: { text: "", kind: "body" },
+});
+```
+
+Also accepted: `@parent <textblock>`. The Vite loader injects `extends` into `defineUmc`, you don't repeat it in the script. Import `slatehtml` first so `umc-*` builtins are registered. Extended hosts skip the `display: contents` shell and keep leaf behavior (`text` → textContent).
+
 ## `defineUmc` basics
 
 ```js
@@ -56,6 +71,7 @@ export default defineUmc({
   tag: "my-widget",           // custom element name (must contain a hyphen)
   attrs: { label: "Default" }, // observed attributes + defaults
   events: { click: "clicked" }, // optional: native DOM → public events
+  // extends: "textblock",    // usually set via @parent instead
   // lifecycle hooks (PascalCase or camelCase)…
 });
 ```
@@ -74,7 +90,7 @@ import "./widgets/my-widget.umc";
 
 Write **bare** panel tag names in the `html` section. The Vite loader rewrites them to `umc-verticalbox`, `umc-textblock`, etc.
 
-Put layout on attributes — same rules as [Layout & positioning](./layout.md):
+Put layout on attributes, same rules as [Layout & positioning](./layout.md):
 
 ```umc
 --- html ---
@@ -106,9 +122,9 @@ With `attrs: { title: "Slate" }`, this copies `title` → child's `text` attribu
 <image data-umc="avatar" data-umc-prop="brush"></image>
 ```
 
-Binding stops at nested custom-element boundaries — parents won't clobber a child's internal `data-umc` nodes.
+Binding stops at nested custom-element boundaries, parents won't clobber a child's internal `data-umc` nodes.
 
-## Content region (`data-content`)
+## Content region (`data-content`) & named slots
 
 Mark where dynamic children go:
 
@@ -121,38 +137,84 @@ el.add({ tag: "textblock", text: "hi" });
 el.add(existingNode, "plain text", [a, b]);
 el.set(/* replace all */);
 el.clear();
+el.namedSlot("footer"); // Named Slot element (or default content target)
 ```
 
 `add` / `set` accept DOM nodes, strings, arrays, or `{ tag, …attrs }` specs. See [Tutorial: dynamic lists](./tutorials/04-dynamic-lists.md).
 
-For live lists (room rows, messages), prefer **`syncKeyed`** over `el.set()` — it patches nodes in place instead of tearing down the whole tree on every update.
+### Named slots (Unreal-style)
+
+**Parent** declares injection points with `<namedslot>`. **Children** of an instance are only `<slot-*>` fillers, nothing else:
+
+```umc
+@parent border
+--- html ---
+<verticalbox gap="10" padding="14">
+  <slate-text kind="label" data-umc="title"></slate-text>
+  <namedslot></namedslot>
+  <namedslot name="footer"></namedslot>
+</verticalbox>
+```
+
+```html
+<slot-default>
+  <slate-text kind="body" text="Default slot"></slate-text>
+</slot-default>
+<slot-footer>
+  <slate-button text="Equip"></slate-button>
+</slot-footer>
+```
+
+| Side | Markup | Role |
+|------|--------|------|
+| Parent | `<namedslot>` / `[data-content]` | Default slot (`el.add` / `el.set`) |
+| Parent | `<namedslot name="footer">` | Named slot |
+| Child | `<slot-default>…` | → default slot (wrapper discarded) |
+| Child | `<slot-footer>…` | → `footer` slot (wrapper discarded) |
+
+`slot-*` tags are authoring sugar, not auto-imported as widgets. Bare children still fall through to the default slot as a convenience.
+
+For live lists (room rows, messages), prefer **`syncKeyed`** over `el.set()`, it patches nodes in place instead of tearing down the whole tree on every update.
 
 ## Reactivity
 
 Import from `slatehtml/umc`:
 
 ```js
-import { syncKeyed, applySpec, cell, watchSource, scheduleFrame } from "slatehtml/umc";
+import { syncKeyed, applySpec, cell, watchSource, watchSize, scheduleFrame } from "slatehtml/umc";
 ```
 
 | API | Use for |
 |-----|---------|
 | `syncKeyed(parent, items, { key, nodeKey, create, update })` | Dynamic lists that update often (no flicker) |
 | `applySpec(node, { tag, …attrs })` | Patch attrs on an existing element (same rules as `create`) |
-| `api.watch(subscribe, fn)` | External sources (`onRoomsChanged`, `onSession`) — invokes `fn` with current snapshot on subscribe; auto-disposes on `Destroyed` |
+| `api.watch(subscribe, fn)` | External sources (`onRoomsChanged`, `onSession`), invokes `fn` with current snapshot on subscribe; auto-disposes on `Destroyed` |
+| `api.watchSize(fn)` | Layout box size → `fn({ width, height })` (ResizeObserver, rAF-coalesced); auto-disposes |
+| `watchSize(el, fn)` | Same observer without a widget host (returns unsubscribe) |
 | `api.schedule(key, fn)` | Coalesce rapid updates to one rAF paint |
 | `api.dispose(fn)` | Manual teardown registered with the widget |
 | `cell(initial)` | Small local mutable state with `.subscribe()` |
 
 ```js
 Construct(el, api) {
+  api.watchSize(({ width, height }) => {
+    api.schedule("paint", () => paint(el, width, height));
+  });
   import("./session.js").then(({ onRoomsChanged }) => {
     api.watch(onRoomsChanged, () => api.schedule("paint", () => paint(el)));
   });
 },
 ```
 
-Attrs still flow through `SynchronizeProperties`; reactivity helpers cover **external** churn (Matrix sync, timers, stores) and **list** patching.
+**Panels** (boxes, `border`, `canvaspanel`, `scrollbox`, …) also emit bubbling `sizechanged` with `{ width, height }` whenever their laid-out box changes, useful from plain HTML:
+
+```js
+panel.addEventListener("sizechanged", (e) => {
+  console.log(e.detail.width, e.detail.height);
+});
+```
+
+Attrs still flow through `SynchronizeProperties`; reactivity helpers cover **size**, **external** churn (Matrix sync, timers, stores), and **list** patching.
 
 ## Lifecycle
 
@@ -295,7 +357,7 @@ widgets/
 ### Extract repeating UI
 
 If the same row, tile, or face appears in HTML **and** in `el.set({ tag: … })`
-factories — or is copy-pasted between widgets — **split it into its own `.umc`**.
+factories, or is copy-pasted between widgets, **split it into its own `.umc`**.
 
 ```
 slate-scope-picker     ← shell (open/close, placement flip)
@@ -304,7 +366,7 @@ slate-scope-picker     ← shell (open/close, placement flip)
 ```
 
 - Parents pass attrs; children implement look in their own `--- style ---`.
-- Layout stays on panel attrs ([Layout guide](./layout.md)) — not duplicated CSS.
+- Layout stays on panel attrs ([Layout guide](./layout.md)), not duplicated CSS.
 - Each child gets a `--- preview ---` for isolated editor preview.
 - `{ tag: "scope-picker-option" }` in script is auto-imported like HTML tags.
 
@@ -316,7 +378,7 @@ Custom elements default to `display: contents`. Layout attributes on the **host*
 <user-message author="Nova" fill padding="4 16"></user-message>
 ```
 
-Works on `canvaspanel` too — place widgets with `anchors` on the host tag.
+Works on `canvaspanel` too, place widgets with `anchors` on the host tag.
 
 Widgets that paint their own box (`slate-button`) keep attrs on the host.
 
@@ -343,7 +405,7 @@ import "./widgets/app/discord-app.umc";
 
 ## Editor preview
 
-The [VS Code extension](../editors/vscode-umc/README.md) is the **component playground** — see [Component playground](./component-playground.md) for the full guide.
+The [VS Code extension](../editors/vscode-umc/README.md) is the **component playground**, see [Component playground](./component-playground.md) for the full guide.
 
 | Action | How |
 |--------|-----|
@@ -351,7 +413,7 @@ The [VS Code extension](../editors/vscode-umc/README.md) is the **component play
 | Keyboard | `Ctrl+K V` / `Cmd+K V` |
 | Command palette | **UMC: Open Preview to the Side** |
 
-The webview loads the workspace's `widget.css` + `widget.js` (the layout engine) and `umc/runtime.js`, then registers every `.umc` in the component's folder — so composed children like `<message-meta>` inside `<user-message>` render too. It re-renders as you type (250 ms debounce), including when you edit a sibling component.
+The webview loads the workspace's `widget.css` + `widget.js` (the layout engine) and `umc/runtime.js`, then registers every `.umc` in the component's folder, so composed children like `<message-meta>` inside `<user-message>` render too. It re-renders as you type (250 ms debounce), including when you edit a sibling component.
 
 Without a `--- preview ---` section it renders a bare `<your-tag></your-tag>`, so `attrs` defaults are what you see. With one, you control the markup:
 
@@ -379,7 +441,7 @@ import {
 } from "slatehtml/umc";
 ```
 
-Inside `.umc` scripts, **do not** import `defineUmc` — the loader injects it.
+Inside `.umc` scripts, **do not** import `defineUmc`, the loader injects it.
 
 ## Tutorials
 

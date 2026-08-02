@@ -1,0 +1,117 @@
+--- html ---
+<horizontalbox class="slate-checkbox-row" gap="8" valign="center">
+  <checkbox class="slate-checkbox-box"></checkbox>
+  <textblock class="slate-checkbox-label" data-umc="label"></textblock>
+</horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+self .slate-checkbox-label {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * Labeled checkbox.
+ *
+ *   <slate-checkbox label="Remember me" checked></slate-checkbox>
+ *
+ * Events: changed { checked }
+ */
+export default defineUmc({
+  tag: "slate-checkbox",
+  attrs: {
+    label: "Checkbox",
+    checked: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "checkbox");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bound) return;
+    el._bound = true;
+
+    const box = () => el.querySelector(".slate-checkbox-box");
+
+    el.addEventListener("click", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      // Let the inner checkbox handle its own click unless we clicked the label.
+      if (e.target?.closest?.(".slate-checkbox-box")) return;
+      const inner = box();
+      if (!inner) return;
+      if (inner.hasAttribute("checked")) inner.removeAttribute("checked");
+      else inner.setAttribute("checked", "");
+      syncFromInner(el, api);
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        el.click();
+      }
+    });
+
+    el.addEventListener(
+      "changed",
+      (e) => {
+        if (e.target !== box()) return;
+        e.stopPropagation();
+        syncFromInner(el, api);
+      },
+      true
+    );
+  },
+
+  SynchronizeProperties(el) {
+    const disabled = el.hasAttribute("disabled");
+    const checked = el.hasAttribute("checked");
+    const inner = el.querySelector(".slate-checkbox-box");
+    if (inner) {
+      if (checked) inner.setAttribute("checked", "");
+      else inner.removeAttribute("checked");
+      if (disabled) inner.setAttribute("disabled", "");
+      else inner.removeAttribute("disabled");
+    }
+    el.setAttribute("aria-checked", checked ? "true" : "false");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.tabIndex = disabled ? -1 : 0;
+  },
+});
+
+function syncFromInner(el, api) {
+  const inner = el.querySelector(".slate-checkbox-box");
+  const on = inner?.hasAttribute("checked");
+  if (on) el.setAttribute("checked", "");
+  else el.removeAttribute("checked");
+  api.emit("changed", { checked: !!on });
+}
+
+--- preview ---
+<verticalbox gap="8" padding="16">
+  <slate-checkbox label="Remember me" checked></slate-checkbox>
+  <slate-checkbox label="Email updates"></slate-checkbox>
+  <slate-checkbox label="Disabled" disabled></slate-checkbox>
+</verticalbox>

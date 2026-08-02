@@ -1,0 +1,118 @@
+--- html ---
+<horizontalbox class="slate-rating" data-content gap="2" valign="center"></horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self .slate-rating-star {
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.35;
+  padding: 2px;
+}
+
+self .slate-rating-star[data-on] {
+  opacity: 1;
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * Star rating.
+ *
+ *   <slate-rating value="3" max="5"></slate-rating>
+ *
+ * Events: changed { value }
+ */
+function paint(el, value, max) {
+  const stars = [];
+  for (let i = 1; i <= max; i++) {
+    stars.push({
+      tag: "textblock",
+      class: "slate-rating-star",
+      role: "radio",
+      "aria-checked": i <= value ? "true" : "false",
+      "data-value": String(i),
+      ...(i <= value ? { "data-on": "" } : {}),
+      text: "★",
+    });
+  }
+  el.set(...stars);
+}
+
+export default defineUmc({
+  tag: "slate-rating",
+  attrs: {
+    value: "0",
+    max: "5",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "radiogroup");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      const star = e.target?.closest?.(".slate-rating-star");
+      if (!star || !el.contains(star)) return;
+      const value = star.getAttribute("data-value");
+      if (value === api.attr("value", "0")) return;
+      el.setAttribute("value", value);
+      api.emit("changed", { value: Number(value) });
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      const max = Math.max(1, Number(api.attr("max", "5")) || 5);
+      let value = Number(api.attr("value", "0")) || 0;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        e.preventDefault();
+        value = Math.min(max, value + 1);
+        el.setAttribute("value", String(value));
+        api.emit("changed", { value });
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+        e.preventDefault();
+        value = Math.max(0, value, 1);
+        el.setAttribute("value", String(value));
+        api.emit("changed", { value });
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const max = Math.max(1, Number(attr("max", "5")) || 5);
+    const value = Math.min(max, Math.max(0, Number(attr("value", "0")) || 0));
+    const key = `${value}/${max}`;
+    if (el._paintKey !== key) {
+      el._paintKey = key;
+      paint(el, value, max);
+    }
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+  },
+});
+
+--- preview ---
+<verticalbox gap="10" padding="16">
+  <slate-rating value="3"></slate-rating>
+  <slate-rating value="0" max="5"></slate-rating>
+</verticalbox>

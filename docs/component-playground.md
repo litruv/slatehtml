@@ -1,6 +1,6 @@
 # Component playground
 
-The **component playground** is the live **UMC preview** in VS Code / Cursor. Open any `.umc` file and render your UserWidget in a resizable stage while you edit — no Vite dev server required.
+The **component playground** is the live **UMC preview** in VS Code / Cursor. Open any `.umc` file and render your UserWidget in a resizable stage while you edit, no Vite dev server required.
 
 This is the counterpart to the [layout gallery](./layout.md) (`npm run demo` / root `index.html`), which demos **built-in panel tags**. The component playground is for **your `.umc` widgets**.
 
@@ -37,7 +37,7 @@ When the preview is open and the file has a `--- preview ---` section:
 | **Ctrl/Cmd+click** a widget in the stage | Opens that component's `.umc` file at its `--- html ---` section |
 | **Ctrl/Cmd+click** preview markup (panel tags) | Opens the current file at that preview line |
 
-Each opening tag in the preview section gets a `data-umc-line` attribute tied to its line in the `.umc` file. Hover only links markup inside `--- preview ---` — not `--- html ---` (that template is compiled into the widget, not shown directly in the stage).
+Each opening tag in the preview section gets a `data-umc-line` attribute tied to its line in the `.umc` file. Hover only links markup inside `--- preview ---`, not `--- html ---` (that template is compiled into the widget, not shown directly in the stage).
 
 ## What you see
 
@@ -56,21 +56,21 @@ Each opening tag in the preview section gets a `data-umc-line` attribute tied to
 
 **Toolbar**
 
-- **Tag name** — e.g. `<user-message>` from `defineUmc({ tag: … })`
-- **Source** — `preview section` if you have `--- preview ---`, otherwise `default attrs`
-- **Size** — live width × height of the stage (updates when you resize)
-- **bg** — stage background color picker (persisted in `localStorage`)
+- **Tag name**, e.g. `<user-message>` from `defineUmc({ tag: … })`
+- **Source**, `preview section` if you have `--- preview ---`, otherwise `default attrs`
+- **Size**, live width × height of the stage (updates when you resize)
+- **bg**, stage background color picker (persisted in `localStorage`)
 
 **Stage**
 
-- Drag the corner to **resize** — useful for testing `fill`, scroll areas, and responsive layout.
+- Drag the corner to **resize**, useful for testing `fill`, scroll areas, and responsive layout.
 - Runtime errors appear in a red bar below the stage instead of failing silently.
 
 ## Control the demo markup
 
 ### With `--- preview ---`
 
-The preview section is **editor-only** — Vite strips it from production builds. Put whatever markup you need to exercise the widget:
+The preview section is **editor-only**, Vite strips it from production builds. Put whatever markup you need to exercise the widget:
 
 ```umc
 --- preview ---
@@ -132,7 +132,7 @@ Add to `.vscode/settings.json` (this repo already does):
 | Setting | Purpose |
 |---------|---------|
 | `umc.preview.stylesheets` | Extra CSS (app theme, `kind` chrome). Resolved from workspace root, then the component folder. |
-| `umc.preview.imports` | JS modules loaded before components — plain `.js` widgets not in a `.umc` folder. |
+| `umc.preview.imports` | JS modules loaded before components, plain `.js` widgets not in a `.umc` folder. |
 
 Paths are relative to the workspace or the `.umc` file's directory.
 
@@ -166,7 +166,7 @@ Heavy npm packages may be stubbed in preview (e.g. `matrix-js-sdk`). For real Ma
 | | Layout gallery | Component playground |
 |--|----------------|-------------------|
 | **What** | Built-in tags (`verticalbox`, `canvaspanel`, …) | Your `.umc` UserWidgets |
-| **Where** | Browser — `npm run demo` → `index.html` | VS Code webview |
+| **Where** | Browser, `npm run demo` → `index.html` | VS Code webview |
 | **Build** | None | None (preview compiles in memory) |
 | **Guide** | [Layout & positioning](./layout.md) | This page |
 
@@ -178,10 +178,10 @@ Use the layout gallery to learn **panel attributes and canvas anchors**. Use the
 npm run umc:link-vscode
 ```
 
-Open `example/widgets/lib/slate-button.umc` → `Ctrl+K V`. Edit `text` in the preview section or toggle `disabled` on a button — the stage updates immediately.
+Open `example/widgets/lib/slate-button.umc` → `Ctrl+K V`. Edit `text` in the preview section or toggle `disabled` on a button, the stage updates immediately.
 
 ## Next steps
 
-- [Your first widget](./tutorials/01-first-widget.md) — build a component and use the playground from step one
-- [UMC components](./umc.md) — full reference
-- [VS Code extension README](../editors/vscode-umc/README.md) — autocomplete and section syntax
+- [Your first widget](./tutorials/01-first-widget.md), build a component and use the playground from step one
+- [UMC components](./umc.md), full reference
+- [VS Code extension README](../editors/vscode-umc/README.md), autocomplete and section syntax

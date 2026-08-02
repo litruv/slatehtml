@@ -1,0 +1,89 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Checkbox"></slate-text>
+          <slate-text kind="hint" text="Edit the UMC on the right, blur or Ctrl+Enter applies it."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-checkbox label="Remember me" checked></slate-checkbox>
+                  <slate-checkbox label="Email updates"></slate-checkbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-checkbox label="Remember me" checked></slate-checkbox>
+<slate-checkbox label="Email updates"></slate-checkbox>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Disabled"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-checkbox label="Required (on)" checked disabled></slate-checkbox>
+                  <slate-checkbox label="Required (off)" disabled></slate-checkbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-checkbox label="Required (on)" checked disabled></slate-checkbox>
+<slate-checkbox label="Required (off)" disabled></slate-checkbox>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="List"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-checkbox label="Wi‑Fi" checked></slate-checkbox>
+                  <slate-checkbox label="Bluetooth" checked></slate-checkbox>
+                  <slate-checkbox label="Airplane mode"></slate-checkbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-checkbox label="Wi‑Fi" checked></slate-checkbox>
+<slate-checkbox label="Bluetooth" checked></slate-checkbox>
+<slate-checkbox label="Airplane mode"></slate-checkbox>
+            </script>
+          </wrapbox>
+        </verticalbox>

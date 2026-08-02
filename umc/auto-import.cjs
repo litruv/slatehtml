@@ -24,8 +24,13 @@ const {
   isUserWidgetTag,
 } = require("./builtin-tags.cjs");
 
-/** Built-in tags (bare + prefixed) — never auto-imported as UserWidgets. */
+/** Built-in tags (bare + prefixed), never auto-imported as UserWidgets. */
 const BUILTIN_TAGS_SKIP = BUILTIN_TAGS_ALL;
+
+/** `<slot-footer>` wrappers, authoring sugar, not widgets. */
+function isSlotWrapperTag(name) {
+  return /^slot-[a-z0-9-]+$/i.test(String(name || ""));
+}
 
 const TAG_RE = /<\/?([a-z][a-z0-9]*(?:-[a-z0-9]+)+)\b/gi;
 /** `{ tag: "channel-row" }` / `tag: 'user-message'` in script (dynamic create/set). */
@@ -42,7 +47,8 @@ function extractCustomTags(html) {
   TAG_RE.lastIndex = 0;
   while ((m = TAG_RE.exec(html))) {
     const tag = m[1].toLowerCase();
-    if (!BUILTIN_TAGS_SKIP.has(tag)) tags.add(tag);
+    if (BUILTIN_TAGS_SKIP.has(tag) || isSlotWrapperTag(tag)) continue;
+    tags.add(tag);
   }
   return tags;
 }
@@ -55,14 +61,15 @@ function extractScriptTags(script) {
   SCRIPT_TAG_RE.lastIndex = 0;
   while ((m = SCRIPT_TAG_RE.exec(script))) {
     const tag = m[1].toLowerCase();
-    if (!BUILTIN_TAGS_SKIP.has(tag)) tags.add(tag);
+    if (BUILTIN_TAGS_SKIP.has(tag) || isSlotWrapperTag(tag)) continue;
+    tags.add(tag);
   }
   return tags;
 }
 
 function guessTag(script) {
   const s = String(script || "");
-  // Prefer the host tag inside defineUmc({ tag: "…" }) — NOT the first
+  // Prefer the host tag inside defineUmc({ tag: "…" }), NOT the first
   // `{ tag: "child" }` create/set spec earlier in the file.
   const fromDef = s.match(
     /\bdefineUmc\s*\(\s*\{[\s\S]*?\btag\s*:\s*["'`]([a-z0-9]+(?:-[a-z0-9]+)+)["'`]/i
@@ -203,7 +210,7 @@ function resolveReferencedWidgets(html, script, fromFile, options = {}) {
   return out;
 }
 
-/** @deprecated use resolveReferencedWidgets — kept for older call sites */
+/** @deprecated use resolveReferencedWidgets, kept for older call sites */
 function resolveHtmlWidgets(html, fromFile, options = {}) {
   return resolveReferencedWidgets(html, options.script ?? "", fromFile, options);
 }
@@ -252,7 +259,7 @@ function rewriteSelfSelectors(css, tag) {
       continue;
     }
 
-    // Type selector `self` — not `myself`, not `align-self`.
+    // Type selector `self`, not `myself`, not `align-self`.
     if (
       src.startsWith("self", i) &&
       (i === 0 || /[,>+~\s(;{]/.test(src[i - 1])) &&
@@ -464,8 +471,8 @@ function dualizeBuiltinSelectors(css) {
 
 /**
  * In script sections:
- *   - `{ tag: "textblock" }` → `{ tag: "umc-textblock" }`
- *   - selector strings starting with a builtin type → prefixed
+ *  , `{ tag: "textblock" }` → `{ tag: "umc-textblock" }`
+ *  , selector strings starting with a builtin type → prefixed
  */
 function prefixBuiltinTagsInScript(script) {
   if (!script) return script || "";
@@ -510,6 +517,7 @@ module.exports = {
   prefixBuiltinTag,
   isBuiltinTag,
   isUserWidgetTag,
+  isSlotWrapperTag,
   extractCustomTags,
   extractScriptTags,
   guessTag,

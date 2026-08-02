@@ -1,0 +1,82 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Overlay"></slate-text>
+          <slate-text kind="hint" text="Stack children, alignment via halign / valign."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Center"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <overlay kind="stage" height="160" padding="12">
+                    <border kind="backdrop" halign="fill" valign="fill"></border>
+                    <border kind="chip" halign="center" valign="center">
+                      <textblock text="centered"></textblock>
+                    </border>
+                  </overlay>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<overlay kind="stage" height="160" padding="12">
+  <border kind="backdrop" halign="fill" valign="fill"></border>
+  <border kind="chip" halign="center" valign="center">
+    <textblock text="centered"></textblock>
+  </border>
+</overlay>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Corners"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <overlay kind="stage" height="160" padding="12">
+                    <border kind="backdrop" halign="fill" valign="fill"></border>
+                    <border kind="hud" halign="left" valign="top">
+                      <slate-text kind="hud" text="left · top"></slate-text>
+                    </border>
+                    <border kind="hud" halign="right" valign="bottom">
+                      <slate-text kind="hud" text="right · bottom"></slate-text>
+                    </border>
+                  </overlay>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<overlay kind="stage" height="160" padding="12">
+  <border kind="backdrop" halign="fill" valign="fill"></border>
+  <border kind="hud" halign="left" valign="top">
+    <slate-text kind="hud" text="left · top"></slate-text>
+  </border>
+  <border kind="hud" halign="right" valign="bottom">
+    <slate-text kind="hud" text="right · bottom"></slate-text>
+  </border>
+</overlay>
+            </script>
+          </wrapbox>
+        </verticalbox>

@@ -98,7 +98,7 @@ function displayForbidden(value) {
 function reasonFor(prop, value) {
   const p = prop.toLowerCase();
   if (p === "display") {
-    return `display:${String(value).trim()} — use panel tags/attrs for layout (display:contents/none/block are ok)`;
+    return `display:${String(value).trim()}, use panel tags/attrs for layout (display:contents/none/block are ok)`;
   }
   if (
     p === "position" ||
@@ -110,12 +110,12 @@ function reasonFor(prop, value) {
     p.startsWith("inset-") ||
     p === "z-index"
   ) {
-    return `${p} — use canvaspanel anchors / overlay alignment, not CSS positioning`;
+    return `${p}, use canvaspanel anchors / overlay alignment, not CSS positioning`;
   }
   if (p === "float" || p === "clear") {
-    return `${p} — use panel tags for layout`;
+    return `${p}, use panel tags for layout`;
   }
-  return `${p} — use panel attrs (fill, gap, halign, valign, …), not flex/grid CSS`;
+  return `${p}, use panel attrs (fill, gap, halign, valign, …), not flex/grid CSS`;
 }
 
 /**

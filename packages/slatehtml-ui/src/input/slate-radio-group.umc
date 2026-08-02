@@ -1,0 +1,140 @@
+--- html ---
+<verticalbox class="slate-radio-group" gap="6">
+  <textblock class="slate-radio-legend" data-umc="label"></textblock>
+  <verticalbox class="slate-radio-list" data-content gap="4"></verticalbox>
+</verticalbox>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+}
+
+self .slate-radio-legend {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self .slate-radio-option {
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 4px 0;
+}
+
+self .slate-radio-dot {
+  font-size: 14px;
+  line-height: 1;
+  width: 1.1em; /* umc-layout-ok */
+  text-align: center;
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+--- script ---
+import { parseOptions, selectableOptions } from "./parse-options.js";
+
+/**
+ * Radio group, one selected value from `options`.
+ *
+ *   <slate-radio-group label="Priority" options="low, med, high" selected="med"></slate-radio-group>
+ *
+ * Events: selectionchanged { value, label, index }
+ */
+function optionRow(option, selected) {
+  const on = option.value === selected;
+  return {
+    tag: "horizontalbox",
+    class: "slate-radio-option",
+    role: "radio",
+    "aria-checked": on ? "true" : "false",
+    "data-value": option.value,
+    tabindex: "-1",
+    gap: "8",
+    valign: "center",
+    children: [
+      { tag: "textblock", class: "slate-radio-dot", text: on ? "●" : "○" },
+      { tag: "textblock", text: option.label },
+    ],
+  };
+}
+
+export default defineUmc({
+  tag: "slate-radio-group",
+  attrs: {
+    label: "",
+    options: "",
+    selected: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "radiogroup");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      const row = e.target?.closest?.(".slate-radio-option");
+      if (!row || !el.contains(row)) return;
+      const value = row.getAttribute("data-value");
+      select(el, api, value);
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      const options = selectableOptions(parseOptions(api.attr("options", "")));
+      if (!options.length) return;
+      const current = options.findIndex((o) => o.value === api.attr("selected", ""));
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const next = current < 0 ? 0 : Math.min(options.length - 1, current + 1);
+        select(el, api, options[next].value);
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        const next = current < 0 ? options.length - 1 : Math.max(0, current - 1);
+        select(el, api, options[next].value);
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const options = selectableOptions(parseOptions(attr("options", "")));
+    const selected = attr("selected", "");
+    const key = options.map((o) => `${o.value}\u0000${o.label}`).join("\u0001") + `\u0002${selected}`;
+    if (el._optionsKey !== key) {
+      el._optionsKey = key;
+      el.set(...options.map((o) => optionRow(o, selected)));
+    }
+    const legend = el.querySelector(".slate-radio-legend");
+    if (legend) legend.hidden = !attr("label", "");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+  },
+});
+
+function select(el, api, value) {
+  const options = selectableOptions(parseOptions(api.attr("options", "")));
+  const index = options.findIndex((o) => o.value === value);
+  if (index < 0 || value === api.attr("selected", "")) return;
+  el.setAttribute("selected", value);
+  api.emit("selectionchanged", { value, label: options[index].label, index });
+}
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="240">
+  <slate-radio-group label="Priority" options="low|Low, med|Medium, high|High" selected="med"></slate-radio-group>
+</verticalbox>

@@ -142,7 +142,7 @@ function readSection(section, dir) {
   }
 }
 
-/** `defineUmc` is injected by the loader — drop user imports of it. */
+/** `defineUmc` is injected by the loader, drop user imports of it. */
 function stripDefineUmcImport(script) {
   return script.replace(
     /^\s*import\s*\{([^}]*)\}\s*from\s*["']slatehtml\/umc["']\s*;?\s*$/gm,
@@ -248,7 +248,7 @@ function collectBareNpmSpecifiers(file, source, readSource) {
   return bare;
 }
 
-/** Lightweight stub — real matrix-js-sdk is too heavy for the webview preview. */
+/** Lightweight stub, real matrix-js-sdk is too heavy for the webview preview. */
 function matrixSdkStubDataUrl() {
   const code = `
 export const ClientEvent = {
@@ -267,7 +267,7 @@ export function createClient(opts = {}) {
     : [];
   return {
     loginRequest: async () => {
-      throw new Error("UMC preview stubs matrix-js-sdk — use npm run dev or Electron to sign in.");
+      throw new Error("UMC preview stubs matrix-js-sdk, use npm run dev or Electron to sign in.");
     },
     getAccessToken: () => state.accessToken,
     getUserId: () => state.userId,
@@ -285,7 +285,7 @@ export default { createClient, ClientEvent };
   return `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;
 }
 
-/** Browserify UMD build — no named ESM exports in the webview import map. */
+/** Browserify UMD build, no named ESM exports in the webview import map. */
 function matrixEncryptAttachmentStubDataUrl() {
   const code = `
 export async function decryptAttachment(buffer) {
@@ -638,7 +638,7 @@ function buildPreviewHtml(options) {
   const runtimePath = findAsset(path.join("umc", "runtime.js"), { file, roots });
   if (!runtimePath) {
     return errorPage(
-      "Could not find slatehtml/umc/runtime.js — open the folder containing SlateHTML, or install it into node_modules."
+      "Could not find slatehtml/umc/runtime.js, open the folder containing SlateHTML, or install it into node_modules."
     );
   }
 
@@ -739,7 +739,7 @@ ${styles}
   <span class="umc-meta">${unit.preview ? "preview section" : "default attrs"}</span>
   <span class="umc-meta umc-hint" id="umc-nav-hint">Hover widget · Ctrl+click to open source</span>
   <span class="umc-spacer"></span>
-  <span class="umc-size" id="umc-size" title="Stage content box (resizable)">— × —</span>
+  <span class="umc-size" id="umc-size" title="Stage content box (resizable)">- × -</span>
   <span class="umc-bg" title="Stage background">
     <label for="umc-bg-input">bg</label>
     <input type="color" id="umc-bg-input" value="#1e1e1e" aria-label="Stage background color" />

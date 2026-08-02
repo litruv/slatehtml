@@ -1,21 +1,13 @@
 --- html ---
-<canvaspanel clip="false" class="picker-root">
-  <scrollbox class="picker-menu" data-content anchors="top-left top-right" top="0" gap="2" padding="4" max-height="220" hidden></scrollbox>
-  <horizontalbox class="picker-face" anchors="top-left top-right" valign="center" gap="8" padding="6 10">
-    <border class="picker-face-icon">
-      <textblock class="picker-face-initial" halign="center" valign="center"></textblock>
-    </border>
-    <editabletext class="picker-input" fill min-height="40"></editabletext>
-    <slate-icon class="picker-toggle" name="chevron-down" size="16"></slate-icon>
-  </horizontalbox>
-</canvaspanel>
+<scrollbox class="server-list" data-content gap="6" padding="4" max-height="320"></scrollbox>
 
 --- style ---
 self {
-  display: block;
+  display: block; /* umc-layout-ok */
   box-sizing: border-box;
   color: inherit;
   font: inherit;
+  min-width: 200px; /* umc-layout-ok */
 }
 
 self[disabled] {
@@ -23,378 +15,150 @@ self[disabled] {
   pointer-events: none;
 }
 
-.picker-face {
+.server-list {
   box-sizing: border-box;
-  --widget-background: var(--bg-input, #383a40);
-  --widget-border: none;
-  --widget-radius: 4px;
-  --widget-padding: 0 4px 0 0;
-  background: var(--widget-background);
-  border-radius: var(--widget-radius);
-  position: relative; /* umc-layout-ok — open menu stacking */
-  z-index: 1; /* umc-layout-ok */
+  background: var(--panel-deep, color-mix(in srgb, currentColor 4%, transparent));
+  border: 1px solid var(--line, color-mix(in srgb, currentColor 22%, transparent));
+  border-radius: var(--radius, 4px);
+  --widget-padding: 6px;
 }
 
-.picker-face:focus-within {
-  outline: 2px solid var(--blurple, #5865f2);
-  outline-offset: 0;
-}
-
-.picker-face-icon {
-  width: 32px;
-  height: 32px;
-  margin-left: 8px;
-  --widget-radius: 4px;
-  --widget-border: none;
-  --widget-padding: 0;
-  border-radius: 4px;
-  background: var(--picker-accent, var(--blurple, #5865f2));
-}
-
-.picker-face-initial {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #fff;
-  line-height: 1;
-}
-
-.picker-input {
-  --widget-background: transparent;
-  --widget-border: none;
-  --widget-radius: 4px;
-  --widget-padding: 10px 8px;
-  color: var(--ink, #f2f3f5);
-  font-size: 14px;
-}
-
-.picker-input:focus {
-  outline: none;
-}
-
-.picker-toggle {
-  color: var(--ink-muted, #949ba4);
-  padding: 8px 10px;
+.server-row {
+  border-radius: var(--radius, 4px);
   cursor: pointer;
-  border-radius: 4px;
-  transition: transform 120ms ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-self[open]:not([disabled]) .picker-toggle {
-  transform: rotate(180deg);
+.server-row:hover {
+  background: color-mix(in srgb, var(--accent, currentColor) 12%, transparent);
 }
 
-.picker-menu {
-  box-sizing: border-box;
-  z-index: 3; /* umc-layout-ok */
-  max-height: var(--picker-max-height, 220px);
-  background: var(--picker-menu-background, var(--bg-channels, #2b2d31));
-  border: 1px solid var(--line, #1f2023);
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  color: var(--ink, #f2f3f5);
+.server-row[aria-selected="true"],
+.server-row.selected {
+  background: color-mix(in srgb, var(--accent, currentColor) 22%, transparent);
 }
 
-.picker-heading {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-muted, #949ba4);
-  padding: 8px 10px 4px;
+.server-row-text {
+  min-width: 0; /* umc-layout-ok */
 }
 
-.picker-option {
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.picker-option:hover {
-  background: color-mix(in srgb, currentColor 12%, transparent);
-}
-
-.picker-option.selected {
-  background: color-mix(in srgb, var(--blurple, #5865f2) 28%, transparent);
-}
-
-.picker-server-icon {
-  width: 28px;
-  height: 28px;
-  --widget-radius: 4px;
-  --widget-border: none;
-  --widget-padding: 0;
-  border-radius: 4px;
-}
-
-.picker-server-initial {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
-}
-
-.picker-option-label {
+.server-row-label {
   font-size: 13px;
-  min-width: 0;
+  font-weight: 600;
 }
 
-.picker-empty {
-  padding: 8px 10px;
+.server-row-host {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.server-empty {
+  padding: 10px;
   opacity: 0.6;
   font-size: 12px;
 }
 
 --- script ---
+import { parseOptions, selectableOptions } from "./input/parse-options.js";
+import { serverAccent, serverInitial, normalizeHost } from "./accent.js";
+
 /**
- * Homeserver combobox with square server tiles and flip-up menu.
+ * Homeserver list, selectable rows with avatar images (or initials).
  *
- *   <slate-server-picker value="matrix.org" options="matrix.org,mozilla.org" placement="auto"></slate-server-picker>
+ *   <slate-server-picker
+ *     selected="matrix.org"
+ *     options="matrix.org|Matrix|https://matrix.org/favicon.ico, mozilla.org|Mozilla"
+ *   ></slate-server-picker>
  *
- * placement: auto | top | bottom — auto flips up when there is more room above.
+ * Options: `host`, `host|Label`, or `host|Label|imageUrl`.
+ * Events: selectionchanged { value, label }, valuechanged { value }
  */
-import {
-  serverAccent,
-  serverInitial,
-} from "./accent.js";
-
-function parseOptions(spec) {
-  return String(spec ?? "")
-    .split(/[,\n]/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry) => {
-      const pipe = entry.indexOf("|");
-      if (pipe >= 0) {
-        const value = entry.slice(0, pipe).trim();
-        const label = entry.slice(pipe + 1).trim();
-        return { value, label: label || value };
-      }
-      const split = entry.indexOf(":");
-      if (split < 0) return { value: entry, label: entry };
-      const value = entry.slice(0, split).trim();
-      const label = entry.slice(split + 1).trim();
-      return { value, label: label || value };
-    });
-}
-
-function inputEl(el) {
-  return el.querySelector(".picker-input");
-}
-
-function readValue(el) {
-  const input = inputEl(el);
-  return (input?.getAttribute("text") ?? input?.textContent ?? "").trim();
-}
-
-function writeValue(el, value) {
-  const next = String(value ?? "");
-  inputEl(el)?.setAttribute("text", next);
-  el.setAttribute("value", next);
-  paintFace(el, next);
-}
-
-function paintFace(el, value) {
-  const icon = el.querySelector(".picker-face-icon");
-  const initial = el.querySelector(".picker-face-initial");
-  if (!icon || !initial) return;
-  const accent = serverAccent(value);
-  icon.style.setProperty("--picker-accent", accent);
-  icon.style.background = accent;
-  initial.setAttribute("text", serverInitial(value));
-}
-
-function serverIconSpec(value) {
-  const accent = serverAccent(value);
-  return {
-    tag: "border",
-    class: "picker-server-icon",
-    style: { background: accent, "--picker-accent": accent },
-    children: {
-      tag: "textblock",
-      class: "picker-server-initial",
-      text: serverInitial(value),
-      halign: "center",
-      valign: "center",
-    },
-  };
-}
 
 function optionRow(option, selected) {
+  const value = option.value;
+  const label = option.label || value;
+  const host = normalizeHost(value) || value;
+  const on = value === selected || host === selected;
+  const avatar = (option.avatar || "").trim();
+  const accent = serverAccent(value);
+
+  const tile = {
+    tag: "slate-avatar-tile",
+    size: "36",
+    shape: "square",
+    label,
+    value,
+    accent,
+  };
+  if (avatar) tile.avatar = avatar;
+  else tile.icon = serverInitial(value);
+
   return {
     tag: "horizontalbox",
-    class: `picker-option${option.value === selected ? " selected" : ""}`,
-    "data-value": option.value,
+    class: `server-row${on ? " selected" : ""}`,
+    "data-value": value,
     role: "option",
+    "aria-selected": on ? "true" : "false",
     gap: "10",
     valign: "center",
-    padding: "6 10",
+    padding: "8 10",
     children: [
-      serverIconSpec(option.value),
+      tile,
       {
-        tag: "textblock",
-        class: "picker-option-label",
-        text: option.label,
+        tag: "verticalbox",
+        class: "server-row-text",
+        gap: "2",
         fill: "",
+        children: [
+          { tag: "textblock", class: "server-row-label", text: label },
+          { tag: "textblock", class: "server-row-host", text: host },
+        ],
       },
     ],
   };
 }
 
-const MENU_GAP = 4;
-
-function resolvePlacement(el, menu) {
-  const mode = el.getAttribute("placement") || "auto";
-  if (mode === "bottom") return "bottom";
-  if (mode === "top") return "top";
-  const rect = el.getBoundingClientRect();
-  const maxH = Number(menu?.getAttribute("max-height")) || 220;
-  const below = window.innerHeight - rect.bottom;
-  const above = rect.top;
-  return below < maxH && above > below ? "top" : "bottom";
-}
-
-function syncPickerLayout(el) {
-  const root = el.querySelector(".picker-root");
-  const face = el.querySelector(".picker-face");
-  const menu = el.querySelector(".picker-menu");
-  if (!root || !face) return;
-
-  const faceH = face.offsetHeight;
-  if (faceH > 0) root.setAttribute("height", String(faceH));
-
-  if (!menu || !el.hasAttribute("open")) {
-    menu?.setAttribute("hidden", "");
-    menu?.style.removeProperty("top");
-    menu?.style.removeProperty("bottom");
-    face.setAttribute("anchors", "top-left top-right");
-    face.setAttribute("top", "0");
-    face.removeAttribute("bottom");
-    return;
-  }
-
-  menu.removeAttribute("hidden");
-  const placement = resolvePlacement(el, menu);
-  const maxH = Number(menu.getAttribute("max-height")) || 220;
-  const menuH = Math.min(menu.scrollHeight || maxH, maxH);
-
-  if (placement === "top") {
-    menu.setAttribute("anchors", "top-left top-right");
-    menu.setAttribute("top", String(-(menuH + MENU_GAP)));
-    menu.removeAttribute("bottom");
-  } else {
-    menu.setAttribute("anchors", "top-left top-right");
-    menu.setAttribute("top", String(faceH + MENU_GAP));
-    menu.removeAttribute("bottom");
-  }
-
-  face.setAttribute("anchors", "top-left top-right");
-  face.setAttribute("top", "0");
-  face.removeAttribute("bottom");
-}
-
-function closeMenu(el, api) {
-  if (!el.hasAttribute("open")) return;
-  el.removeAttribute("open");
-  if (el._onOutside) {
-    document.removeEventListener("pointerdown", el._onOutside, true);
-    el._onOutside = null;
-  }
-  syncPickerLayout(el);
-  api.emit("closed", { value: readValue(el) });
-}
-
-function openMenu(el, api) {
-  if (el.hasAttribute("open") || el.hasAttribute("disabled")) return;
-  rebuildMenu(el);
-  el.setAttribute("open", "");
-  syncPickerLayout(el);
-  requestAnimationFrame(() => syncPickerLayout(el));
-  el._onOutside = (event) => {
-    if (!el.contains(event.target)) closeMenu(el, api);
-  };
-  document.addEventListener("pointerdown", el._onOutside, true);
-  api.emit("opened", { value: readValue(el) });
-}
-
-function menuSections(el) {
-  const recent = parseOptions(el.getAttribute("recent"));
-  const options = parseOptions(el.getAttribute("options"));
-  const recentValues = new Set(recent.map((o) => o.value));
-  const suggested = options.filter((o) => !recentValues.has(o.value));
-  const sections = [];
-  if (recent.length) {
-    sections.push({
-      title: el.getAttribute("recent-label") || "Recent",
-      items: recent,
-    });
-  }
-  if (suggested.length) {
-    sections.push({
-      title:
-        recent.length > 0
-          ? el.getAttribute("options-label") || "Suggested"
-          : null,
-      items: suggested,
-    });
-  }
-  return sections;
-}
-
-function rebuildMenu(el) {
-  const current = readValue(el);
-  const sections = menuSections(el);
-  const rows = [];
-  for (const section of sections) {
-    if (section.title) {
-      rows.push({
-        tag: "textblock",
-        class: "picker-heading",
-        text: section.title,
-      });
-    }
-    for (const item of section.items) {
-      rows.push(optionRow(item, current));
-    }
-  }
-  if (!rows.length) {
+function rebuild(el) {
+  const options = selectableOptions(
+    parseOptions(el.getAttribute("options") || el.getAttribute("recent"))
+  );
+  const selected =
+    el.getAttribute("selected") ||
+    el.getAttribute("value") ||
+    "";
+  if (!options.length) {
     el.set({
       tag: "textblock",
-      class: "picker-empty",
-      text: el.getAttribute("empty") || "No servers yet",
+      class: "server-empty",
+      text: el.getAttribute("empty") || "No servers",
     });
-  } else {
-    el.set(...rows);
+    return;
   }
+  el.set(...options.map((o) => optionRow(o, selected)));
 }
 
-function pick(el, api, value) {
-  writeValue(el, value);
-  const sections = menuSections(el);
-  let label = value;
-  for (const section of sections) {
-    const hit = section.items.find((o) => o.value === value);
-    if (hit) {
-      label = hit.label;
-      break;
-    }
-  }
-  api.emit("selectionchanged", { value, label });
+function select(el, api, value) {
+  const options = selectableOptions(
+    parseOptions(el.getAttribute("options") || el.getAttribute("recent"))
+  );
+  const hit = options.find((o) => o.value === value);
+  if (!hit) return;
+  if (value === (api.attr("selected", "") || api.attr("value", ""))) return;
+  el.setAttribute("selected", value);
+  el.setAttribute("value", value);
+  api.emit("selectionchanged", { value, label: hit.label });
   api.emit("valuechanged", { value });
-  closeMenu(el, api);
-  inputEl(el)?.focus?.();
 }
 
 export default defineUmc({
   tag: "slate-server-picker",
   attrs: {
+    selected: "",
     value: "",
     options: "",
     recent: "",
-    "recent-label": "Recent",
-    "options-label": "Suggested",
-    empty: "No servers yet",
-    placement: "auto",
-    open: "",
+    empty: "No servers",
     disabled: "",
   },
 
@@ -402,105 +166,49 @@ export default defineUmc({
     if (el._bound) return;
     el._bound = true;
 
-    el.setAttribute("role", "combobox");
-    el.setAttribute("aria-haspopup", "listbox");
-    el.querySelector(".picker-menu")?.setAttribute("role", "listbox");
-
-    const face = el.querySelector(".picker-face");
-    if (face && !el._layoutObs) {
-      el._layoutObs = new ResizeObserver(() => syncPickerLayout(el));
-      el._layoutObs.observe(face);
-    }
-
-    const input = inputEl(el);
-    input?.addEventListener("focus", () => {
-      requestAnimationFrame(() => {
-        if (document.activeElement !== input) return;
-        const range = document.createRange();
-        range.selectNodeContents(input);
-        const sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-      });
-    });
-    input?.addEventListener("textchanged", () => {
-      const value = readValue(el);
-      el.setAttribute("value", value);
-      paintFace(el, value);
-      api.emit("valuechanged", { value });
-    });
-    input?.addEventListener("committed", () => closeMenu(el, api));
+    el.setAttribute("role", "listbox");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
 
     el.addEventListener("click", (event) => {
-      const toggle = event.target?.closest?.(".picker-toggle");
-      if (toggle && el.contains(toggle)) {
-        event.preventDefault();
-        if (el.hasAttribute("open")) closeMenu(el, api);
-        else openMenu(el, api);
-        return;
-      }
-      const row = event.target?.closest?.(".picker-option");
-      if (row && el.contains(row)) {
-        event.preventDefault();
-        pick(el, api, row.getAttribute("data-value") || "");
-      }
+      if (el.hasAttribute("disabled")) return;
+      const row = event.target?.closest?.(".server-row");
+      if (!row || !el.contains(row)) return;
+      select(el, api, row.getAttribute("data-value") || "");
     });
 
     el.addEventListener("keydown", (event) => {
       if (el.hasAttribute("disabled")) return;
-      if (event.key === "Escape" && el.hasAttribute("open")) {
+      const options = selectableOptions(
+    parseOptions(el.getAttribute("options") || el.getAttribute("recent"))
+  );
+      if (!options.length) return;
+      const cur = el.getAttribute("selected") || el.getAttribute("value") || "";
+      const index = options.findIndex((o) => o.value === cur);
+      if (event.key === "ArrowDown") {
         event.preventDefault();
-        event.stopPropagation();
-        closeMenu(el, api);
-        return;
-      }
-      if (event.key === "ArrowDown" && !el.hasAttribute("open")) {
+        const next = index < 0 ? 0 : Math.min(options.length - 1, index + 1);
+        select(el, api, options[next].value);
+      } else if (event.key === "ArrowUp") {
         event.preventDefault();
-        openMenu(el, api);
+        const next = index < 0 ? options.length - 1 : Math.max(0, index - 1);
+        select(el, api, options[next].value);
       }
     });
-
-    el.refresh = () => {
-      if (el.hasAttribute("open")) rebuildMenu(el);
-    };
-  },
-
-  Destroyed(el, api) {
-    closeMenu(el, api);
-    el._layoutObs?.disconnect();
-    el._layoutObs = null;
-    el._bound = false;
   },
 
   SynchronizeProperties(el, { attr }) {
-    const value = attr("value", "");
-    const input = inputEl(el);
-    if (input && input.getAttribute("text") !== value) {
-      input.setAttribute("text", value);
+    if (!attr("selected", "") && attr("value", "")) {
+      el.setAttribute("selected", attr("value", ""));
     }
-    paintFace(el, value || readValue(el));
-    el.setAttribute("aria-expanded", el.hasAttribute("open") ? "true" : "false");
-    el.setAttribute(
-      "aria-disabled",
-      el.hasAttribute("disabled") ? "true" : "false"
-    );
-    if (!el.hasAttribute("open") && el._onOutside) {
-      document.removeEventListener("pointerdown", el._onOutside, true);
-      el._onOutside = null;
-    }
-    if (el.hasAttribute("open")) rebuildMenu(el);
-    syncPickerLayout(el);
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    rebuild(el);
   },
 });
 
 --- preview ---
-<verticalbox gap="12" padding="16" width="360">
+<verticalbox gap="12" padding="16" width="320">
   <slate-server-picker
-    value="matrix.org"
-    options="matrix.org,mozilla.org,envs.net"
-    recent="matrix.org"
-    placement="auto"
-    fill
+    selected="matrix.org"
+    options="matrix.org|Matrix|https://matrix.org/favicon.ico, mozilla.org|Mozilla|https://www.mozilla.org/media/img/favicons/firefox/browser/favicon-196x196.59e382bdcbf50b0e89ee.png, envs.net|envs.net"
   ></slate-server-picker>
-  <textblock kind="hint" text="Menu flips up when there is not enough room below."></textblock>
 </verticalbox>

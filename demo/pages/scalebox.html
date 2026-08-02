@@ -1,0 +1,72 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Scalebox"></slate-text>
+          <slate-text kind="hint" text="Scale the first child to fit the box."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Fit"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <scalebox width="200" height="100" stretch="fit">
+                    <border kind="panel" padding="16">
+                      <slate-text kind="section" text="Scaled"></slate-text>
+                    </border>
+                  </scalebox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<scalebox width="200" height="100" stretch="fit">
+  <border kind="panel" padding="16">
+    <slate-text kind="section" text="Scaled"></slate-text>
+  </border>
+</scalebox>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Fill"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <scalebox width="200" height="100" stretch="fill">
+                    <border kind="chip" padding="20">
+                      <textblock text="fill"></textblock>
+                    </border>
+                  </scalebox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<scalebox width="200" height="100" stretch="fill">
+  <border kind="chip" padding="20">
+    <textblock text="fill"></textblock>
+  </border>
+</scalebox>
+            </script>
+          </wrapbox>
+        </verticalbox>

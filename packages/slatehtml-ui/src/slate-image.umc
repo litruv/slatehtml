@@ -1,16 +1,18 @@
 --- html ---
-<sizebox class="slate-image-box" fill>
-  <image class="slate-image-face"></image>
-</sizebox>
+<image class="slate-image-face"></image>
 
 --- style ---
 self {
-  display: block; /* umc-layout-ok — painted media host */
+  display: block; /* umc-layout-ok, painted media host */
   overflow: hidden;
+  max-width: 100%; /* umc-layout-ok, stay inside parent panels */
+  box-sizing: border-box;
 }
 
 .slate-image-face {
   display: block; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
   --widget-background: var(--slate-image-placeholder, transparent);
   background-size: var(--slate-image-fit, contain);
   background-position: center;
@@ -27,7 +29,10 @@ self[failed] .slate-image-face {
  * Pass https/blob/data directly, or mxc:// when the host app provides a resolver.
  */
 function parseSize(raw) {
-  const n = Number.parseFloat(raw);
+  const s = String(raw || "").trim();
+  // Only plain px lengths, leave %, auto, etc. to layout attrs / CSS.
+  if (!/^-?[\d.]+$/.test(s)) return 0;
+  const n = Number.parseFloat(s);
   return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
 }
 
@@ -56,7 +61,7 @@ export default defineUmc({
     height: "",
     /** cover | contain */
     fit: "contain",
-    /** crop | scale — thumbnail method when requesting mxc */
+    /** crop | scale, thumbnail method when requesting mxc */
     resize: "scale",
     /** Download full media (no thumbnail) */
     full: "",

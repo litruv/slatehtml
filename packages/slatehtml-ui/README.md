@@ -1,6 +1,6 @@
 # slatehtml-ui
 
-Reusable UI widgets for **slatehtml** — buttons, dropdowns, pickers, media, and more. Custom elements built as `.umc` UserWidgets.
+Reusable UI widgets for **slatehtml**, typography, buttons, dropdowns, pickers, media, and more. Custom elements built as `.umc` UserWidgets.
 
 ## Install
 
@@ -8,7 +8,7 @@ Reusable UI widgets for **slatehtml** — buttons, dropdowns, pickers, media, an
 npm install slatehtml slatehtml-ui
 ```
 
-Your Vite app needs the UMC plugin:
+Your Vite app needs the UMC plugin (for your own `.umc` files, and for tree-shaking individual UI widgets from source):
 
 ```js
 import { defineConfig } from "vite";
@@ -30,19 +30,36 @@ export default defineConfig({
 
 ```js
 import "slatehtml";
-import "slatehtml-ui";
+import "slatehtml-ui"; // one prebuilt bundle, registers every widget
 ```
 
 ```html
 <verticalbox gap="8" padding="16">
-  <slate-button text="Save"></slate-button>
-  <slate-icon name="chevron-down" size="16"></slate-icon>
+  <slate-text kind="title" text="SlateHTML"></slate-text>
+  <slate-button text="OK"></slate-button>
 </verticalbox>
 ```
 
-Tree-shake a single control:
+Tree-shake a single control (still goes through the app Vite `umc()` plugin):
 
 ```js
 import "slatehtml";
+import "slatehtml-ui/text";
 import "slatehtml-ui/button";
 ```
+
+## Package layout
+
+| Path | Role |
+|------|------|
+| `src/input/*.umc` | Form controls (button, select, checkbox, …) |
+| `src/*.umc` | Other widgets (text, pickers, media, …) |
+| `src/index.js` | Glob barrel, `import.meta.glob(["./*.umc", "./input/*.umc"])` |
+| `dist/index.js` | Built ESM, all widgets compiled into one file |
+
+```bash
+npm run build        # from this package
+npm run build:ui     # from the slatehtml repo root
+```
+
+`prepublishOnly` runs the build so npm publishes `dist/`. Dev (`vite` / `import` with the `development` condition) resolves `"."` to the glob barrel so you don't need a prior build while iterating.

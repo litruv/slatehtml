@@ -1,0 +1,307 @@
+--- html ---
+<verticalbox class="slate-text-field" gap="4">
+  <textblock class="slate-text-field-label" data-umc="label"></textblock>
+  <editabletext class="slate-text-field-input" data-umc="value" data-umc-prop="text" fill></editabletext>
+  <textblock class="slate-text-field-helper" data-umc="helper"></textblock>
+</verticalbox>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+  min-width: 160px; /* umc-layout-ok */
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self .slate-text-field-label {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+self .slate-text-field-input {
+  --widget-padding: 8px 10px;
+  --widget-radius: 4px;
+  --widget-border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  font-size: 13px;
+}
+
+self[error] .slate-text-field-input {
+  --widget-border: 1px solid #c44;
+}
+
+self .slate-text-field-helper {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+self:not([label]) .slate-text-field-label,
+self[label=""] .slate-text-field-label {
+  display: none; /* umc-layout-ok */
+}
+
+self:not([helper]) .slate-text-field-helper,
+self[helper=""] .slate-text-field-helper {
+  display: none; /* umc-layout-ok */
+}
+
+/* After the helper-hide rules so validation messages still show. */
+self[error] .slate-text-field-helper {
+  color: #c44;
+  opacity: 1;
+  display: block; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * Labeled text field with optional validation.
+ *
+ *   <slate-text-field label="Email" type="email" required></slate-text-field>
+ *   <slate-text-field label="Code" pattern="^[A-Z]{3}-\\d{3}$" minlength="7" maxlength="7"></slate-text-field>
+ *   <slate-text-field label="Name" required errormessage="Name is required"></slate-text-field>
+ *
+ * Validation attrs: required, type (text|email|url|number), pattern, minlength, maxlength.
+ * `validate`: commit (default when any rule is set), change, or manual.
+ * Manual `error` still forces the error chrome (e.g. server-side messages).
+ *
+ * Events: valuechanged { value }, committed { value }, validitychanged { valid, reason, message }
+ */
+
+const TYPE_PATTERNS = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  url: /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w./?%&=-]*)?$/i,
+  number: /^-?\d+(\.\d+)?$/,
+};
+
+const REASON_MESSAGES = {
+  required: "Required",
+  minlength: "Too short",
+  maxlength: "Too long",
+  type: "Invalid value",
+  pattern: "Invalid format",
+};
+
+function hasValidationRules(el) {
+  return (
+    el.hasAttribute("required") ||
+    el.hasAttribute("pattern") ||
+    el.hasAttribute("minlength") ||
+    el.hasAttribute("maxlength") ||
+    ["email", "url", "number"].includes((el.getAttribute("type") || "text").toLowerCase())
+  );
+}
+
+function validateMode(el) {
+  const raw = (el.getAttribute("validate") || "").trim().toLowerCase();
+  if (raw === "manual" || raw === "change" || raw === "commit") return raw;
+  return hasValidationRules(el) ? "commit" : "manual";
+}
+
+function checkValidity(el, value) {
+  const v = value ?? "";
+  const empty = v.trim() === "";
+
+  if (el.hasAttribute("required") && empty) {
+    return { valid: false, reason: "required" };
+  }
+
+  // Empty optional fields skip type / pattern / length (HTML5-style).
+  if (empty) return { valid: true, reason: "" };
+
+  const minRaw = el.getAttribute("minlength");
+  const minLen =
+    minRaw != null && minRaw !== "" ? Number(minRaw) : Number.NaN;
+  if (Number.isFinite(minLen) && minLen > 0 && v.length < minLen) {
+    return { valid: false, reason: "minlength" };
+  }
+
+  const maxRaw = el.getAttribute("maxlength");
+  const maxLen =
+    maxRaw != null && maxRaw !== "" ? Number(maxRaw) : Number.NaN;
+  if (Number.isFinite(maxLen) && maxLen >= 0 && v.length > maxLen) {
+    return { valid: false, reason: "maxlength" };
+  }
+
+  const type = (el.getAttribute("type") || "text").toLowerCase();
+  const typeRe = TYPE_PATTERNS[type];
+  if (typeRe && !typeRe.test(v)) {
+    return { valid: false, reason: "type" };
+  }
+
+  const pattern = el.getAttribute("pattern");
+  if (pattern) {
+    try {
+      if (!new RegExp(pattern).test(v)) {
+        return { valid: false, reason: "pattern" };
+      }
+    } catch {
+      /* ignore bad pattern */
+    }
+  }
+
+  return { valid: true, reason: "" };
+}
+
+function messageFor(el, result, attr) {
+  if (result.valid) return attr("helper", "") || "";
+  const custom = attr("errormessage", "");
+  if (custom) return custom;
+  return REASON_MESSAGES[result.reason] || attr("helper", "") || "Invalid";
+}
+
+function applyValidity(el, api, value, { force = false } = {}) {
+  const mode = validateMode(el);
+  const result = checkValidity(el, value);
+  const prev = el._validity;
+  el._validity = result;
+
+  // change → paint on every check; commit → only blur / Enter / checkValidity();
+  // manual → only when forced or author already set error chrome.
+  const shouldPaint =
+    mode === "change" ||
+    (mode === "commit" && force) ||
+    (mode === "manual" && (force || el.hasAttribute("error")));
+
+  if (shouldPaint) {
+    // Manual `error` without rules: keep forced error until cleared by author.
+    if (!hasValidationRules(el) && el.hasAttribute("error") && !el._autoError) {
+      // Author-driven error only, don't clear.
+    } else if (result.valid) {
+      if (el._autoError || hasValidationRules(el)) {
+        el.removeAttribute("error");
+        el._autoError = false;
+      }
+    } else {
+      el.setAttribute("error", "");
+      el._autoError = true;
+    }
+  }
+
+  const helperEl = el.querySelector(".slate-text-field-helper");
+  if (helperEl && shouldPaint) {
+    const msg = messageFor(el, result, api.attr);
+    helperEl.setAttribute("text", msg);
+  }
+
+  if (!prev || prev.valid !== result.valid || prev.reason !== result.reason) {
+    api.emit("validitychanged", {
+      valid: result.valid,
+      reason: result.reason,
+      message: messageFor(el, result, api.attr),
+    });
+  }
+
+  return result;
+}
+
+export default defineUmc({
+  tag: "slate-text-field",
+  attrs: {
+    label: "Field",
+    value: "",
+    helper: "",
+    placeholder: "",
+    error: "",
+    errormessage: "",
+    disabled: "",
+    multiline: "",
+    readonly: "",
+    required: "",
+    type: "text",
+    pattern: "",
+    minlength: "",
+    maxlength: "",
+    validate: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+    const input = () => el.querySelector(".slate-text-field-input");
+
+    el.addEventListener(
+      "textchanged",
+      (e) => {
+        if (e.target !== input()) return;
+        e.stopPropagation();
+        const value = e.detail?.text ?? input()?.getAttribute("text") ?? "";
+        el.setAttribute("value", value);
+        api.emit("valuechanged", { value });
+        // `change` validates while typing; `commit` only paints on blur / Enter.
+        if (validateMode(el) === "change") {
+          applyValidity(el, api, value);
+        }
+      },
+      true
+    );
+
+    el.addEventListener(
+      "committed",
+      (e) => {
+        if (e.target !== input()) return;
+        e.stopPropagation();
+        const value = input()?.getAttribute("text") ?? api.attr("value", "");
+        el._touched = true;
+        api.emit("committed", { value });
+        if (validateMode(el) !== "manual") {
+          applyValidity(el, api, value, { force: true });
+        }
+      },
+      true
+    );
+
+    // Public: re-run rules and paint (forms can call field.checkValidity()).
+    el.checkValidity = () => {
+      el._touched = true;
+      const value = input()?.getAttribute("text") ?? api.attr("value", "");
+      return applyValidity(el, api, value, { force: true }).valid;
+    };
+  },
+
+  SynchronizeProperties(el, { attr, emit }) {
+    const input = el.querySelector(".slate-text-field-input");
+    if (!input) return;
+    if (el !== document.activeElement && input !== document.activeElement) {
+      input.setAttribute("text", attr("value", ""));
+    }
+    if (el.hasAttribute("multiline")) input.setAttribute("multiline", "");
+    else input.removeAttribute("multiline");
+    const locked = el.hasAttribute("readonly") || el.hasAttribute("disabled");
+    if (locked) input.setAttribute("readonly", "");
+    else input.removeAttribute("readonly");
+    // widget.js syncs contentEditable from `readonly`, but set it here too so
+    // disabled fields stay non-editable even before the next enhance pass.
+    input.contentEditable = locked ? "false" : "true";
+    if (attr("placeholder", "") && !attr("value", "")) {
+      input.setAttribute("placeholder", attr("placeholder", ""));
+    }
+
+    if (el.hasAttribute("required")) el.setAttribute("aria-required", "true");
+    else el.removeAttribute("aria-required");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    el.setAttribute("aria-readonly", el.hasAttribute("readonly") ? "true" : "false");
+
+    // Live re-paint only for validate=change. Commit mode waits for blur / Enter.
+    if (hasValidationRules(el) && validateMode(el) === "change") {
+      applyValidity(el, { attr, emit }, attr("value", ""));
+    } else if (el.hasAttribute("error") && attr("errormessage", "")) {
+      const helperEl = el.querySelector(".slate-text-field-helper");
+      helperEl?.setAttribute("text", attr("errormessage", ""));
+    }
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="300">
+  <slate-text-field label="Email" type="email" required helper="We'll never share it."></slate-text-field>
+  <slate-text-field label="Username" required minlength="3" maxlength="16" pattern="^[a-z][a-z0-9_]*$" errormessage="3-16 chars, start with a letter"></slate-text-field>
+  <slate-text-field label="Age" type="number" minlength="1"></slate-text-field>
+  <slate-text-field label="Bio" multiline value="" helper="Required" error></slate-text-field>
+</verticalbox>

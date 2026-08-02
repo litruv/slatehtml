@@ -1,0 +1,112 @@
+--- html ---
+<textblock class="slate-button-label" data-umc="text"></textblock>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok, painted control host */
+  align-items: center; /* umc-layout-ok */
+  justify-content: center; /* umc-layout-ok */
+  box-sizing: border-box;
+  /* Panels reset --widget-padding to 0; redefine here so fallback isn't needed. */
+  --widget-padding: 6px 12px;
+  --widget-radius: 4px;
+  padding: var(--widget-padding);
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  border-radius: var(--widget-radius);
+  color: var(--button-fg, inherit);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+slate-button:hover:not([disabled]) {
+  filter: brightness(1.08);
+}
+
+slate-button:active:not([disabled]) {
+  filter: brightness(0.92);
+}
+
+slate-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+slate-button[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+slate-button .slate-button-label {
+  pointer-events: none;
+}
+
+--- script ---
+/**
+ * UMG-style Button.
+ *
+ * Public events (listen with a reference):
+ *   clicked / doubleclicked / pressed / released
+ *
+ *   const btn = el.querySelector("slate-button");
+ *   btn.addEventListener("clicked", (e) => console.log(e.detail));
+ *
+ * Hyperscript:
+ *   tags["slate-button"]({ text: "OK", onClicked: (e) => … })
+ *
+ * Or declare events yourself in any .umc with:
+ *   events: { click: "clicked", … }
+ */
+export default defineUmc({
+  tag: "slate-button",
+  attrs: {
+    text: "Button",
+    disabled: "",
+  },
+
+  // Native DOM → public widget events
+  events: {
+    click: "clicked",
+    dblclick: "doubleclicked",
+    mousedown: "pressed",
+    mouseup: "released",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "button");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._keysBound) return;
+    el._keysBound = true;
+    el.addEventListener("keydown", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        // Space/Enter should feel like a click.
+        el.click();
+      }
+    });
+  },
+
+  SynchronizeProperties(el) {
+    const disabled = el.hasAttribute("disabled");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.tabIndex = disabled ? -1 : 0;
+  },
+});
+
+--- preview ---
+<verticalbox gap="10" padding="12">
+  <horizontalbox gap="8">
+    <slate-button text="Primary"></slate-button>
+    <slate-button text="Disabled" disabled></slate-button>
+  </horizontalbox>
+  <textblock kind="hint" text="Listen: button.addEventListener('clicked', …)"></textblock>
+</verticalbox>

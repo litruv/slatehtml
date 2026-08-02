@@ -15,8 +15,8 @@
     max-width="min(96vw, 1100px)"
     max-height="min(92vh, 900px)"
   >
-    <horizontalbox class="shadowbox-chrome" gap="8" valign="center" halign="fill">
-      <textblock class="shadowbox-title" data-title text="" fill></textblock>
+    <horizontalbox class="shadowbox-chrome" gap="8" valign="center" width="100%" min-width="0">
+      <textblock class="shadowbox-title" data-title text="" fill min-width="0"></textblock>
       <slate-icon class="shadowbox-close" name="x" size="18"></slate-icon>
     </horizontalbox>
     <border class="shadowbox-image-frame" padding="0" max-width="min(96vw, 1100px)" max-height="min(80vh, 820px)" hidden>
@@ -27,7 +27,7 @@
 </overlay>
 
 --- style ---
-/* Host stays display:contents — hide stamped overlay when closed. */
+/* Host stays display:contents, hide stamped overlay when closed. */
 self:not([open]) > .shadowbox-root {
   display: none !important;
   pointer-events: none !important;

@@ -1,0 +1,222 @@
+--- html ---
+<horizontalbox class="slate-tabs-list" gap="0" valign="end"></horizontalbox>
+<verticalbox class="slate-tabs-body" data-content gap="0" fill></verticalbox>
+
+--- style ---
+self {
+  display: flex; /* umc-layout-ok, real box so parents can size the strip */
+  flex-direction: column; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  min-width: 0; /* umc-layout-ok */
+}
+
+self .slate-tabs-list {
+  border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self .slate-tabs-tab {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.62;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px; /* umc-layout-ok, sit on the list rule */
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+self .slate-tabs-tab:hover {
+  opacity: 0.9;
+}
+
+self .slate-tabs-tab[aria-selected="true"] {
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+
+/* Host is a flex column, body is the second flex child. */
+self > .slate-tabs-body:empty {
+  display: none; /* umc-layout-ok */
+}
+
+self:focus-visible .slate-tabs-tab[aria-selected="true"],
+self .slate-tabs-tab:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+--- script ---
+import { create } from "slatehtml/umc";
+import { parseOptions, selectableOptions } from "./input/parse-options.js";
+
+/**
+ * Tab strip + optional panels.
+ *
+ *   <slate-tabs active="email">
+ *     <slate-tab name="basic" label="Basic">…</slate-tab>
+ *     <slate-tab name="email" label="Email">…</slate-tab>
+ *   </slate-tabs>
+ *
+ * Tab labels can also come from `tabs="Basic, Email"` when driving the strip
+ * without panels (e.g. gallery variant switchers). Empty panel body hides itself.
+ *
+ * Events: selectionchanged { value, label, index }
+ */
+
+function tabKey(panel) {
+  return (
+    panel.getAttribute("name") ||
+    panel.getAttribute("label") ||
+    ""
+  ).trim();
+}
+
+function panelsOf(el) {
+  const body = el.querySelector(".slate-tabs-body");
+  if (!body) return [];
+  return [...body.children].filter((n) => n.localName === "slate-tab");
+}
+
+function resolveTabs(el, attr) {
+  const fromAttr = selectableOptions(parseOptions(attr("tabs", "")));
+  if (fromAttr.length) return fromAttr;
+
+  return panelsOf(el).map((panel, index) => {
+    const value = tabKey(panel) || `tab-${index}`;
+    const label = (panel.getAttribute("label") || value).trim() || value;
+    return { type: "option", value, label, avatar: "" };
+  });
+}
+
+function tabRow(option, selected) {
+  const on = option.value === selected;
+  return {
+    tag: "horizontalbox",
+    class: "slate-tabs-tab",
+    role: "tab",
+    id: `slate-tab-${option.value}`,
+    "aria-selected": on ? "true" : "false",
+    "data-value": option.value,
+    tabindex: on ? "0" : "-1",
+    padding: "8 12",
+    valign: "center",
+    children: [{ tag: "textblock", text: option.label }],
+  };
+}
+
+function syncPanels(el, selected) {
+  const panels = panelsOf(el);
+  for (const panel of panels) {
+    const key = tabKey(panel);
+    if (key && key === selected) panel.setAttribute("active", "");
+    else panel.removeAttribute("active");
+  }
+  const body = el.querySelector(".slate-tabs-body");
+  if (!body) return;
+  if (panels.length === 0) body.setAttribute("hidden", "");
+  else body.removeAttribute("hidden");
+}
+
+function select(el, api, value) {
+  const tabs = resolveTabs(el, api.attr);
+  const index = tabs.findIndex((t) => t.value === value);
+  if (index < 0) return;
+  if (value === api.attr("active", "")) return;
+  el.setAttribute("active", value);
+  api.emit("selectionchanged", {
+    value,
+    label: tabs[index].label,
+    index,
+  });
+}
+
+export default defineUmc({
+  tag: "slate-tabs",
+  attrs: {
+    tabs: "",
+    active: "",
+  },
+
+  Construct(el, api) {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (e) => {
+      const tab = e.target?.closest?.(".slate-tabs-tab");
+      if (!tab || !el.contains(tab)) return;
+      const value = tab.getAttribute("data-value");
+      if (value != null) select(el, api, value);
+    });
+
+    el.addEventListener("keydown", (e) => {
+      const tabs = resolveTabs(el, api.attr);
+      if (!tabs.length) return;
+      const current = tabs.findIndex((t) => t.value === api.attr("active", ""));
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const next = current < 0 ? 0 : Math.min(tabs.length - 1, current + 1);
+        select(el, api, tabs[next].value);
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const next = current < 0 ? tabs.length - 1 : Math.max(0, current - 1);
+        select(el, api, tabs[next].value);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        select(el, api, tabs[0].value);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        select(el, api, tabs[tabs.length - 1].value);
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const tabs = resolveTabs(el, attr);
+    let selected = attr("active", "");
+    if (!selected && tabs.length) {
+      selected = tabs[0].value;
+      if (attr("active", "") !== selected) el.setAttribute("active", selected);
+    }
+
+    const list = el.querySelector(".slate-tabs-list");
+    if (list) {
+      list.setAttribute("role", "tablist");
+      const key = tabs.map((t) => `${t.value}\u0000${t.label}`).join("\u0001");
+      if (el._tabsKey !== key) {
+        el._tabsKey = key;
+        list.replaceChildren(
+          ...tabs.map((option) => create(tabRow(option, selected))).filter(Boolean)
+        );
+      } else {
+        for (const tab of list.querySelectorAll(".slate-tabs-tab")) {
+          const on = tab.getAttribute("data-value") === selected;
+          tab.setAttribute("aria-selected", on ? "true" : "false");
+          tab.setAttribute("tabindex", on ? "0" : "-1");
+        }
+      }
+    }
+
+    syncPanels(el, selected);
+  },
+});
+
+--- preview ---
+<verticalbox gap="16" padding="16" width="360">
+  <slate-tabs active="email">
+    <slate-tab name="basic" label="Basic">
+      <slate-text-field label="Name" helper="Display name"></slate-text-field>
+    </slate-tab>
+    <slate-tab name="email" label="Email">
+      <slate-text-field label="Email" type="email" required validate="change"></slate-text-field>
+    </slate-tab>
+    <slate-tab name="bio" label="Bio">
+      <slate-text-field label="Bio" multiline helper="Optional"></slate-text-field>
+    </slate-tab>
+  </slate-tabs>
+  <slate-tabs tabs="Day, Week, Month" active="Week"></slate-tabs>
+</verticalbox>

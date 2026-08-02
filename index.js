@@ -10,6 +10,21 @@
  */
 
 import { injectStyles } from "./inject-styles.js";
-import { enhance, enhanceTree, boot, start } from "./widget.js";
+import {
+  enhance,
+  enhanceTree,
+  boot,
+  start,
+  configure,
+  getSettings,
+} from "./widget.js";
 
-export { enhance, enhanceTree, boot, start, injectStyles };
+export {
+  enhance,
+  enhanceTree,
+  boot,
+  start,
+  injectStyles,
+  configure,
+  getSettings,
+};

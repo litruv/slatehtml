@@ -5,7 +5,7 @@
 --- style ---
 /* Own the layout box (not contents) so the trigger sizes the host. */
 self {
-  position: relative; /* umc-layout-ok — popup stacking context */
+  position: relative; /* umc-layout-ok, popup stacking context */
   display: inline-block;
   vertical-align: top;
   max-width: 100%;
@@ -18,7 +18,7 @@ self {
 /* Fixed so menus escape scrollbox / overflow ancestors (avatars in chat). */
 .popup-anchor-panel {
   display: none;
-  position: fixed; /* umc-layout-ok — floating menu */
+  position: fixed; /* umc-layout-ok, floating menu */
   top: 0; /* umc-layout-ok */
   left: 0; /* umc-layout-ok */
   z-index: var(--popup-z, 60); /* umc-layout-ok */
@@ -132,14 +132,14 @@ function placePanel(el, api) {
   if (!PLACEMENTS.has(placement)) placement = "bottom-start";
 
   const anchor = anchorRect(trigger, el);
-  // Measure in place — never park at 0,0 first (that flashes every popup
+  // Measure in place, never park at 0,0 first (that flashes every popup
   // to the viewport top-left and can stick there if layout is interrupted).
   const cardW = panel.offsetWidth || panel.getBoundingClientRect().width;
   const cardH = panel.offsetHeight || panel.getBoundingClientRect().height;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // If we still have no trigger box, don't guess top-left — keep current pos.
+  // If we still have no trigger box, don't guess top-left, keep current pos.
   if (!(anchor.width > 0 || anchor.height > 0)) return;
 
   const preferBottom = placement.startsWith("bottom");

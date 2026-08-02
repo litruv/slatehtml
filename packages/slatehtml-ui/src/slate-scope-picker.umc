@@ -29,7 +29,7 @@ self {
   border: var(--widget-border, 1px solid currentColor);
   background: var(--widget-background, transparent);
   border-radius: var(--widget-radius, 4px);
-  z-index: 1; /* umc-layout-ok — face above canvas menu layer */
+  z-index: 1; /* umc-layout-ok, face above canvas menu layer */
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -75,7 +75,7 @@ self[open]:not([disabled]) .scope-picker-chevron {
 }
 
 self[open] .scope-picker-root {
-  position: relative; /* umc-layout-ok — open menu stacking */
+  position: relative; /* umc-layout-ok, open menu stacking */
   z-index: 100; /* umc-layout-ok */
 }
 
@@ -206,7 +206,7 @@ function syncScopeLayout(el) {
   const flush = el.hasAttribute("flush");
   const faceH = scopeBarHeight(el, root, face);
 
-  // Canvas absolute children don't contribute height — always size the root.
+  // Canvas absolute children don't contribute height, always size the root.
   if (faceH > 0) root.setAttribute("height", String(faceH));
 
   const pinFaceFill = () => {

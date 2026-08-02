@@ -1,0 +1,47 @@
+--- html ---
+<verticalbox class="slate-tab" data-content gap="8" fill></verticalbox>
+
+--- style ---
+/* Override default host `display:contents` so inactive panels can hide. */
+self {
+  display: none !important; /* umc-layout-ok */
+}
+
+self[active] {
+  display: contents !important; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * One panel inside `<slate-tabs>`.
+ *
+ *   <slate-tabs active="email">
+ *     <slate-tab name="basic" label="Basic">…</slate-tab>
+ *     <slate-tab name="email" label="Email">…</slate-tab>
+ *   </slate-tabs>
+ *
+ * `name` is the selection key (falls back to `label`). Light children land in the panel.
+ */
+export default defineUmc({
+  tag: "slate-tab",
+  attrs: {
+    name: "",
+    label: "",
+    active: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "tabpanel");
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const name = attr("name", "") || attr("label", "");
+    if (name) el.setAttribute("aria-labelledby", `slate-tab-${name}`);
+    el.setAttribute("aria-hidden", el.hasAttribute("active") ? "false" : "true");
+  },
+});
+
+--- preview ---
+<verticalbox padding="12" gap="8">
+  <slate-text kind="hint" text="Use inside slate-tabs, see that widget’s preview."></slate-text>
+</verticalbox>

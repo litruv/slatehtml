@@ -37,7 +37,7 @@ Open a `.umc` file, then:
 - press `Ctrl+K V` (`Cmd+K V`), or
 - run **UMC: Open Preview to the Side**.
 
-The webview loads the workspace's `widget.css` + `widget.js` (the layout engine) and `umc/runtime.js`, then registers every `.umc` in the component's folder — so composed children like `<message-meta>` inside `<user-message>` render too. It re-renders as you type (250 ms debounce), including when you edit a sibling component.
+The webview loads the workspace's `widget.css` + `widget.js` (the layout engine) and `umc/runtime.js`, then registers every `.umc` in the component's folder, so composed children like `<message-meta>` inside `<user-message>` render too. It re-renders as you type (250 ms debounce), including when you edit a sibling component.
 
 Without a `--- preview ---` section it renders a bare `<your-tag></your-tag>`, so `attrs` defaults are what you see. With one, you control the markup:
 
@@ -62,7 +62,7 @@ With the preview open, hover elements in the stage to highlight their source lin
 | Setting | What it does |
 | --- | --- |
 | `umc.preview.stylesheets` | Extra CSS to load, resolved against the workspace folder then the component folder (e.g. `example/discord.css` for app theming). |
-| `umc.preview.imports` | JS modules to load before the components — use it for widgets defined in plain `.js`. |
+| `umc.preview.imports` | JS modules to load before the components, use it for widgets defined in plain `.js`. |
 
 Runtime errors from a component appear under the stage instead of failing silently.
 

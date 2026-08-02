@@ -37,8 +37,24 @@ check("bottom-right is a corner pin", () => {
   }
 });
 
+check("left top and top left both pin top-left", () => {
+  for (const raw of ["left top", "top left", "top-left"]) {
+    const anchors = parseAnchors(raw);
+    if (!anchors || anchors.join(",") !== "0,0,0,0") {
+      throw new Error(`${raw}: expected 0,0,0,0 got ${anchors}`);
+    }
+  }
+});
+
+check("right bottom pins bottom-right", () => {
+  const anchors = parseAnchors("right bottom");
+  if (!anchors || anchors.join(",") !== "1,1,1,1") {
+    throw new Error(`expected 1,1,1,1 got ${anchors}`);
+  }
+});
+
 if (failures.length) {
-  console.error("\nWidget layout tests failed:\n" + failures.map((f) => `  - ${f}`).join("\n"));
+  console.error("\nWidget layout tests failed:\n" + failures.map((f) => ` , ${f}`).join("\n"));
   process.exit(1);
 }
 

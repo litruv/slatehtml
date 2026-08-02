@@ -1,0 +1,195 @@
+--- html ---
+<horizontalbox class="transfer-root" gap="10" valign="stretch">
+  <verticalbox class="transfer-pane" fill gap="6">
+    <textblock class="transfer-heading" data-umc="choices-label"></textblock>
+    <scrollbox class="transfer-list transfer-choices" data-slot="choices" gap="2" padding="4" min-height="140" max-height="220"></scrollbox>
+  </verticalbox>
+  <verticalbox class="transfer-actions" gap="6" valign="center">
+    <slate-button class="transfer-to-chosen" text="→"></slate-button>
+    <slate-button class="transfer-to-choices" text="←"></slate-button>
+  </verticalbox>
+  <verticalbox class="transfer-pane" fill gap="6">
+    <textblock class="transfer-heading" data-umc="chosen-label"></textblock>
+    <scrollbox class="transfer-list transfer-chosen" data-slot="chosen" gap="2" padding="4" min-height="140" max-height="220"></scrollbox>
+  </verticalbox>
+</horizontalbox>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+  min-width: 360px; /* umc-layout-ok */
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self .transfer-heading {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+self .transfer-list {
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: var(--widget-radius, 4px);
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+self .transfer-item {
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self .transfer-item:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+self .transfer-item.selected {
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+self .transfer-actions slate-button {
+  min-width: 36px; /* umc-layout-ok */
+}
+
+--- script ---
+import { create } from "slatehtml/umc";
+import { parseOptions, serializeOptions, selectableOptions } from "./parse-options.js";
+
+/**
+ * Transfer list, move items between choices and chosen.
+ *
+ *   <slate-transfer-list
+ *     choices="a|Alpha, b|Beta, c|Gamma"
+ *     chosen="d|Delta"
+ *   ></slate-transfer-list>
+ *
+ * Events: changed { choices, chosen }
+ *
+ * Note: attrs are `choices` / `chosen` (not left/right), those clash with
+ * canvas layout attrs forwarded onto the root panel.
+ */
+
+function itemRow(option, selected) {
+  const on = selected.has(option.value);
+  return {
+    tag: "textblock",
+    class: `transfer-item${on ? " selected" : ""}`,
+    "data-value": option.value,
+    role: "option",
+    "aria-selected": on ? "true" : "false",
+    text: option.label,
+  };
+}
+
+function selectedSet(el, side) {
+  const key = side === "choices" ? "_selChoices" : "_selChosen";
+  if (!el[key]) el[key] = new Set();
+  return el[key];
+}
+
+function paintSide(el, side) {
+  const options = selectableOptions(parseOptions(el.getAttribute(side)));
+  const target = el.namedSlot(side);
+  if (!target) return;
+  const selected = selectedSet(el, side);
+  target.replaceChildren(
+    ...options.map((o) => create(itemRow(o, selected))).filter(Boolean)
+  );
+}
+
+function paint(el) {
+  paintSide(el, "choices");
+  paintSide(el, "chosen");
+}
+
+function move(el, api, from, to) {
+  const fromOpts = selectableOptions(parseOptions(el.getAttribute(from)));
+  const toOpts = selectableOptions(parseOptions(el.getAttribute(to)));
+  const sel = selectedSet(el, from);
+  if (!sel.size) return;
+  const moving = fromOpts.filter((o) => sel.has(o.value));
+  const remaining = fromOpts.filter((o) => !sel.has(o.value));
+  el.setAttribute(from, serializeOptions(remaining));
+  el.setAttribute(to, serializeOptions([...toOpts, ...moving]));
+  sel.clear();
+  selectedSet(el, to).clear();
+  api.emit("changed", {
+    choices: selectableOptions(parseOptions(el.getAttribute("choices"))),
+    chosen: selectableOptions(parseOptions(el.getAttribute("chosen"))),
+  });
+}
+
+export default defineUmc({
+  tag: "slate-transfer-list",
+  attrs: {
+    "choices-label": "Choices",
+    "chosen-label": "Chosen",
+    choices: "",
+    chosen: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      if (e.target?.closest?.(".transfer-to-chosen") && el.contains(e.target)) {
+        move(el, api, "choices", "chosen");
+        return;
+      }
+      if (e.target?.closest?.(".transfer-to-choices") && el.contains(e.target)) {
+        move(el, api, "chosen", "choices");
+        return;
+      }
+      const item = e.target?.closest?.(".transfer-item");
+      if (!item || !el.contains(item)) return;
+      const side = item.closest(".transfer-choices") ? "choices" : "chosen";
+      const value = item.getAttribute("data-value");
+      const set = selectedSet(el, side);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      selectedSet(el, side === "choices" ? "chosen" : "choices").clear();
+      paint(el);
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const key = `${attr("choices", "")}\u0001${attr("chosen", "")}`;
+    if (el._paintKey === key) return;
+    el._paintKey = key;
+    const choiceVals = new Set(
+      selectableOptions(parseOptions(attr("choices", ""))).map((o) => o.value)
+    );
+    const chosenVals = new Set(
+      selectableOptions(parseOptions(attr("chosen", ""))).map((o) => o.value)
+    );
+    for (const v of [...selectedSet(el, "choices")]) {
+      if (!choiceVals.has(v)) selectedSet(el, "choices").delete(v);
+    }
+    for (const v of [...selectedSet(el, "chosen")]) {
+      if (!chosenVals.has(v)) selectedSet(el, "chosen").delete(v);
+    }
+    paint(el);
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="480">
+  <slate-transfer-list
+    choices="a|Alpha, b|Beta, c|Gamma, d|Delta"
+    chosen="e|Epsilon"
+  ></slate-transfer-list>
+</verticalbox>

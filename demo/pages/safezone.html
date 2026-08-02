@@ -1,0 +1,72 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Safezone"></slate-text>
+          <slate-text kind="hint" text="Pads by env(safe-area-inset-*), useful on notched devices."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <safezone pad="1">
+                    <border kind="panel" padding="12">
+                      <slate-text kind="body" text="Content inset by safe-area."></slate-text>
+                    </border>
+                  </safezone>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<safezone pad="1">
+  <border kind="panel" padding="12">
+    <slate-text kind="body" text="Content inset by safe-area."></slate-text>
+  </border>
+</safezone>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Double pad"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <safezone pad="2">
+                    <border kind="slot" padding="12">
+                      <slate-text kind="mono" text="pad=&quot;2&quot;"></slate-text>
+                    </border>
+                  </safezone>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<safezone pad="2">
+  <border kind="slot" padding="12">
+    <slate-text kind="mono" text="pad=&quot;2&quot;"></slate-text>
+  </border>
+</safezone>
+            </script>
+          </wrapbox>
+        </verticalbox>

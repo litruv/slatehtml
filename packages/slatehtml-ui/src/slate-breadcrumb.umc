@@ -1,0 +1,153 @@
+--- html ---
+<horizontalbox class="bc-root" gap="6" valign="center" data-content></horizontalbox>
+
+--- style ---
+self {
+  color: var(--muted, #5a6a60);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+self .bc-crumb {
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+self .bc-crumb:hover {
+  color: var(--accent, currentColor);
+}
+
+self .bc-current {
+  color: var(--ink, currentColor);
+  font-weight: 600;
+  cursor: default;
+}
+
+self .bc-sep {
+  color: inherit;
+  opacity: 0.55;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * Trail of links for hierarchical navigation.
+ *
+ *   <slate-breadcrumb items="Overview|#/, Inputs|#/inputs, Button"></slate-breadcrumb>
+ *
+ * Grammar (comma-separated crumbs):
+ *   Label|href   → clickable crumb
+ *   Label        → current page (last crumb usually)
+ *
+ * Events: clicked { label, href, index }
+ * Hash / absolute hrefs navigate automatically; listen for clicked for app routes.
+ */
+function parseCrumbs(spec) {
+  return String(spec || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const pipe = entry.indexOf("|");
+      if (pipe < 0) return { label: entry, href: "" };
+      return {
+        label: entry.slice(0, pipe).trim(),
+        href: entry.slice(pipe + 1).trim(),
+      };
+    })
+    .filter((c) => c.label);
+}
+
+function paint(el, api) {
+  const crumbs = parseCrumbs(api.attr("items", ""));
+  const sep = api.attr("separator", "chevron-right") || "chevron-right";
+  const children = [];
+
+  crumbs.forEach((crumb, index) => {
+    if (index > 0) {
+      children.push({
+        tag: "slate-icon",
+        class: "bc-sep",
+        name: sep,
+        size: "12",
+        "aria-hidden": "true",
+      });
+    }
+
+    const isLink = Boolean(crumb.href);
+    children.push({
+      tag: "textblock",
+      class: isLink ? "bc-crumb" : "bc-current",
+      text: crumb.label,
+      role: isLink ? "link" : "text",
+      tabindex: isLink ? "0" : undefined,
+      "data-index": String(index),
+      "data-label": crumb.label,
+      "data-href": crumb.href || undefined,
+      "aria-current": isLink ? undefined : "page",
+    });
+  });
+
+  el.set(children);
+}
+
+function activate(el, api, crumb) {
+  if (!crumb) return;
+  const href = crumb.getAttribute("data-href") || "";
+  const label = crumb.getAttribute("data-label") || "";
+  const index = Number(crumb.getAttribute("data-index") || "0");
+  api.emit("clicked", { label, href, index });
+  if (!href) return;
+  if (href.startsWith("#")) {
+    location.hash = href;
+  } else if (/^(https?:|\/|\.\/)/i.test(href)) {
+    location.assign(href);
+  }
+}
+
+export default defineUmc({
+  tag: "slate-breadcrumb",
+  attrs: {
+    items: "",
+    separator: "chevron-right",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("aria-label", "Breadcrumb");
+    if (el._bound) return;
+    el._bound = true;
+
+    el.addEventListener("click", (e) => {
+      const crumb = e.target?.closest?.(".bc-crumb");
+      if (!crumb || !el.contains(crumb)) return;
+      e.preventDefault();
+      activate(el, api, crumb);
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const crumb = e.target?.closest?.(".bc-crumb");
+      if (!crumb || !el.contains(crumb)) return;
+      e.preventDefault();
+      activate(el, api, crumb);
+    });
+  },
+
+  SynchronizeProperties(el, api) {
+    const key = `${api.attr("items", "")}\u0000${api.attr("separator", "chevron-right")}`;
+    if (el._crumbsKey === key) return;
+    el._crumbsKey = key;
+    paint(el, api);
+  },
+});
+
+--- preview ---
+<verticalbox gap="14" padding="16" width="420">
+  <slate-breadcrumb items="Overview|#/, Inputs|#/inputs, Button"></slate-breadcrumb>
+  <slate-breadcrumb items="Home|#/, Settings"></slate-breadcrumb>
+</verticalbox>

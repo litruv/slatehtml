@@ -1,6 +1,6 @@
 /*
   UMG-style layout panels as plain HTML tags.
-  <canvas> is reserved by HTML5 — use <canvaspanel> instead.
+  <canvas> is reserved by HTML5, use <canvaspanel> instead.
 */
 
 /* --- reset unknown tags to block boxes --- */
@@ -32,7 +32,7 @@
   min-height: 0;
 }
 
-/* Panel display rules below override UA [hidden]{display:none} — restore collapse */
+/* Panel display rules below override UA [hidden]{display:none}, restore collapse */
 :is(horizontalbox, umc-horizontalbox, verticalbox, umc-verticalbox, wrapbox, umc-wrapbox,
   overlay, umc-overlay, canvaspanel, umc-canvaspanel, scrollbox, umc-scrollbox,
   sizebox, umc-sizebox, spacer, umc-spacer, gridpanel, umc-gridpanel,
@@ -141,9 +141,9 @@
 
 /* In a row, non-fill chrome shrink-wraps to content */
 :is(horizontalbox, umc-horizontalbox) > :is(border, umc-border):not([fill]),
-:is(horizontalbox, umc-horizontalbox) > :is(textblock, umc-textblock):not([fill]),
+:is(horizontalbox, umc-horizontalbox) > :is(textblock, umc-textblock, [data-umc-extends="textblock"]):not([fill]),
 :is(wrapbox, umc-wrapbox) > :is(border, umc-border):not([fill]),
-:is(wrapbox, umc-wrapbox) > :is(textblock, umc-textblock):not([fill]) {
+:is(wrapbox, umc-wrapbox) > :is(textblock, umc-textblock, [data-umc-extends="textblock"]):not([fill]) {
   width: max-content;
   max-width: 100%;
 }
@@ -227,14 +227,14 @@
 :is(overlay, umc-overlay) > [valign="center"] { align-self: center; }
 :is(overlay, umc-overlay) > [valign="bottom"] { align-self: end; }
 :is(overlay, umc-overlay) > [valign="fill"] { align-self: stretch; max-height: none; }
-/* Backdrop blur must sit under siblings — `backdrop-filter` creates a stacking context. */
+/* Backdrop blur must sit under siblings, `backdrop-filter` creates a stacking context. */
 :is(overlay, umc-overlay) > :is(backgroundblur, umc-backgroundblur) {
   z-index: 0;
 }
 :is(overlay, umc-overlay) > *:not(:is(backgroundblur, umc-backgroundblur)) {
   z-index: 1;
 }
-/* Intrinsic size for pinned children — don't let flex/grid chrome expand them */
+/* Intrinsic size for pinned children, don't let flex/grid chrome expand them */
 :is(overlay, umc-overlay) > [halign]:not([halign="fill"]),
 :is(overlay, umc-overlay) > [valign]:not([valign="fill"]) {
   flex: 0 0 auto;
@@ -277,6 +277,32 @@
   padding: var(--widget-padding, 0px);
   min-width: 0;
   min-height: 0;
+  /* Thin overlay-style bars (VS Code-like); colors from --widget-scrollbar-* */
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--widget-scrollbar-thumb, rgba(121, 121, 121, 0.4))
+    var(--widget-scrollbar-track, transparent);
+}
+:is(scrollbox, umc-scrollbox)::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+:is(scrollbox, umc-scrollbox)::-webkit-scrollbar-track {
+  background: var(--widget-scrollbar-track, transparent);
+}
+:is(scrollbox, umc-scrollbox)::-webkit-scrollbar-thumb {
+  background: var(--widget-scrollbar-thumb, rgba(121, 121, 121, 0.4));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+:is(scrollbox, umc-scrollbox)::-webkit-scrollbar-thumb:hover {
+  background: var(--widget-scrollbar-thumb-hover, rgba(121, 121, 121, 0.7));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+:is(scrollbox, umc-scrollbox)::-webkit-scrollbar-corner {
+  background: transparent;
 }
 :is(scrollbox, umc-scrollbox)[orientation="horizontal"] {
   overflow-x: auto;
@@ -285,6 +311,17 @@
 :is(scrollbox, umc-scrollbox)[orientation="vertical"] {
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+/* Click-drag scroll (configure({ dragScroll: true }) or drag-scroll attr).
+   No grab cursor when idle, text keeps the I-beam; grabbing only while dragging. */
+:is(scrollbox, umc-scrollbox).umc-drag-scrolling {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+:is(scrollbox, umc-scrollbox).umc-drag-scroll :is(a, img) {
+  -webkit-user-drag: none;
 }
 
 /* Fill slots must be allowed to shrink below content size or overflow never triggers */
@@ -313,7 +350,7 @@
   grid-template-columns: repeat(var(--widget-columns, 2), minmax(0, 1fr));
 }
 
-/* --- Uniform grid panel — equal 1fr rows and columns --- */
+/* --- Uniform grid panel, equal 1fr rows and columns --- */
 :is(uniformgridpanel, umc-uniformgridpanel) {
   display: grid;
   gap: var(--widget-gap, 0px);
@@ -371,7 +408,7 @@
   max-height: none;
 }
 
-/* --- Safe zone — display cutouts / notches --- */
+/* --- Safe zone, display cutouts / notches --- */
 :is(safezone, umc-safezone) {
   display: flex;
   flex-direction: column;
@@ -388,7 +425,7 @@
   min-height: 0;
 }
 
-/* --- Widget switcher — one child page at a time --- */
+/* --- Widget switcher, one child page at a time --- */
 :is(widgetswitcher, umc-widgetswitcher) {
   display: contents;
 }
@@ -396,12 +433,12 @@
   display: none !important;
 }
 
-/* --- Named slot — light-DOM injection placeholder --- */
+/* --- Named slot, light-DOM injection placeholder --- */
 :is(namedslot, umc-namedslot) {
   display: contents;
 }
 
-/* --- Retainer / Invalidation — UMG API parity passthroughs (no browser cache) --- */
+/* --- Retainer / Invalidation, UMG API parity passthroughs (no browser cache) --- */
 :is(retainerbox, umc-retainerbox),
 :is(invalidationbox, umc-invalidationbox) {
   display: flex;
@@ -417,7 +454,7 @@
   min-height: 0;
 }
 
-/* --- Background blur — blur content behind the panel --- */
+/* --- Background blur, blur content behind the panel --- */
 :is(backgroundblur, umc-backgroundblur) {
   display: flex;
   flex-direction: column;
@@ -439,7 +476,7 @@
 }
 
 /* --- Leaf widgets (UMG palette) --- */
-:is(textblock, umc-textblock) {
+:is(textblock, umc-textblock, [data-umc-extends="textblock"]) {
   display: block;
   white-space: pre-wrap;
   line-height: 1.35;

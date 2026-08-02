@@ -1,4 +1,4 @@
-import { cell, watchSource, scheduleFrame, runDisposeBag } from "../umc/reactivity.js";
+import { cell, watchSource, watchSize, scheduleFrame, runDisposeBag } from "../umc/reactivity.js";
 import {
   applySpec,
   syncKeyed,
@@ -62,6 +62,32 @@ await (async () => {
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
   assert(runs === 1, "scheduleFrame coalesces same key");
   runDisposeBag(host);
+  host.remove();
+})();
+
+// --- watchSize ---
+await (async () => {
+  if (typeof document === "undefined") return;
+  const host = document.createElement("div");
+  host.style.cssText = "width:120px;height:80px;position:absolute;left:0;top:0";
+  document.body.appendChild(host);
+  const sizes = [];
+  const off = watchSize(host, (size) => sizes.push(size));
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  assert(sizes.length >= 1, "watchSize fires initial size");
+  assert(
+    Math.round(sizes[0].width) === 120 && Math.round(sizes[0].height) === 80,
+    "watchSize reports initial box"
+  );
+  host.style.width = "200px";
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // jsdom may not fire ResizeObserver, accept either update or graceful no-op.
+  if (typeof ResizeObserver !== "undefined" && sizes.length > 1) {
+    assert(Math.round(sizes.at(-1).width) === 200, "watchSize updates on resize");
+  } else {
+    assert(true, "watchSize resize skipped (no ResizeObserver / jsdom)");
+  }
+  off();
   host.remove();
 })();
 

@@ -4,7 +4,7 @@
  * The document itself is built by ./preview.js; this file is only the editor
  * glue: command, panel lifecycle, settings, and re-render on edit.
  *
- * CommonJS on purpose — the extension host loads extensions with require().
+ * CommonJS on purpose, the extension host loads extensions with require().
  */
 
 const vscode = require("vscode");

@@ -1,13 +1,12 @@
 --- html ---
-<textblock class="slate-button-label" data-umc="text"></textblock>
+<textblock class="slate-toggle-label" data-umc="text"></textblock>
 
 --- style ---
 self {
-  display: inline-flex; /* umc-layout-ok — painted control host */
+  display: inline-flex; /* umc-layout-ok, painted control host */
   align-items: center; /* umc-layout-ok */
   justify-content: center; /* umc-layout-ok */
   box-sizing: border-box;
-  /* Panels reset --widget-padding to 0; redefine here so fallback isn't needed. */
   --widget-padding: 6px 12px;
   --widget-radius: 4px;
   padding: var(--widget-padding);
@@ -25,62 +24,52 @@ self {
   flex: 0 0 auto; /* umc-layout-ok */
 }
 
-slate-button:hover:not([disabled]) {
+self[pressed] {
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+self:hover:not([disabled]) {
   filter: brightness(1.08);
 }
 
-slate-button:active:not([disabled]) {
-  filter: brightness(0.92);
-}
-
-slate-button:focus-visible {
+self:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
 
-slate-button[disabled] {
+self[disabled] {
   opacity: 0.45;
   cursor: default;
   pointer-events: none;
 }
 
-slate-button .slate-button-label {
+self .slate-toggle-label {
   pointer-events: none;
 }
 
 --- script ---
 /**
- * UMG-style Button.
+ * Toggle button, latched pressed / unpressed.
  *
- * Public events (listen with a reference):
- *   clicked / doubleclicked / pressed / released
+ *   <slate-toggle-button text="Bold" pressed></slate-toggle-button>
  *
- *   const btn = el.querySelector("slate-button");
- *   btn.addEventListener("clicked", (e) => console.log(e.detail));
- *
- * Hyperscript:
- *   tags["slate-button"]({ text: "OK", onClicked: (e) => … })
- *
- * Or declare events yourself in any .umc with:
- *   events: { click: "clicked", … }
+ * Events: changed { pressed }, clicked
  */
 export default defineUmc({
-  tag: "slate-button",
+  tag: "slate-toggle-button",
   attrs: {
-    text: "Button",
+    text: "Toggle",
+    pressed: "",
     disabled: "",
   },
 
-  // Native DOM → public widget events
   events: {
     click: "clicked",
-    dblclick: "doubleclicked",
-    mousedown: "pressed",
-    mouseup: "released",
   },
 
   Construct(el) {
     el.setAttribute("role", "button");
+    el.setAttribute("aria-pressed", el.hasAttribute("pressed") ? "true" : "false");
     if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
 
     if (el._keysBound) return;
@@ -89,24 +78,30 @@ export default defineUmc({
       if (el.hasAttribute("disabled")) return;
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
-        // Space/Enter should feel like a click.
         el.click();
       }
     });
   },
 
+  OnClicked(el, api) {
+    if (el.hasAttribute("disabled")) return;
+    if (el.hasAttribute("pressed")) el.removeAttribute("pressed");
+    else el.setAttribute("pressed", "");
+    api.emit("changed", { pressed: el.hasAttribute("pressed") });
+  },
+
   SynchronizeProperties(el) {
     const disabled = el.hasAttribute("disabled");
+    const pressed = el.hasAttribute("pressed");
+    el.setAttribute("aria-pressed", pressed ? "true" : "false");
     el.setAttribute("aria-disabled", disabled ? "true" : "false");
     el.tabIndex = disabled ? -1 : 0;
   },
 });
 
 --- preview ---
-<verticalbox gap="10" padding="12">
-  <horizontalbox gap="8">
-    <slate-button text="Primary"></slate-button>
-    <slate-button text="Disabled" disabled></slate-button>
-  </horizontalbox>
-  <textblock kind="hint" text="Listen: button.addEventListener('clicked', …)"></textblock>
-</verticalbox>
+<horizontalbox gap="8" padding="12">
+  <slate-toggle-button text="Bold" pressed></slate-toggle-button>
+  <slate-toggle-button text="Italic"></slate-toggle-button>
+  <slate-toggle-button text="Off" disabled></slate-toggle-button>
+</horizontalbox>

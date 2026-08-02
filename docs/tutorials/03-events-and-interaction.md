@@ -49,7 +49,7 @@ self[disabled] {
 }
 ```
 
-Note `display: inline-flex` on `self` — this widget **is** the painted control, not `display: contents`.
+Note `display: inline-flex` on `self`, this widget **is** the painted control, not `display: contents`.
 
 ## Step 2: Declare the event map
 
@@ -171,7 +171,7 @@ SlateHTML leaf widgets already emit:
 | `slider` | `percentchanged` |
 | `editabletext` | `textchanged`, `committed` |
 
-No `events` map needed — listen on the element directly.
+No `events` map needed, listen on the element directly.
 
 ## Checkpoint
 
@@ -187,5 +187,5 @@ No `events` map needed — listen on the element directly.
 ## Reference
 
 - `example/widgets/lib/slate-button.umc`
-- `example/widgets/nav/server-rail.umc` — selection + `serverchanged` event
+- `example/widgets/nav/server-rail.umc`, selection + `serverchanged` event
 - [VS Code extension: autocomplete](../../editors/vscode-umc/README.md)

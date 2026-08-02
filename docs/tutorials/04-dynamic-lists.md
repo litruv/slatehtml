@@ -56,7 +56,7 @@ SynchronizeProperties(el, { attr }) {
 
 `el.set(a, b, c)` **replaces** all content-slot children. Each argument can be:
 
-- `{ tag: "user-message", author: "…", … }` — create element
+- `{ tag: "user-message", author: "…", … }`, create element
 - A DOM `Node`
 - A string (text node)
 - An array (flattened)
@@ -150,11 +150,11 @@ Sending a message (`chat-composer`) appends to data then calls `messageList.add(
 
 | API | Use when |
 |-----|----------|
-| `el.set(…)` | Channel changed — replace entire list |
-| `el.add(…)` | New message arrived — append one row |
+| `el.set(…)` | Channel changed, replace entire list |
+| `el.add(…)` | New message arrived, append one row |
 | `el.clear()` | Empty the slot without replacing parent markup |
 
-Avoid calling `set` on every tick — it's a full replace. For huge lists, consider virtualizing in `SynchronizeProperties` or patching DOM manually (advanced).
+Avoid calling `set` on every tick, it's a full replace. For huge lists, consider virtualizing in `SynchronizeProperties` or patching DOM manually (advanced).
 
 ## Checkpoint
 
@@ -170,7 +170,7 @@ You've covered the core SlateHTML stack:
 
 1. Panel layout ([layout guide](../layout.md))
 2. `.umc` widgets ([UMC guide](../umc.md))
-3. Composition, events, and dynamic content (tutorials 1–4)
+3. Composition, events, and dynamic content (tutorials 1-4)
 
 Explore the full Discord example:
 
@@ -183,5 +183,5 @@ Pick any file under `example/widgets/` and open the UMC preview.
 ## Reference
 
 - `example/widgets/chat/message-list.umc`
-- `example/widgets/chat/chat-composer.umc` — sending messages
-- `example/data.js` — static message data
+- `example/widgets/chat/chat-composer.umc`, sending messages
+- `example/data.js`, static message data

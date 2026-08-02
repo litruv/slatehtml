@@ -37,25 +37,25 @@ const TAGS = {
 };
 
 const TAG_DOCS = {
-  horizontalbox: "UMG Horizontal Box — lays out children in a row.",
-  verticalbox: "UMG Vertical Box — lays out children in a column.",
-  wrapbox: "UMG Wrap Box — horizontal flow that wraps.",
-  overlay: "UMG Overlay — stacks children in one cell.",
-  canvaspanel: "UMG Canvas Panel — anchored, absolute-positioned children.",
-  scrollbox: "UMG Scroll Box — clips and scrolls overflow.",
-  sizebox: "UMG Size Box — constrains child dimensions.",
-  scalebox: "UMG Scale Box — scales its first child.",
-  gridpanel: "UMG Grid Panel — evenly divided CSS grid.",
+  horizontalbox: "UMG Horizontal Box, lays out children in a row.",
+  verticalbox: "UMG Vertical Box, lays out children in a column.",
+  wrapbox: "UMG Wrap Box, horizontal flow that wraps.",
+  overlay: "UMG Overlay, stacks children in one cell.",
+  canvaspanel: "UMG Canvas Panel, anchored, absolute-positioned children.",
+  scrollbox: "UMG Scroll Box, clips and scrolls overflow.",
+  sizebox: "UMG Size Box, constrains child dimensions.",
+  scalebox: "UMG Scale Box, scales its first child.",
+  gridpanel: "UMG Grid Panel, evenly divided CSS grid.",
   spacer: "Flexible empty space that absorbs remaining room.",
   border: "Chrome and padding around content.",
   textblock: "Static text driven by its `text` attribute.",
   image: "Brush/tint image rectangle.",
-  progressbar: "Display bar driven by `percent` (0–100).",
+  progressbar: "Display bar driven by `percent` (0-100).",
   checkbox: "Interactive boolean checkbox.",
-  slider: "Interactive value slider (0–100).",
-  editabletext: "Editable text field; Enter fires `committed`.",
+  slider: "Interactive value slider (0-100).",
+  editabletext: "Editable text field; blur / Enter fires `committed`.",
   button: "Native button; add `widget` for SlateHTML styling.",
-  "slate-button": "UMG Button — emits clicked / doubleclicked / pressed / released.",
+  "slate-button": "UMG Button, emits clicked / doubleclicked / pressed / released.",
 };
 
 /** Built-in public events for known widgets (when not parsed from source). */
@@ -171,7 +171,7 @@ const CSS_VARS = [
   ["--widget-background", "Widget/chrome background."],
   ["--widget-radius", "Widget border radius."],
   ["--widget-brush", "Image background brush."],
-  ["--widget-percent", "Progress/slider value (0–100)."],
+  ["--widget-percent", "Progress/slider value (0-100)."],
   ["--widget-fill", "Progress bar fill color."],
   ["--widget-height", "Default widget height token."],
 ];
@@ -334,7 +334,7 @@ function scriptItems(document, position, line) {
   const declared = parseEventsMap(source);
   const published = [...new Set(Object.values(declared))];
 
-  // Inside events: { … } — keys and values
+  // Inside events: { … }, keys and values
   const eventsCtx = eventsContext(document, position);
   if (eventsCtx) {
     if (eventsCtx.kind === "value") {
@@ -469,7 +469,7 @@ function eventNameItems(names, document, position, { asString }) {
       name,
       vscode.CompletionItemKind.Event,
       index,
-      `Public widget event — \`addEventListener("${name}", …)\` or \`emit("${name}")\`.`
+      `Public widget event, \`addEventListener("${name}", …)\` or \`emit("${name}")\`.`
     );
     item.insertText = asString ? `"${name}"` : name;
     item.range = tokenRange(document, position);
@@ -554,7 +554,7 @@ function styleItems(document, position) {
       "self",
       vscode.CompletionItemKind.Keyword,
       0,
-      "Host tag for this .umc — compiles to e.g. server-pill"
+      "Host tag for this .umc, compiles to e.g. server-pill"
     );
     item.range = tokenRange(document, position);
     items.push(item);

@@ -1,5 +1,6 @@
 export {
   defineUmc,
+  deferCustomElementDefines,
   injectUmcStyles,
   hostShellCss,
   forwardHostLayout,
@@ -8,6 +9,10 @@ export {
   readAttrs,
   create,
   contentTarget,
+  resolveSlotTarget,
+  slotWrapperName,
+  scoopLightChildren,
+  distributeSlots,
   addContent,
   installWidgetApi,
   WidgetElement,
@@ -20,6 +25,9 @@ export { applySpec, syncKeyed, createVirtualListState, computeVirtualRange, setV
 export {
   cell,
   watchSource,
+  watchSize,
+  layoutBox,
+  boxSize,
   scheduleFrame,
   cancelScheduledFrame,
   disposeBag,

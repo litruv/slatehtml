@@ -1,0 +1,319 @@
+--- html ---
+<canvaspanel clip="false" class="ac-root">
+  <horizontalbox class="ac-face" anchors="top-left top-right" valign="center" gap="6" padding="0">
+    <editabletext class="ac-input" fill min-height="36"></editabletext>
+    <textblock class="ac-chevron" text="▾"></textblock>
+  </horizontalbox>
+  <scrollbox class="ac-menu" data-content anchors="top-left top-right" top="0" gap="2" padding="4" max-height="220" hidden></scrollbox>
+</canvaspanel>
+
+--- style ---
+self {
+  display: block;
+  box-sizing: border-box;
+  color: inherit;
+  font: inherit;
+  min-width: 180px; /* umc-layout-ok */
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self[open] {
+  position: relative; /* umc-layout-ok, stack above following siblings */
+  z-index: 100; /* umc-layout-ok */
+}
+
+.ac-face {
+  box-sizing: border-box;
+  --widget-background: color-mix(in srgb, currentColor 6%, transparent);
+  --widget-border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  --widget-radius: 4px;
+  --widget-padding: 0 8px 0 0;
+  background: var(--widget-background);
+  border: var(--widget-border);
+  border-radius: var(--widget-radius);
+  z-index: 1; /* umc-layout-ok, face above menu layer */
+}
+
+.ac-face:focus-within {
+  outline: 2px solid currentColor;
+  outline-offset: 0;
+}
+
+.ac-input {
+  --widget-background: transparent;
+  --widget-border: none;
+  --widget-radius: 4px;
+  --widget-padding: 8px 10px;
+  font-size: 13px;
+}
+
+.ac-input:focus {
+  outline: none;
+}
+
+.ac-chevron {
+  opacity: 0.55;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px;
+  transition: transform 120ms ease;
+}
+
+self[open]:not([disabled]) .ac-chevron {
+  transform: rotate(180deg);
+}
+
+.ac-menu {
+  box-sizing: border-box;
+  max-height: var(--autocomplete-max-height, 220px);
+  background: var(--autocomplete-background, var(--panel, #f3f7f4));
+  border: var(--widget-border, 1px solid currentColor);
+  border-radius: var(--widget-radius, 4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  z-index: 2; /* umc-layout-ok, menu above face when open */
+  color: inherit;
+}
+
+self[open] .ac-root {
+  z-index: 100; /* umc-layout-ok */
+}
+
+.ac-option {
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ac-option:hover,
+.ac-option.selected {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.ac-empty {
+  padding: 6px 10px;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+--- script ---
+import fuzzysort from "fuzzysort";
+import { parseOptions, selectableOptions } from "./parse-options.js";
+
+/**
+ * Autocomplete, free text with fuzzysort-filtered suggestions.
+ *
+ *   <slate-autocomplete options="apple, apricot, banana"></slate-autocomplete>
+ *   <slate-autocomplete match="contains" options="…"></slate-autocomplete>
+ *
+ * `match`, `fuzzy` (default, fuzzysort); `contains`: substring.
+ * Events: valuechanged { value }, selectionchanged { value, label }, opened / closed
+ */
+
+function inputEl(el) {
+  return el.querySelector(".ac-input");
+}
+
+function readValue(el) {
+  const input = inputEl(el);
+  return (input?.getAttribute("text") ?? input?.textContent ?? "").trim();
+}
+
+function writeValue(el, value) {
+  const next = String(value ?? "");
+  inputEl(el)?.setAttribute("text", next);
+  el.setAttribute("value", next);
+}
+
+function filtered(el) {
+  const q = readValue(el);
+  const options = selectableOptions(parseOptions(el.getAttribute("options")));
+  if (!q) return options;
+
+  const mode = (el.getAttribute("match") || "fuzzy").toLowerCase();
+  if (mode === "contains") {
+    const needle = q.toLowerCase();
+    return options.filter(
+      (o) => o.label.toLowerCase().includes(needle) || o.value.toLowerCase().includes(needle)
+    );
+  }
+
+  const hits = fuzzysort.go(q, options, {
+    keys: ["label", "value"],
+    threshold: -50000,
+    limit: 50,
+  });
+  return hits.map((hit) => hit.obj);
+}
+
+const MENU_GAP = 4;
+
+function syncLayout(el) {
+  const root = el.querySelector(".ac-root");
+  const face = el.querySelector(".ac-face");
+  const menu = el.querySelector(".ac-menu");
+  if (!root || !face) return;
+  const faceH = face.offsetHeight;
+  if (faceH > 0) root.setAttribute("height", String(faceH));
+  if (menu) menu.setAttribute("top", String(faceH + MENU_GAP));
+}
+
+function closeMenu(el, api) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  el.querySelector(".ac-menu")?.setAttribute("hidden", "");
+  if (el._onOutside) {
+    document.removeEventListener("pointerdown", el._onOutside, true);
+    el._onOutside = null;
+  }
+  syncLayout(el);
+  api.emit("closed", { value: readValue(el) });
+}
+
+function rebuildMenu(el) {
+  const current = readValue(el);
+  const items = filtered(el);
+  if (!items.length) {
+    el.set({
+      tag: "textblock",
+      class: "ac-empty",
+      text: el.getAttribute("empty") || "No matches",
+    });
+    return;
+  }
+  el.set(
+    ...items.map((item) => ({
+      tag: "textblock",
+      class: `ac-option${item.value === current ? " selected" : ""}`,
+      "data-value": item.value,
+      role: "option",
+      text: item.label,
+    }))
+  );
+}
+
+function openMenu(el, api) {
+  if (el.hasAttribute("disabled")) return;
+  rebuildMenu(el);
+  syncLayout(el);
+  if (!el.hasAttribute("open")) {
+    el.setAttribute("open", "");
+    el.querySelector(".ac-menu")?.removeAttribute("hidden");
+    el._onOutside = (event) => {
+      if (!el.contains(event.target)) closeMenu(el, api);
+    };
+    document.addEventListener("pointerdown", el._onOutside, true);
+    api.emit("opened", { value: readValue(el) });
+  } else {
+    el.querySelector(".ac-menu")?.removeAttribute("hidden");
+  }
+}
+
+function pick(el, api, value) {
+  const options = selectableOptions(parseOptions(el.getAttribute("options")));
+  const hit = options.find((o) => o.value === value);
+  const label = hit?.label ?? value;
+  writeValue(el, value);
+  api.emit("selectionchanged", { value, label });
+  api.emit("valuechanged", { value });
+  closeMenu(el, api);
+  inputEl(el)?.focus?.();
+}
+
+export default defineUmc({
+  tag: "slate-autocomplete",
+  attrs: {
+    value: "",
+    options: "",
+    match: "fuzzy",
+    empty: "No matches",
+    open: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    if (el._bound) return;
+    el._bound = true;
+
+    el.setAttribute("role", "combobox");
+    el.setAttribute("aria-autocomplete", "list");
+    el.setAttribute("aria-haspopup", "listbox");
+    el.querySelector(".ac-menu")?.setAttribute("role", "listbox");
+
+    const face = el.querySelector(".ac-face");
+    if (face && !el._layoutObs) {
+      el._layoutObs = new ResizeObserver(() => syncLayout(el));
+      el._layoutObs.observe(face);
+    }
+
+    const input = inputEl(el);
+    input?.addEventListener("textchanged", () => {
+      const value = readValue(el);
+      el.setAttribute("value", value);
+      api.emit("valuechanged", { value });
+      openMenu(el, api);
+      rebuildMenu(el);
+    });
+    input?.addEventListener("committed", () => closeMenu(el, api));
+    input?.addEventListener("focus", () => openMenu(el, api));
+
+    el.addEventListener("click", (event) => {
+      const chevron = event.target?.closest?.(".ac-chevron");
+      if (chevron && el.contains(chevron)) {
+        event.preventDefault();
+        if (el.hasAttribute("open")) closeMenu(el, api);
+        else openMenu(el, api);
+        return;
+      }
+      const row = event.target?.closest?.(".ac-option");
+      if (row && el.contains(row)) {
+        event.preventDefault();
+        pick(el, api, row.getAttribute("data-value") || "");
+      }
+    });
+
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      if (event.key === "Escape" && el.hasAttribute("open")) {
+        event.preventDefault();
+        closeMenu(el, api);
+      } else if (event.key === "ArrowDown" && !el.hasAttribute("open")) {
+        event.preventDefault();
+        openMenu(el, api);
+      }
+    });
+  },
+
+  Destroyed(el, api) {
+    closeMenu(el, api);
+    el._layoutObs?.disconnect();
+    el._layoutObs = null;
+    el._bound = false;
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const value = attr("value", "");
+    const input = inputEl(el);
+    if (input && input !== document.activeElement && input.getAttribute("text") !== value) {
+      input.setAttribute("text", value);
+    }
+    const isOpen = el.hasAttribute("open");
+    el.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    if (isOpen) rebuildMenu(el);
+    syncLayout(el);
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="280">
+  <slate-autocomplete
+    options="apple, apricot, avocado, banana, blueberry, cherry"
+    value=""
+  ></slate-autocomplete>
+  <textblock kind="hint" text="fuzzysort, try “bby” for blueberry."></textblock>
+</verticalbox>

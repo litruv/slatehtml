@@ -1,0 +1,71 @@
+--- html ---
+<horizontalbox class="slate-button-group" data-content gap="0" valign="stretch"></horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok, painted group shell */
+  color: inherit;
+  font: inherit;
+}
+
+self .slate-button-group {
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+/* Join adjacent buttons / toggles into one segmented control. */
+self slate-button,
+self slate-toggle-button {
+  border-radius: 0;
+}
+
+self slate-button:first-child,
+self slate-toggle-button:first-child {
+  border-top-left-radius: var(--widget-radius, 4px);
+  border-bottom-left-radius: var(--widget-radius, 4px);
+}
+
+self slate-button:last-child,
+self slate-toggle-button:last-child {
+  border-top-right-radius: var(--widget-radius, 4px);
+  border-bottom-right-radius: var(--widget-radius, 4px);
+}
+
+self slate-button + slate-button,
+self slate-button + slate-toggle-button,
+self slate-toggle-button + slate-button,
+self slate-toggle-button + slate-toggle-button {
+  margin-left: -1px; /* umc-layout-ok, overlap shared border */
+}
+
+--- script ---
+/**
+ * Segmented button group, light children land in the content row.
+ *
+ *   <slate-button-group>
+ *     <slate-button text="Left"></slate-button>
+ *     <slate-button text="Center"></slate-button>
+ *     <slate-button text="Right"></slate-button>
+ *   </slate-button-group>
+ */
+export default defineUmc({
+  tag: "slate-button-group",
+  attrs: {},
+
+  Construct(el) {
+    el.setAttribute("role", "group");
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16">
+  <slate-button-group>
+    <slate-button text="Left"></slate-button>
+    <slate-button text="Center"></slate-button>
+    <slate-button text="Right"></slate-button>
+  </slate-button-group>
+  <slate-button-group>
+    <slate-toggle-button text="Day" pressed></slate-toggle-button>
+    <slate-toggle-button text="Week"></slate-toggle-button>
+    <slate-toggle-button text="Month"></slate-toggle-button>
+  </slate-button-group>
+</verticalbox>

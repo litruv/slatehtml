@@ -6,18 +6,18 @@ SlateHTML brings Unreal UMG-style layout panels and UserWidgets to the web. Thes
 
 | Guide | What you'll learn |
 |-------|-------------------|
-| [Layout & positioning](./layout.md) | Panel tags, `fill`, overlay alignment, canvas anchors — walk through the layout gallery (`index.html`) |
-| [Component playground](./component-playground.md) | Live `.umc` preview in VS Code — `--- preview ---`, resizable stage, sibling widgets |
+| [Layout & positioning](./layout.md) | Panel tags, `fill`, overlay alignment, canvas anchors, walk through the layout gallery (`index.html`) |
+| [Component playground](./component-playground.md) | Live `.umc` preview in VS Code, `--- preview ---`, resizable stage, sibling widgets |
 | [UMC components](./umc.md) | `.umc` sections, lifecycle, composition, child extraction |
 | [Tutorials](./tutorials/README.md) | Step-by-step projects from your first widget to dynamic lists |
 
 ## Quick commands
 
 ```bash
-# Layout gallery (no build step) — built-in panel tags
+# Layout gallery (no build step), built-in panel tags
 npm run demo
 
-# Component playground — open any .umc in VS Code, then Ctrl+K V
+# Component playground, open any .umc in VS Code, then Ctrl+K V
 npm run umc:link-vscode
 # → open http://localhost:3000 (or the port serve prints)
 

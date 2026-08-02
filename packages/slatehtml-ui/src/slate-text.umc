@@ -1,0 +1,126 @@
+@parent textblock
+
+--- style ---
+/*
+  Typed text, subclasses textblock (@parent textblock).
+  The host *is* the leaf; no inner textblock wrapper.
+
+  Theme hooks:
+    --slate-font / --slate-font-mono
+    --ink / --muted / --hud-ink
+*/
+
+self {
+  font-family: var(--slate-font, Sora, system-ui, sans-serif);
+  color: var(--ink, currentColor);
+  line-height: 1.4;
+}
+
+/* Reading copy opts into selection (blocks drag-scroll). Chrome labels do not. */
+self[kind="title"],
+self[kind="section"],
+self[kind="subtitle"],
+self[kind="body"],
+self[kind="hint"],
+self:not([kind]) {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+self[kind="label"],
+self[kind="mono"],
+self[kind="hud"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self[kind="title"] {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+self[kind="section"] {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+self[kind="subtitle"] {
+  color: var(--muted, #5a6a60);
+  max-width: 56ch; /* umc-layout-ok, measure, not box model fill */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+self[kind="body"],
+self:not([kind]) {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+self[kind="label"] {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #5a6a60);
+}
+
+self[kind="hint"] {
+  font-size: 12px;
+  color: var(--muted, #5a6a60);
+  line-height: 1.4;
+  max-width: 52ch; /* umc-layout-ok, measure */
+}
+
+self[kind="mono"] {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 12px;
+  color: var(--muted, #5a6a60);
+}
+
+self[kind="hud"] {
+  font-family: var(--slate-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--hud-ink, #e8f2ec);
+}
+
+--- script ---
+/**
+ * Typed text for the UI kit, parents off textblock via `@parent`.
+ *
+ *   <slate-text kind="title" text="SlateHTML"></slate-text>
+ *   <slate-text kind="label" text="Overlay"></slate-text>
+ *
+ * Kinds: title | section | subtitle | body | label | hint | mono | hud
+ * (bare / missing kind → body)
+ */
+export default defineUmc({
+  tag: "slate-text",
+  attrs: {
+    text: "",
+    kind: "body",
+  },
+});
+
+--- preview ---
+<verticalbox gap="14" padding="16" width="420">
+  <slate-text kind="title" text="The quick brown fox"></slate-text>
+  <slate-text kind="section" text="Section heading"></slate-text>
+  <slate-text kind="subtitle" text="Supporting line for intros and panel lead-ins."></slate-text>
+  <slate-text kind="body" text="Default body copy for primary reading."></slate-text>
+  <slate-text kind="label" text="Panel label"></slate-text>
+  <slate-text kind="hint" text="Muted helper under a control."></slate-text>
+  <slate-text kind="mono" text="fill · anchors · gap"></slate-text>
+  <border kind="hud" padding="8 12">
+    <slate-text kind="hud" text="HUD · mono on dark"></slate-text>
+  </border>
+</verticalbox>

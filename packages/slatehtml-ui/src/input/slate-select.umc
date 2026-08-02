@@ -1,0 +1,436 @@
+--- html ---
+<canvaspanel clip="false" class="select-root" min-width="180">
+  <horizontalbox class="select-face" anchors="top-left top-right" valign="center" gap="8" padding="6 10">
+    <slate-image class="select-face-image" width="18" height="18" fit="cover" hidden></slate-image>
+    <slate-icon class="select-face-icon" name="" size="16" hidden></slate-icon>
+    <textblock class="select-label" fill></textblock>
+    <textblock class="select-chevron" text="▾"></textblock>
+  </horizontalbox>
+  <scrollbox class="select-menu" data-content anchors="top-left top-right" top="0" gap="2" padding="4" max-height="220" hidden></scrollbox>
+</canvaspanel>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self[open] {
+  position: relative; /* umc-layout-ok, stack above following siblings */
+  z-index: 100; /* umc-layout-ok */
+}
+
+.select-root {
+  min-width: var(--select-min-width, 180px);
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.select-face {
+  box-sizing: border-box;
+  padding: var(--widget-padding, 6px 10px);
+  border: var(--widget-border, 1px solid currentColor);
+  background: var(--widget-background, transparent);
+  border-radius: var(--widget-radius, 4px);
+  z-index: 1; /* umc-layout-ok */
+}
+
+self:hover:not([disabled]) .select-face {
+  filter: brightness(1.08);
+}
+
+self .select-label,
+self .select-chevron {
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+self.is-placeholder .select-label {
+  opacity: 0.6;
+}
+
+self .select-chevron {
+  transition: transform 120ms ease;
+}
+
+self[open]:not([disabled]) .select-chevron {
+  transform: rotate(180deg);
+}
+
+self .select-face-image,
+self .select-face-icon {
+  pointer-events: none;
+}
+
+self .select-face-image {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+self .select-face-image[hidden],
+self .select-face-icon[hidden] {
+  display: none; /* umc-layout-ok */
+}
+
+.select-menu {
+  box-sizing: border-box;
+  max-height: var(--select-max-height, 220px);
+  background: var(--select-background, var(--panel, #f3f7f4));
+  border: var(--select-border, var(--widget-border, 1px solid currentColor));
+  border-radius: var(--widget-radius, 4px);
+  box-shadow: var(--select-shadow, 0 8px 24px rgba(0, 0, 0, 0.35));
+  z-index: 2; /* umc-layout-ok */
+  color: inherit;
+}
+
+self .select-option {
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+self .select-option:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+self .select-option.selected {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+self .select-option-image {
+  border-radius: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+self .select-option-icon {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+self .select-option-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+self .select-heading {
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+self .select-separator {
+  height: 1px; /* umc-layout-ok */
+  margin: 4px 8px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  pointer-events: none;
+}
+
+self .select-empty {
+  padding: 6px 10px;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+--- script ---
+import { parseOptions, selectableOptions } from "./parse-options.js";
+
+/**
+ * Form select (single value from a list).
+ *
+ *   <slate-select options="general, random, dev" selected="random"></slate-select>
+ *
+ * Rich menus, optional images, Lucide icons, category headings, separators:
+ *
+ *   options="# Text, general|General|hash, random|Random, ---, # Voice,
+ *            voice|Voice|volume-2, matrix.org|Matrix|https://…"
+ *
+ * 3rd `|` field: URL → image; otherwise Lucide kebab-case icon name.
+ *
+ * Events: selectionchanged { value, label, index }, opened / closed
+ */
+
+function menuRow(item) {
+  if (item.type === "separator") {
+    return { tag: "border", class: "select-separator", role: "separator" };
+  }
+  if (item.type === "category") {
+    return {
+      tag: "textblock",
+      class: "select-heading",
+      role: "presentation",
+      text: item.label,
+    };
+  }
+
+  const children = [];
+  const avatar = (item.avatar || "").trim();
+  const icon = (item.icon || "").trim();
+  if (avatar) {
+    children.push({
+      tag: "slate-image",
+      class: "select-option-image",
+      src: avatar,
+      width: "18",
+      height: "18",
+      fit: "cover",
+    });
+  } else if (icon) {
+    children.push({
+      tag: "slate-icon",
+      class: "select-option-icon",
+      name: icon,
+      size: "16",
+    });
+  }
+  children.push({
+    tag: "textblock",
+    class: "select-option-label",
+    fill: "",
+    text: item.label,
+  });
+
+  return {
+    tag: "horizontalbox",
+    class: "select-option",
+    "data-value": item.value,
+    role: "option",
+    valign: "center",
+    gap: "8",
+    children,
+  };
+}
+
+function paintSelection(el, value) {
+  for (const row of el.querySelectorAll(".select-option")) {
+    const on = row.getAttribute("data-value") === value;
+    row.classList.toggle("selected", on);
+    row.setAttribute("aria-selected", on ? "true" : "false");
+  }
+}
+
+function paintFaceMedia(el, option) {
+  const img = el.querySelector(".select-face-image");
+  const icon = el.querySelector(".select-face-icon");
+  const avatar = (option?.avatar || "").trim();
+  const iconName = (option?.icon || "").trim();
+
+  if (avatar && img) {
+    img.setAttribute("src", avatar);
+    img.removeAttribute("hidden");
+    icon?.setAttribute("hidden", "");
+    icon?.removeAttribute("name");
+  } else if (iconName && icon) {
+    icon.setAttribute("name", iconName);
+    icon.removeAttribute("hidden");
+    img?.removeAttribute("src");
+    img?.setAttribute("hidden", "");
+  } else {
+    img?.removeAttribute("src");
+    img?.setAttribute("hidden", "");
+    icon?.removeAttribute("name");
+    icon?.setAttribute("hidden", "");
+  }
+}
+
+const MENU_GAP = 4;
+
+function syncLayout(el) {
+  const root = el.querySelector(".select-root");
+  const face = el.querySelector(".select-face");
+  const menu = el.querySelector(".select-menu");
+  if (!root || !face) return;
+  const faceH = face.offsetHeight;
+  if (faceH > 0) root.setAttribute("height", String(faceH));
+  if (menu) menu.setAttribute("top", String(faceH + MENU_GAP));
+}
+
+function closeMenu(el, api) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  el.querySelector(".select-menu")?.setAttribute("hidden", "");
+  if (el._onOutside) {
+    document.removeEventListener("pointerdown", el._onOutside, true);
+    el._onOutside = null;
+  }
+  syncLayout(el);
+  api.emit("closed", { value: api.attr("selected", "") });
+}
+
+function openMenu(el, api) {
+  if (el.hasAttribute("open") || el.hasAttribute("disabled")) return;
+  syncLayout(el);
+  el.setAttribute("open", "");
+  el.querySelector(".select-menu")?.removeAttribute("hidden");
+  el._onOutside = (event) => {
+    if (!el.contains(event.target)) closeMenu(el, api);
+  };
+  document.addEventListener("pointerdown", el._onOutside, true);
+  api.emit("opened", { value: api.attr("selected", "") });
+}
+
+function select(el, api, value) {
+  const options = selectableOptions(parseOptions(api.attr("options", "")));
+  const index = options.findIndex((o) => o.value === value);
+  if (index < 0 || value === api.attr("selected", "")) return;
+  el.setAttribute("selected", value);
+  api.emit("selectionchanged", { value, label: options[index].label, index });
+}
+
+function step(el, api, delta) {
+  const options = selectableOptions(parseOptions(api.attr("options", "")));
+  if (!options.length) return;
+  const current = options.findIndex((o) => o.value === api.attr("selected", ""));
+  const next = current < 0 ? (delta > 0 ? 0 : options.length - 1) : current + delta;
+  const clamped = Math.min(options.length - 1, Math.max(0, next));
+  select(el, api, options[clamped].value);
+}
+
+function itemsKey(items) {
+  return items
+    .map(
+      (o) =>
+        `${o.type}\u0000${o.value}\u0000${o.label}\u0000${o.avatar || ""}\u0000${o.icon || ""}`
+    )
+    .join("\u0001");
+}
+
+export default defineUmc({
+  tag: "slate-select",
+  attrs: {
+    options: "",
+    selected: "",
+    placeholder: "Select…",
+    empty: "No options",
+    open: "",
+    disabled: "",
+  },
+
+  events: { click: "clicked" },
+
+  PreConstruct(el) {
+    el._optionsKey = null;
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "combobox");
+    el.setAttribute("aria-haspopup", "listbox");
+    el.querySelector(".select-menu")?.setAttribute("role", "listbox");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (!el._layoutObs) {
+      const face = el.querySelector(".select-face");
+      if (face) {
+        el._layoutObs = new ResizeObserver(() => syncLayout(el));
+        el._layoutObs.observe(face);
+      }
+    }
+
+    if (el._keysBound) return;
+    el._keysBound = true;
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      switch (event.key) {
+        case " ":
+        case "Enter":
+          event.preventDefault();
+          if (el.hasAttribute("open")) closeMenu(el, api);
+          else openMenu(el, api);
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          step(el, api, 1);
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          step(el, api, -1);
+          break;
+        case "Escape":
+          if (el.hasAttribute("open")) {
+            event.preventDefault();
+            closeMenu(el, api);
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  },
+
+  OnClicked(el, api, event) {
+    const native = event?.detail?.originalEvent ?? event;
+    const target = native?.target instanceof Element ? native.target : null;
+    const row = target?.closest?.(".select-option");
+    if (row && el.contains(row)) {
+      select(el, api, row.getAttribute("data-value"));
+      closeMenu(el, api);
+      return;
+    }
+    if (el.hasAttribute("open")) closeMenu(el, api);
+    else openMenu(el, api);
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const items = parseOptions(attr("options", ""));
+    const options = selectableOptions(items);
+    const key = itemsKey(items);
+    if (el._optionsKey !== key) {
+      el._optionsKey = key;
+      if (items.length) el.set(...items.map(menuRow));
+      else el.set({ tag: "textblock", class: "select-empty", text: attr("empty", "No options") });
+    }
+
+    const current = options.find((o) => o.value === attr("selected", ""));
+    el.classList.toggle("is-placeholder", !current);
+    el.querySelector(".select-label")?.setAttribute(
+      "text",
+      current ? current.label : attr("placeholder", "Select…")
+    );
+    paintFaceMedia(el, current);
+    paintSelection(el, current?.value ?? "");
+
+    const disabled = el.hasAttribute("disabled");
+    el.setAttribute("aria-expanded", el.hasAttribute("open") && !disabled ? "true" : "false");
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    el.tabIndex = disabled ? -1 : 0;
+    syncLayout(el);
+  },
+
+  Destruct(el, api) {
+    closeMenu(el, api);
+    el._layoutObs?.disconnect();
+    el._layoutObs = null;
+    el._optionsKey = null;
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="300">
+  <slate-select options="general, random, dev-log" selected="random"></slate-select>
+  <slate-select
+    selected="text"
+    options="# Channels, text|Text|hash, voice|Voice|volume-2, ---, # Servers, matrix.org|Matrix|https://matrix.org/favicon.ico"
+  ></slate-select>
+</verticalbox>

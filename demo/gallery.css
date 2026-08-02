@@ -1,0 +1,454 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+/* Catppuccin Mocha, https://github.com/catppuccin/catppuccin */
+:root {
+  --ctp-rosewater: #f5e0dc;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-pink: #f5c2e7;
+  --ctp-mauve: #cba6f7;
+  --ctp-red: #f38ba8;
+  --ctp-maroon: #eba0ac;
+  --ctp-peach: #fab387;
+  --ctp-yellow: #f9e2af;
+  --ctp-green: #a6e3a1;
+  --ctp-teal: #94e2d5;
+  --ctp-sky: #89dceb;
+  --ctp-sapphire: #74c7ec;
+  --ctp-blue: #89b4fa;
+  --ctp-lavender: #b4befe;
+  --ctp-text: #cdd6f4;
+  --ctp-subtext1: #bac2de;
+  --ctp-subtext0: #a6adc8;
+  --ctp-overlay2: #9399b2;
+  --ctp-overlay1: #7f849c;
+  --ctp-overlay0: #6c7086;
+  --ctp-surface2: #585b70;
+  --ctp-surface1: #45475a;
+  --ctp-surface0: #313244;
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+
+  --ink: var(--ctp-text);
+  --muted: var(--ctp-subtext0);
+  --paper: var(--ctp-base);
+  --panel: var(--ctp-surface0);
+  --panel-deep: var(--ctp-mantle);
+  --line: var(--ctp-surface1);
+  --line-strong: var(--ctp-surface2);
+  --accent: var(--ctp-mauve);
+  --accent-soft: color-mix(in srgb, var(--ctp-mauve) 28%, var(--ctp-surface0));
+  --hud: var(--ctp-crust);
+  --hud-ink: var(--ctp-text);
+  --stage: var(--ctp-mantle);
+  --warn: var(--ctp-peach);
+  --bg-input: var(--ctp-surface0);
+  --bg-channels: var(--ctp-mantle);
+  --blurple: var(--ctp-mauve);
+  --radius: 6px;
+  --slate-font: Sora, system-ui, sans-serif;
+  --slate-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --widget-scrollbar-thumb: color-mix(in srgb, var(--ctp-overlay0) 50%, transparent);
+  --widget-scrollbar-thumb-hover: color-mix(in srgb, var(--ctp-overlay2) 75%, transparent);
+  --widget-scrollbar-track: transparent;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--slate-font);
+  color: var(--ink);
+  background: var(--ctp-base);
+}
+
+/* --- chrome --- */
+border[kind="panel"],
+umc-border[kind="panel"] {
+  --widget-background: var(--panel);
+  --widget-border: 1px solid var(--line);
+  --widget-radius: var(--radius);
+}
+border[kind="well"],
+umc-border[kind="well"] {
+  --widget-background: var(--stage);
+  --widget-border: 1px solid var(--line);
+  --widget-radius: var(--radius);
+  --widget-padding: 0;
+}
+border[kind="chip"],
+umc-border[kind="chip"] {
+  --widget-background: var(--accent-soft);
+  --widget-border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  --widget-padding: 8px 12px;
+  --widget-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink);
+}
+border[kind="hud"],
+umc-border[kind="hud"] {
+  --widget-background: var(--hud);
+  --widget-padding: 8px 12px;
+  --widget-radius: var(--radius);
+  color: var(--hud-ink);
+  font-size: 12px;
+}
+border[kind="slot"],
+umc-border[kind="slot"],
+backgroundblur[kind="slot"],
+umc-backgroundblur[kind="slot"] {
+  --widget-border: 1px dashed var(--line-strong);
+  --widget-background: color-mix(in srgb, var(--accent) 6%, var(--stage));
+  --widget-padding: 8px 10px;
+  --widget-radius: var(--radius);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+border[kind="pin"],
+umc-border[kind="pin"] {
+  --widget-background: var(--hud);
+  --widget-padding: 5px 9px;
+  --widget-radius: 2px;
+  color: var(--hud-ink);
+  white-space: nowrap;
+}
+border[kind="stretch"],
+umc-border[kind="stretch"] {
+  --widget-background: color-mix(in srgb, var(--accent-soft) 88%, white);
+  --widget-border: 1px dashed var(--accent);
+  --widget-padding: 6px 10px;
+  --widget-radius: var(--radius);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--slate-font-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+border[kind="inset"],
+umc-border[kind="inset"] {
+  --widget-background: var(--panel);
+  --widget-border: 1px solid var(--accent);
+  --widget-padding: 14px;
+  --widget-radius: var(--radius);
+}
+border[kind="backdrop"],
+umc-border[kind="backdrop"] {
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-background: var(--stage);
+  background-color: var(--stage);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px;
+}
+
+overlay[kind="stage"],
+umc-overlay[kind="stage"],
+canvaspanel[kind="stage"],
+umc-canvaspanel[kind="stage"],
+scrollbox[kind="stage"],
+umc-scrollbox[kind="stage"] {
+  background: var(--stage);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+canvaspanel[kind="stage"],
+umc-canvaspanel[kind="stage"] {
+  background-color: var(--stage);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px);
+  background-size: 50% 100%, 100% 50%, 20px 20px, 20px 20px;
+  background-position: center, center, 0 0, 0 0;
+}
+scrollbox[kind="stage"],
+umc-scrollbox[kind="stage"] {
+  --widget-padding: 10px;
+  background: var(--panel-deep);
+}
+
+slate-button {
+  --widget-background: var(--ctp-mauve);
+  --widget-border: 1px solid color-mix(in srgb, var(--ctp-mauve) 70%, var(--ctp-crust));
+  --widget-radius: var(--radius);
+  --button-fg: var(--ctp-base);
+  color: var(--ctp-base);
+}
+
+slate-button .slate-button-label {
+  color: var(--button-fg, var(--ctp-base));
+}
+
+button[widget] {
+  --widget-background: var(--ctp-mauve);
+  --widget-border: 1px solid color-mix(in srgb, var(--ctp-mauve) 70%, var(--ctp-crust));
+  --widget-radius: var(--radius);
+  --widget-padding: 8px 14px;
+  color: var(--ctp-base);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+progressbar, umc-progressbar {
+  --widget-fill: var(--accent);
+  --widget-background: var(--accent-soft);
+  --widget-radius: 2px;
+}
+
+slider, umc-slider {
+  color: var(--accent);
+}
+
+checkbox, umc-checkbox {
+  color: var(--accent);
+  border-color: var(--line-strong);
+}
+
+editabletext, umc-editabletext {
+  --widget-border: 1px solid var(--line);
+  --widget-background: var(--bg-input);
+  --widget-padding: 8px 10px;
+  --widget-radius: var(--radius);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+image[kind="swatch"],
+umc-image[kind="swatch"] {
+  --widget-background: linear-gradient(135deg, var(--ctp-mauve) 0%, var(--ctp-blue) 100%);
+  --widget-radius: var(--radius);
+  border-radius: var(--radius);
+}
+
+slate-dropdown,
+slate-combobox {
+  --widget-background: var(--panel);
+  --widget-border: 1px solid var(--line);
+  --widget-radius: var(--radius);
+}
+
+.gallery-scroll {
+  --widget-padding: 0;
+}
+
+/* Docs shell, flush left rail (not a rounded card) */
+.docs-nav {
+  --widget-background: var(--ctp-mantle);
+  --widget-border: none;
+  --widget-radius: 0;
+  --widget-padding: 0;
+  border-radius: 0;
+  border-right: 1px solid var(--line);
+  height: 100%;
+}
+
+.docs-nav-scroll {
+  --widget-padding: 4px 8px 16px;
+}
+
+.docs-brand {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.docs-brand-sub {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.docs-nav-label {
+  padding: 12px 8px 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.docs-nav-group {
+  display: flex; /* umc-layout-ok, docs chrome stack */
+  flex-direction: column;
+  gap: 1px;
+}
+
+.docs-nav-link {
+  display: block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  line-height: 1.35;
+}
+
+.docs-nav-link:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ctp-surface1) 70%, transparent);
+}
+
+.docs-nav-link.is-active {
+  color: var(--ctp-base);
+  background: var(--accent);
+}
+
+.docs-text-link {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.docs-text-link:hover {
+  text-decoration: underline;
+}
+
+.docs-hub-tile {
+  color: inherit;
+  text-decoration: none;
+  min-height: 108px; /* umc-layout-ok, docs hub tile chrome */
+}
+
+.docs-hub-tile border[kind="panel"],
+.docs-hub-tile umc-border[kind="panel"] {
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.docs-hub-tile:hover border[kind="panel"],
+.docs-hub-tile:hover umc-border[kind="panel"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+}
+
+.docs-hub-tile slate-icon {
+  color: var(--accent);
+}
+
+.demo-meta {
+  --widget-background: var(--panel-deep);
+}
+
+/* Inputs: live demo | umc code box + events */
+.demo-example > script {
+  display: none;
+}
+
+.demo-code-box {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--ctp-mantle);
+}
+
+.demo-code-box pre {
+  margin: 0;
+}
+
+.demo-code-box:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 1px;
+}
+
+.demo-code-box code,
+.demo-code-box code[class*="language-"] {
+  font-family: var(--slate-font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre;
+  tab-size: 2;
+  background: transparent;
+  color: var(--ink);
+  text-shadow: none;
+  display: block;
+  outline: none;
+  caret-color: var(--accent);
+}
+
+/* Kill any leftover Prism default theme bleed */
+.demo-code-box .token {
+  background: none;
+  text-shadow: none;
+}
+
+.demo-code-box code.is-editing {
+  color: var(--ink);
+}
+
+.demo-code-box code.is-editing .token {
+  all: unset;
+}
+
+/* Prism tokens, Catppuccin Mocha */
+.demo-code-box .token.comment,
+.demo-code-box .token.prolog,
+.demo-code-box .token.doctype {
+  color: var(--ctp-overlay0);
+}
+.demo-code-box .token.section,
+.demo-code-box .token.important {
+  color: var(--ctp-peach);
+  font-weight: 600;
+}
+.demo-code-box .token.tag,
+.demo-code-box .token.panel-tag {
+  color: var(--ctp-blue);
+}
+.demo-code-box .token.attr-name {
+  color: var(--ctp-yellow);
+}
+.demo-code-box .token.attr-value,
+.demo-code-box .token.string {
+  color: var(--ctp-green);
+}
+.demo-code-box .token.punctuation {
+  color: var(--ctp-overlay1);
+}
+.demo-code-box .token.keyword {
+  color: var(--ctp-mauve);
+  font-weight: 600;
+}
+.demo-code-box .token.class-name {
+  color: var(--ctp-teal);
+}
+.demo-code-box .token.directive .token.keyword {
+  color: var(--ctp-pink);
+}
+
+.demo-events-scroll {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--ctp-mantle);
+  --widget-padding: 8px 10px;
+}
+
+.demo-events,
+umc-textblock.demo-events {
+  font-family: var(--slate-font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  color: var(--accent);
+}
+
+.gallery-link {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.gallery-link:hover {
+  color: color-mix(in srgb, var(--accent) 70%, black);
+}

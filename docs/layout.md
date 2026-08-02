@@ -1,6 +1,6 @@
 # Layout & positioning
 
-SlateHTML layout is **attribute-driven**, modeled after Unreal Engine UMG. You structure UI with panel tags (`verticalbox`, `overlay`, `canvaspanel`, …) and put sizing, spacing, alignment, and anchors on those tags — not in flex/grid CSS.
+SlateHTML layout is **attribute-driven**, modeled after Unreal Engine UMG. You structure UI with panel tags (`verticalbox`, `overlay`, `canvaspanel`, …) and put sizing, spacing, alignment, and anchors on those tags, not in flex/grid CSS.
 
 The canonical reference is root [`index.html`](../index.html): a live **layout gallery** you can open with:
 
@@ -8,7 +8,7 @@ The canonical reference is root [`index.html`](../index.html): a live **layout g
 npm run demo
 ```
 
-Resize the browser while you read — especially the canvas panel section — to see stretch anchors behave like UMG.
+Resize the browser while you read, especially the canvas panel section, to see stretch anchors behave like UMG.
 
 ## Core idea: layout vs look
 
@@ -19,7 +19,7 @@ Resize the browser while you read — especially the canvas panel section — to
 
 Do **not** paper over layout problems with CSS `width: 100%`, `position: absolute`, flex shims, or `z-index`. Fix the tag tree and attributes instead.
 
-Authors write **bare** tag names (`verticalbox`). The Vite `.umc` loader rewrites them to `umc-verticalbox` custom elements. Uncompiled HTML keeps bare names — `widget.css` matches both.
+Authors write **bare** tag names (`verticalbox`). The Vite `.umc` loader rewrites them to `umc-verticalbox` custom elements. Uncompiled HTML keeps bare names, `widget.css` matches both.
 
 > **Note:** bare `<image>` is rewritten by the HTML parser to `<img>`. In static HTML use `umc-image`, or compile through Vite.
 
@@ -42,6 +42,8 @@ Authors write **bare** tag names (`verticalbox`). The Vite `.umc` loader rewrite
 | `textblock` / `image` / `progressbar` / `checkbox` / `slider` / `editabletext` | Leaf widgets |
 
 Leaf widgets fire native events: `changed` (checkbox), `percentchanged` (slider), `textchanged` / `committed` (editabletext).
+
+Layout panels emit bubbling `sizechanged` `{ width, height }` when their box changes (ResizeObserver). UMC widgets can use `api.watchSize(({ width, height }) => …)` from `slatehtml/umc`.
 
 ## Shared attributes
 
@@ -75,7 +77,7 @@ From the gallery's **Horizontal / Vertical / Spacer / Fill** panel:
 <verticalbox fill gap="8">
   <border kind="chip"><textblock text="auto height"></textblock></border>
   <border kind="slot" fill>
-    <textblock text="fill — remaining space"></textblock>
+    <textblock text="fill, remaining space"></textblock>
   </border>
   <horizontalbox gap="8" min-height="52">
     <border kind="slot" fill="1"><textblock text="fill 1"></textblock></border>
@@ -108,13 +110,13 @@ From the gallery's **Horizontal / Vertical / Spacer / Fill** panel:
 </overlay>
 ```
 
-**Full-page layers:** use `canvaspanel` with children `anchors="fill"` and `top`/`left`/`right`/`bottom`=`0` — not CSS `position` / `z-index`.
+**Full-page layers:** use `canvaspanel` with children `anchors="fill"` and `top`/`left`/`right`/`bottom`=`0`, not CSS `position` / `z-index`.
 
 **Overlay + fill trick:** `fill height="0"` with `min-height` on the stage (via `kind="stage"` CSS in `index.html`) lets the overlay grow inside a flex column while respecting min sizes.
 
 ## Scrollbox
 
-`scrollbox` clips to its allocated size and scrolls overflow. It needs a bounded height — from `height`, a parent `fill` slot, or `min-height`:
+`scrollbox` clips to its allocated size and scrolls overflow. It needs a bounded height, from `height`, a parent `fill` slot, or `min-height`:
 
 ```html
 <scrollbox kind="stage" fill>
@@ -127,11 +129,13 @@ From the gallery's **Horizontal / Vertical / Spacer / Fill** panel:
 
 Set `orientation="horizontal"` for sideways scroll.
 
+**Click-drag scroll** (mouse/pen, phone-like): enable globally with `configure({ dragScroll: true })`, or per box with `drag-scroll` / `drag-scroll="false"`. Touch keeps native panning. Works over buttons and list chrome; skips `user-select: text` / `pre` / `code` / `[selectable]` and pointer-owned controls (fields, sliders, menus).
+
 ## Canvas panel: the positioning playground
 
 `canvaspanel` is the UMG **Canvas Panel**. Children are absolutely positioned using **anchors** plus optional **offsets** (`top`, `left`, `right`, `bottom`).
 
-Open the gallery and resize the wide **Canvaspanel — child positioning** stage to watch stretch behavior.
+Open the gallery and resize the wide **Canvaspanel, child positioning** stage to watch stretch behavior.
 
 ### Named anchor presets
 
@@ -184,11 +188,11 @@ When min and max anchors differ on an axis, the widget **stretches** along that 
 </border>
 ```
 
-Resize the gallery — the inset panel grows and shrinks with the canvas.
+Resize the gallery, the inset panel grows and shrinks with the canvas.
 
 ### UE-style numeric anchors
 
-Four comma-separated values `minX,minY,maxX,maxY` in the 0–1 range (Unreal canvas coordinates):
+Four comma-separated values `minX,minY,maxX,maxY` in the 0-1 range (Unreal canvas coordinates):
 
 ```html
 <!-- Pin point at 22% from left, 78% from top -->
@@ -211,7 +215,7 @@ You can position with offsets alone (the gallery's bottom HUD bar):
 
 ### UserWidgets on a canvas
 
-`.umc` hosts default to `display: contents`; layout attributes on the host are forwarded to the stamped root. You can place `<my-modal anchors="fill" …>` directly on a `canvaspanel` — see [UMC components](./umc.md#host-layout).
+`.umc` hosts default to `display: contents`; layout attributes on the host are forwarded to the stamped root. You can place `<my-modal anchors="fill" …>` directly on a `canvaspanel`, see [UMC components](./umc.md#host-layout).
 
 ## Other panels (gallery sections)
 
@@ -293,4 +297,4 @@ textblock[kind="label"] {
 
 - [Build your first `.umc` widget](./tutorials/01-first-widget.md)
 - [UMC components reference](./umc.md)
-- [Root README](../README.md) — install and API
+- [Root README](../README.md), install and API

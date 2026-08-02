@@ -25,6 +25,7 @@
     "inject-styles.js",
     "widget.js",
     "widget.css",
+    "drag-scroll.js",
     "umc",
     "README.md",
     "docs"
@@ -39,9 +40,11 @@
   ],
   "scripts": {
     "demo": "npx --yes serve .",
+    "ui": "vite --config demo/vite.config.js",
+    "build:ui": "npm run build -w slatehtml-ui",
     "umc:link-vscode": "node editors/vscode-umc/link.mjs",
     "umc:unlink-vscode": "node editors/vscode-umc/link.mjs --unlink",
-    "test": "node --import ./test/dom-shim.mjs test/parse.test.mjs && node test/lint-style.test.mjs && node test/preview-inspect.test.mjs && node test/widget-layout.test.mjs && node --import ./test/dom-shim.mjs test/reactivity.test.mjs"
+    "test": "node --import ./test/dom-shim.mjs test/parse.test.mjs && node test/lint-style.test.mjs && node test/preview-inspect.test.mjs && node test/widget-layout.test.mjs && node test/parse-options.test.mjs && node --import ./test/dom-shim.mjs test/reactivity.test.mjs && node --import ./test/dom-shim.mjs test/configure.test.mjs"
   },
   "keywords": [
     "css",
@@ -53,6 +56,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "playwright": "^1.62.0"
+    "playwright": "^1.62.0",
+    "prismjs": "^1.30.0",
+    "vite": "^6.3.5"
   }
 }

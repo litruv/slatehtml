@@ -1,19 +1,19 @@
 --- html ---
 <canvaspanel clip="false" class="combobox-root">
   <horizontalbox class="combobox-face" anchors="top-left top-right" valign="center" gap="6" padding="0">
-    <editabletext class="combobox-input" fill min-height="40"></editabletext>
-    <slate-icon class="combobox-toggle" name="chevron-down" size="16"></slate-icon>
+    <editabletext class="combobox-input" fill min-height="36"></editabletext>
+    <textblock class="combobox-chevron" text="▾"></textblock>
   </horizontalbox>
   <scrollbox class="combobox-menu" data-content anchors="top-left top-right" top="0" gap="2" padding="4" max-height="220" hidden></scrollbox>
 </canvaspanel>
 
 --- style ---
-/* Own the flex slot when `fill` is set (host opts out of display:contents). */
 self {
-  display: block;
+  display: block; /* umc-layout-ok */
   box-sizing: border-box;
   color: inherit;
   font: inherit;
+  min-width: 180px; /* umc-layout-ok */
 }
 
 self[disabled] {
@@ -21,18 +21,25 @@ self[disabled] {
   pointer-events: none;
 }
 
+self[open] {
+  position: relative; /* umc-layout-ok */
+  z-index: 100; /* umc-layout-ok */
+}
+
 .combobox-face {
   box-sizing: border-box;
-  --widget-background: var(--bg-input, #383a40);
-  --widget-border: none;
-  --widget-radius: 4px;
-  --widget-padding: 0 4px 0 0;
+  --widget-background: var(--bg-input, color-mix(in srgb, currentColor 6%, transparent));
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 35%, transparent));
+  --widget-radius: var(--radius, 4px);
+  --widget-padding: 0 8px 0 0;
   background: var(--widget-background);
+  border: var(--widget-border);
   border-radius: var(--widget-radius);
+  z-index: 1; /* umc-layout-ok */
 }
 
 .combobox-face:focus-within {
-  outline: 2px solid var(--blurple, #5865f2);
+  outline: 2px solid var(--accent, currentColor);
   outline-offset: 0;
 }
 
@@ -40,39 +47,36 @@ self[disabled] {
   --widget-background: transparent;
   --widget-border: none;
   --widget-radius: 4px;
-  --widget-padding: 10px 12px;
-  color: var(--ink, #f2f3f5);
-  font-size: 14px;
+  --widget-padding: 8px 10px;
+  font-size: 13px;
+  color: inherit;
 }
 
 .combobox-input:focus {
   outline: none;
 }
 
-.combobox-toggle {
-  color: var(--ink-muted, #949ba4);
-  padding: 8px 10px;
+.combobox-chevron {
+  opacity: 0.55;
+  font-size: 12px;
   cursor: pointer;
-  border-radius: 4px;
+  padding: 6px;
   transition: transform 120ms ease;
 }
 
-.combobox-toggle:focus-visible {
-  outline: none;
-}
-
-self[open]:not([disabled]) .combobox-toggle {
+self[open]:not([disabled]) .combobox-chevron {
   transform: rotate(180deg);
 }
 
 .combobox-menu {
   box-sizing: border-box;
   max-height: var(--combobox-max-height, 220px);
-  background: var(--bg-channels, #2b2d31);
-  border: 1px solid var(--line, #1f2023);
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  color: var(--ink, #f2f3f5);
+  background: var(--panel, #f3f7f4);
+  border: 1px solid var(--line, color-mix(in srgb, currentColor 35%, transparent));
+  border-radius: var(--radius, 4px);
+  box-shadow: 0 8px 24px color-mix(in srgb, #000 28%, transparent);
+  z-index: 2; /* umc-layout-ok */
+  color: inherit;
 }
 
 .combobox-heading {
@@ -80,64 +84,41 @@ self[open]:not([disabled]) .combobox-toggle {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--ink-muted, #949ba4);
+  opacity: 0.55;
   padding: 8px 10px 4px;
 }
 
 .combobox-option {
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-radius: 3px;
   font-size: 13px;
   cursor: pointer;
 }
 
-.combobox-option:hover {
-  background: color-mix(in srgb, currentColor 12%, transparent);
-}
-
+.combobox-option:hover,
 .combobox-option.selected {
-  background: color-mix(in srgb, var(--blurple, #5865f2) 28%, transparent);
+  background: color-mix(in srgb, var(--accent, currentColor) 18%, transparent);
 }
 
 .combobox-empty {
-  padding: 8px 10px;
+  padding: 6px 10px;
   opacity: 0.6;
   font-size: 12px;
 }
 
 --- script ---
+import fuzzysort from "fuzzysort";
+import { parseOptions, selectableOptions } from "./input/parse-options.js";
+
 /**
- * Editable combobox: free text + optional dropdown of recent / suggested values.
+ * Editable combobox, free text + fuzzysort-filtered suggestions (recent + options).
  *
  *   <slate-combobox value="matrix.org" options="matrix.org,mozilla.org"></slate-combobox>
- *   <slate-combobox options="a|Alpha, b|Beta" recent="b,c" recent-label="Recent"></slate-combobox>
+ *   <slate-combobox options="a|Alpha, b|Beta" recent="b" recent-label="Recent"></slate-combobox>
  *
- * Options use the same grammar as slate-dropdown (`a,b` or `value|Label` / `value:Label`).
- * `recent` is the same grammar; those entries appear first (deduped from `options`).
- *
+ * Typing filters the open menu. Chevron toggles the full list.
  * Events: valuechanged { value }, selectionchanged { value, label }, opened / closed
  */
-
-/** Same grammar as slate-dropdown. Prefer `|` when values may contain `:`. */
-function parseOptions(spec) {
-  return String(spec ?? "")
-    .split(/[,\n]/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry) => {
-      const pipe = entry.indexOf("|");
-      if (pipe >= 0) {
-        const value = entry.slice(0, pipe).trim();
-        const label = entry.slice(pipe + 1).trim();
-        return { value, label: label || value };
-      }
-      const split = entry.indexOf(":");
-      if (split < 0) return { value: entry, label: entry };
-      const value = entry.slice(0, split).trim();
-      const label = entry.slice(split + 1).trim();
-      return { value, label: label || value };
-    });
-}
 
 function inputEl(el) {
   return el.querySelector(".combobox-input");
@@ -150,14 +131,13 @@ function readValue(el) {
 
 function writeValue(el, value) {
   const next = String(value ?? "");
-  const input = inputEl(el);
-  input?.setAttribute("text", next);
+  inputEl(el)?.setAttribute("text", next);
   el.setAttribute("value", next);
 }
 
 const MENU_GAP = 4;
 
-function syncComboboxLayout(el) {
+function syncLayout(el) {
   const root = el.querySelector(".combobox-root");
   const face = el.querySelector(".combobox-face");
   const menu = el.querySelector(".combobox-menu");
@@ -175,60 +155,62 @@ function closeMenu(el, api) {
     document.removeEventListener("pointerdown", el._onOutside, true);
     el._onOutside = null;
   }
-  syncComboboxLayout(el);
+  syncLayout(el);
   api.emit("closed", { value: readValue(el) });
 }
 
 function openMenu(el, api) {
-  if (el.hasAttribute("open") || el.hasAttribute("disabled")) return;
+  if (el.hasAttribute("disabled")) return;
   rebuildMenu(el);
-  syncComboboxLayout(el);
-  el.setAttribute("open", "");
-  el.querySelector(".combobox-menu")?.removeAttribute("hidden");
-  el._onOutside = (event) => {
-    if (!el.contains(event.target)) closeMenu(el, api);
-  };
-  document.addEventListener("pointerdown", el._onOutside, true);
-  api.emit("opened", { value: readValue(el) });
+  syncLayout(el);
+  if (!el.hasAttribute("open")) {
+    el.setAttribute("open", "");
+    el.querySelector(".combobox-menu")?.removeAttribute("hidden");
+    el._onOutside = (event) => {
+      if (!el.contains(event.target)) closeMenu(el, api);
+    };
+    document.addEventListener("pointerdown", el._onOutside, true);
+    api.emit("opened", { value: readValue(el) });
+  } else {
+    el.querySelector(".combobox-menu")?.removeAttribute("hidden");
+  }
 }
 
-function menuSections(el) {
-  const recent = parseOptions(el.getAttribute("recent"));
-  const options = parseOptions(el.getAttribute("options"));
+function allItems(el) {
+  const recent = selectableOptions(parseOptions(el.getAttribute("recent")));
+  const options = selectableOptions(parseOptions(el.getAttribute("options")));
   const recentValues = new Set(recent.map((o) => o.value));
-  const suggested = options.filter((o) => !recentValues.has(o.value));
-  const sections = [];
-  if (recent.length) {
-    sections.push({
-      title: el.getAttribute("recent-label") || "Recent",
-      items: recent,
-    });
-  }
-  if (suggested.length) {
-    sections.push({
-      title:
-        recent.length > 0
-          ? el.getAttribute("options-label") || "Suggested"
-          : null,
-      items: suggested,
-    });
-  }
-  return sections;
+  return {
+    recent,
+    suggested: options.filter((o) => !recentValues.has(o.value)),
+  };
+}
+
+function filterItems(items, query) {
+  if (!query) return items;
+  const hits = fuzzysort.go(query, items, {
+    keys: ["label", "value"],
+    threshold: -50000,
+    limit: 50,
+  });
+  return hits.map((hit) => hit.obj);
 }
 
 function rebuildMenu(el) {
   const current = readValue(el);
-  const sections = menuSections(el);
+  const { recent, suggested } = allItems(el);
+  const q = current;
+  const recentHits = filterItems(recent, q);
+  const suggestedHits = filterItems(suggested, q);
   const rows = [];
-  for (const section of sections) {
-    if (section.title) {
-      rows.push({
-        tag: "textblock",
-        class: "combobox-heading",
-        text: section.title,
-      });
-    }
-    for (const item of section.items) {
+
+  if (recentHits.length) {
+    rows.push({
+      tag: "textblock",
+      class: "combobox-heading",
+      text: el.getAttribute("recent-label") || "Recent",
+    });
+    for (const item of recentHits) {
       rows.push({
         tag: "textblock",
         class: `combobox-option${item.value === current ? " selected" : ""}`,
@@ -238,11 +220,31 @@ function rebuildMenu(el) {
       });
     }
   }
+
+  if (suggestedHits.length) {
+    if (recentHits.length || (!q && recent.length)) {
+      rows.push({
+        tag: "textblock",
+        class: "combobox-heading",
+        text: el.getAttribute("options-label") || "Suggested",
+      });
+    }
+    for (const item of suggestedHits) {
+      rows.push({
+        tag: "textblock",
+        class: `combobox-option${item.value === current ? " selected" : ""}`,
+        "data-value": item.value,
+        role: "option",
+        text: item.label,
+      });
+    }
+  }
+
   if (!rows.length) {
     el.set({
       tag: "textblock",
       class: "combobox-empty",
-      text: el.getAttribute("empty") || "No options",
+      text: el.getAttribute("empty") || "No matches",
     });
   } else {
     el.set(...rows);
@@ -250,15 +252,9 @@ function rebuildMenu(el) {
 }
 
 function pick(el, api, value) {
-  const sections = menuSections(el);
-  let label = value;
-  for (const section of sections) {
-    const hit = section.items.find((o) => o.value === value);
-    if (hit) {
-      label = hit.label;
-      break;
-    }
-  }
+  const { recent, suggested } = allItems(el);
+  const hit = [...recent, ...suggested].find((o) => o.value === value);
+  const label = hit?.label || value;
   writeValue(el, value);
   api.emit("selectionchanged", { value, label });
   api.emit("valuechanged", { value });
@@ -274,7 +270,7 @@ export default defineUmc({
     recent: "",
     "recent-label": "Recent",
     "options-label": "Suggested",
-    empty: "No options",
+    empty: "No matches",
     open: "",
     disabled: "",
   },
@@ -285,17 +281,18 @@ export default defineUmc({
 
     el.setAttribute("role", "combobox");
     el.setAttribute("aria-haspopup", "listbox");
+    el.setAttribute("aria-autocomplete", "list");
     el.querySelector(".combobox-menu")?.setAttribute("role", "listbox");
 
     const face = el.querySelector(".combobox-face");
     if (face && !el._layoutObs) {
-      el._layoutObs = new ResizeObserver(() => syncComboboxLayout(el));
+      el._layoutObs = new ResizeObserver(() => syncLayout(el));
       el._layoutObs.observe(face);
     }
 
     const input = inputEl(el);
     input?.addEventListener("focus", () => {
-      // Defer so programmatic focus (e.g. login open) still selects.
+      openMenu(el, api);
       requestAnimationFrame(() => {
         if (document.activeElement !== input) return;
         const range = document.createRange();
@@ -309,14 +306,14 @@ export default defineUmc({
       const value = readValue(el);
       el.setAttribute("value", value);
       api.emit("valuechanged", { value });
+      openMenu(el, api);
+      rebuildMenu(el);
     });
-    input?.addEventListener("committed", () => {
-      closeMenu(el, api);
-    });
+    input?.addEventListener("committed", () => closeMenu(el, api));
 
     el.addEventListener("click", (event) => {
-      const toggle = event.target?.closest?.(".combobox-toggle");
-      if (toggle && el.contains(toggle)) {
+      const chevron = event.target?.closest?.(".combobox-chevron");
+      if (chevron && el.contains(chevron)) {
         event.preventDefault();
         if (el.hasAttribute("open")) closeMenu(el, api);
         else openMenu(el, api);
@@ -337,13 +334,12 @@ export default defineUmc({
         closeMenu(el, api);
         return;
       }
-      if (event.key === "ArrowDown" && !el.hasAttribute("open")) {
+      if (event.key === "ArrowDown") {
         event.preventDefault();
         openMenu(el, api);
       }
     });
 
-    /** Rebuild the menu from current `options` / `recent` attrs (e.g. after persist). */
     el.refresh = () => {
       if (el.hasAttribute("open")) rebuildMenu(el);
     };
@@ -359,30 +355,26 @@ export default defineUmc({
   SynchronizeProperties(el, { attr }) {
     const value = attr("value", "");
     const input = inputEl(el);
-    if (input && input.getAttribute("text") !== value) {
+    if (input && input !== document.activeElement && input.getAttribute("text") !== value) {
       input.setAttribute("text", value);
     }
-    const isOpen = el.hasAttribute("open");
-    el.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    el.setAttribute(
-      "aria-disabled",
-      el.hasAttribute("disabled") ? "true" : "false"
-    );
-    if (!isOpen && el._onOutside) {
+    el.setAttribute("aria-expanded", el.hasAttribute("open") ? "true" : "false");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    if (!el.hasAttribute("open") && el._onOutside) {
       document.removeEventListener("pointerdown", el._onOutside, true);
       el._onOutside = null;
     }
-    if (isOpen) rebuildMenu(el);
-    syncComboboxLayout(el);
+    if (el.hasAttribute("open")) rebuildMenu(el);
+    syncLayout(el);
   },
 });
 
 --- preview ---
-<verticalbox gap="12" padding="16" width="360">
+<verticalbox gap="12" padding="16" width="320">
   <slate-combobox
-    value="matrix.org"
-    options="matrix.org,mozilla.org,envs.net"
+    value=""
+    options="matrix.org,mozilla.org,envs.net,synapse.example"
     recent="matrix.org"
   ></slate-combobox>
-  <textblock kind="hint" text="Type freely, or open ▾ for recent / suggested."></textblock>
+  <textblock kind="hint" text="Type to filter, fuzzysort ranks recent + suggested."></textblock>
 </verticalbox>

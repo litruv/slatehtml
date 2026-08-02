@@ -2,14 +2,16 @@
  * Vite plugin: import "./widget.umc" → JS module registering a custom element.
  *
  * Supports:
+ *   @parent textblock   optional, subclass a builtin (host *is* the leaf)
  *   --- html ---     inline markup, or `@ ./file.html`
  *   --- style ---    inline CSS, or `@ ./file.css`
  *   --- script ---   inline JS, or `@ ./file.js`
  *   --- preview ---  editor-only (ignored here)
  *
  * The script should `export default defineUmc({ ... })`.
- * The plugin injects `html` / `css` / `cssId` into that call — HTML and CSS
- * are always string-inlined into the JS module (no separate CSS emit).
+ * The plugin injects `html` / `css` / `cssId` / `extends` (from `@parent`)
+ * into that call, HTML and CSS are always string-inlined into the JS module
+ * (no separate CSS emit).
  *
  * Custom tags in the HTML section are auto-imported (./tag.umc or under the
  * nearest widgets/ tree). Set `umc({ autoImport: false })` to opt out.
@@ -21,9 +23,11 @@
  * Uses resolveId + load (not transform) so Vite never tries to parse .umc as JS.
  * Also transforms app HTML / CSS so bare tags in index.html and *.css match.
  *
- * Optional companion: `singleFile()` — collapses a Vite app build into one
+ * Optional companion: `singleFile()`, collapses a Vite app build into one
  * self-contained `index.html` (JS + CSS inlined).
- */
+ *
+ * Library packages (e.g. slatehtml-ui) should pass `runtime: "slatehtml/umc"`
+ * so compiled widgets import the peer runtime instead of a file:// path. */
 
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, resolve, relative } from "node:path";
@@ -68,7 +72,7 @@ function resolveSection(section, umcPath) {
 }
 
 /**
- * `defineUmc` is provided by the loader — strip user imports of it so the
+ * `defineUmc` is provided by the loader, strip user imports of it so the
  * injected helper (with html/css) wins.
  */
 function stripDefineUmcImport(script) {
@@ -85,10 +89,10 @@ function stripDefineUmcImport(script) {
   );
 }
 
-function injectIntoScript(script, { html, css, cssId, runtimeId, umcPath, autoImport }) {
+function injectIntoScript(script, { html, css, cssId, extends: extendsTag, runtimeId, umcPath, autoImport }) {
   script = stripDefineUmcImport(script);
 
-  // Collect child imports from (possibly prefixed) html — builtins are skipped.
+  // Collect child imports from (possibly prefixed) html, builtins are skipped.
   const withAutos = injectAutoImports(script, html, umcPath, autoImport);
   const autoImportLines = [];
   const bodyScript = withAutos.replace(
@@ -99,20 +103,28 @@ function injectIntoScript(script, { html, css, cssId, runtimeId, umcPath, autoIm
     }
   );
 
-  const header = [
+  const extendsBare = extendsTag ? String(extendsTag).trim().toLowerCase() : "";
+  const headerLines = [
     `import { defineUmc as __defineUmc } from ${JSON.stringify(runtimeId)};`,
     ...autoImportLines,
     `const __umcHtml = ${JSON.stringify(html)};`,
     `const __umcCss = ${JSON.stringify(css)};`,
     `const __umcCssId = ${JSON.stringify(cssId)};`,
+  ];
+  if (extendsBare) {
+    headerLines.push(`const __umcExtends = ${JSON.stringify(extendsBare)};`);
+  }
+  headerLines.push(
     `const defineUmc = (def = {}) => __defineUmc({`,
     `  html: __umcHtml,`,
     `  css: __umcCss,`,
     `  cssId: __umcCssId,`,
     `  ...def,`,
+    ...(extendsBare ? [`  extends: __umcExtends,`] : []),
     `});`,
-    "",
-  ].join("\n");
+    ""
+  );
+  const header = headerLines.join("\n");
 
   if (/\bdefineUmc\s*\(/.test(bodyScript) || /\bexport\s+default\s+defineUmc\b/.test(bodyScript)) {
     return `${header}${bodyScript}`;
@@ -143,9 +155,9 @@ function styleSectionLineOffset(source) {
   return 0;
 }
 
-function compileUmc(source, umcPath, autoImport = {}) {
+function compileUmc(source, umcPath, autoImport = {}, runtimeId = RUNTIME_URL) {
   const sections = parseUmc(source);
-  // preview is editor-only — intentionally unused
+  // preview is editor-only, intentionally unused
   const htmlSec = resolveSection(sections.html, umcPath);
   const styleSec = resolveSection(sections.style, umcPath);
   const scriptSec = resolveSection(sections.script, umcPath);
@@ -169,10 +181,11 @@ function compileUmc(source, umcPath, autoImport = {}) {
     html,
     css,
     cssId,
-    runtimeId: RUNTIME_URL,
+    extends: sections.parent || "",
+    runtimeId,
     umcPath,
     autoImport,
-    // Pass bare HTML for discovery if inject ever needs it — currently
+    // Pass bare HTML for discovery if inject ever needs it, currently
     // prefixed html is fine because custom tags are unchanged.
   });
 }
@@ -215,15 +228,22 @@ export function umc(options = {}) {
     autoImport: options.autoImport !== false,
     roots: options.roots ?? [],
   };
+  // Default: absolute file URL so Vite can resolve the runtime next to this
+  // plugin. Library packages should pass `runtime: "slatehtml/umc"` so the
+  // built bundle externalizes against the peer instead of inlining a path.
+  const runtimeId = options.runtime ?? RUNTIME_URL;
 
   return {
     name: "slatehtml-umc",
     enforce: "pre",
 
     resolveId(id, importer) {
-      if (!id.endsWith(ext)) return null;
-      if (id.startsWith("\0") || id.includes("://")) return null;
-      const resolved = importer ? resolve(dirname(importer.split("?")[0]), id) : resolve(id);
+      const clean = String(id || "").split("?")[0];
+      if (!clean.endsWith(ext)) return null;
+      if (clean.startsWith("\0") || clean.includes("://")) return null;
+      const resolved = importer
+        ? resolve(dirname(importer.split("?")[0]), clean)
+        : resolve(clean);
       return resolved;
     },
 
@@ -232,7 +252,7 @@ export function umc(options = {}) {
       if (!path.endsWith(ext)) return null;
       if (!existsSync(path)) return null;
       const source = readFileSync(path, "utf8");
-      return compileUmc(source, path, autoImport);
+      return compileUmc(source, path, autoImport, runtimeId);
     },
 
     transform(code, id) {

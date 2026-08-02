@@ -2,7 +2,7 @@
 
 --- style ---
 self {
-  display: inline-flex; /* umc-layout-ok — painted control host */
+  display: inline-flex; /* umc-layout-ok, painted control host */
   align-items: center; /* umc-layout-ok */
   justify-content: center; /* umc-layout-ok */
   flex: 0 0 auto; /* umc-layout-ok */
@@ -30,7 +30,7 @@ self[hidden] {
  *   <slate-icon name="chevron-down" size="16"></slate-icon>
  *   <slate-icon name="log-out" size="14" stroke-width="2"></slate-icon>
  *
- * Register new icons in `lucide-icons.js` (keeps the bundle tree-shaken).
+ * Any kebab-case name from https://lucide.dev/icons/.
  * Color follows `currentColor` / parent text color.
  */
 import { lucideSvg } from "./lucide-icons.js";
@@ -72,9 +72,6 @@ export default defineUmc({
 
 --- preview ---
 <horizontalbox gap="12" padding="16" valign="center">
-  <slate-icon name="chevron-down" size="18"></slate-icon>
-  <slate-icon name="log-out" size="18"></slate-icon>
-  <slate-icon name="hash" size="18"></slate-icon>
-  <slate-icon name="at-sign" size="18"></slate-icon>
-  <textblock kind="hint" text="slate-icon · Lucide"></textblock>
+  <slate-icon name="search" size="18"></slate-icon>
+  <textblock kind="hint" text="slate-icon · any Lucide name → lucide.dev/icons"></textblock>
 </horizontalbox>

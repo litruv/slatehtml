@@ -3,14 +3,45 @@
   "version": "1.0.0",
   "description": "Reusable SlateHTML UI widgets (button, dropdown, pickers, …)",
   "type": "module",
-  "main": "./src/index.js",
-  "module": "./src/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./button": "./src/slate-button.umc",
+    ".": {
+      "development": "./src/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./text": "./src/slate-text.umc",
+    "./button": "./src/input/slate-button.umc",
+    "./autocomplete": "./src/input/slate-autocomplete.umc",
+    "./button-group": "./src/input/slate-button-group.umc",
+    "./checkbox": "./src/input/slate-checkbox.umc",
+    "./radio-group": "./src/input/slate-radio-group.umc",
+    "./rating": "./src/input/slate-rating.umc",
+    "./select": "./src/input/slate-select.umc",
+    "./slider": "./src/input/slate-slider.umc",
+    "./switch": "./src/input/slate-switch.umc",
+    "./text-field": "./src/input/slate-text-field.umc",
+    "./transfer-list": "./src/input/slate-transfer-list.umc",
+    "./toggle-button": "./src/input/slate-toggle-button.umc",
+    "./tabs": "./src/slate-tabs.umc",
+    "./tab": "./src/slate-tab.umc",
+    "./input/button": "./src/input/slate-button.umc",
+    "./input/autocomplete": "./src/input/slate-autocomplete.umc",
+    "./input/button-group": "./src/input/slate-button-group.umc",
+    "./input/checkbox": "./src/input/slate-checkbox.umc",
+    "./input/radio-group": "./src/input/slate-radio-group.umc",
+    "./input/rating": "./src/input/slate-rating.umc",
+    "./input/select": "./src/input/slate-select.umc",
+    "./input/slider": "./src/input/slate-slider.umc",
+    "./input/switch": "./src/input/slate-switch.umc",
+    "./input/text-field": "./src/input/slate-text-field.umc",
+    "./input/transfer-list": "./src/input/slate-transfer-list.umc",
+    "./input/toggle-button": "./src/input/slate-toggle-button.umc",
     "./dropdown": "./src/slate-dropdown.umc",
     "./combobox": "./src/slate-combobox.umc",
     "./icon": "./src/slate-icon.umc",
+    "./breadcrumb": "./src/slate-breadcrumb.umc",
     "./image": "./src/slate-image.umc",
     "./media": "./src/slate-media.umc",
     "./shadowbox": "./src/slate-shadowbox.umc",
@@ -23,22 +54,31 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "dist",
     "src",
     "README.md"
   ],
   "sideEffects": [
     "./src/index.js",
+    "./dist/index.js",
     "**/*.umc",
     "**/*.css",
     "**/*.js"
   ],
+  "scripts": {
+    "build": "vite build",
+    "prepare": "vite build",
+    "prepublishOnly": "npm run build"
+  },
   "peerDependencies": {
     "slatehtml": "*"
   },
   "devDependencies": {
-    "slatehtml": "file:../.."
+    "slatehtml": "file:../..",
+    "vite": "^6.3.5"
   },
   "dependencies": {
+    "fuzzysort": "^3.1.0",
     "lucide": "^1.27.0"
   },
   "keywords": [

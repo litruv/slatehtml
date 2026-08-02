@@ -1,0 +1,105 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Button Group"></slate-text>
+          <slate-text kind="hint" text="Edit the UMC on the right, blur or Ctrl+Enter applies it."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Buttons"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button-group>
+                    <slate-button text="Left"></slate-button>
+                    <slate-button text="Center"></slate-button>
+                    <slate-button text="Right"></slate-button>
+                  </slate-button-group>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button-group>
+  <slate-button text="Left"></slate-button>
+  <slate-button text="Center"></slate-button>
+  <slate-button text="Right"></slate-button>
+</slate-button-group>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Toggles"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button-group>
+                    <slate-toggle-button text="Day" pressed></slate-toggle-button>
+                    <slate-toggle-button text="Week"></slate-toggle-button>
+                    <slate-toggle-button text="Month"></slate-toggle-button>
+                  </slate-button-group>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button-group>
+  <slate-toggle-button text="Day" pressed></slate-toggle-button>
+  <slate-toggle-button text="Week"></slate-toggle-button>
+  <slate-toggle-button text="Month"></slate-toggle-button>
+</slate-button-group>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,changed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Mixed"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button-group>
+                    <slate-button text="Cut"></slate-button>
+                    <slate-button text="Copy"></slate-button>
+                    <slate-button text="Paste" disabled></slate-button>
+                  </slate-button-group>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button-group>
+  <slate-button text="Cut"></slate-button>
+  <slate-button text="Copy"></slate-button>
+  <slate-button text="Paste" disabled></slate-button>
+</slate-button-group>
+            </script>
+          </wrapbox>
+        </verticalbox>

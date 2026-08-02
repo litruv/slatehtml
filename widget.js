@@ -4,8 +4,8 @@
  * Shared: width, height, min-width, max-width, min-height, max-height, padding, gap
  * Boxes: fill (on children), fill="2" for flex-grow weight
  * Canvas children: top, left, right, bottom, anchors
- *   anchors: "left top" | "right bottom" | "fill" | "h-fill" | "v-fill"
- *            or "minX,minY,maxX,maxY" in 0–1 (UE style)
+ *   anchors: "top-left" | "left top" | "top left" | "fill" | "h-fill" | "v-fill"
+ *            or "minX,minY,maxX,maxY" in 0-1 (UE style)
  * Grid: columns="3"
  * Uniform grid: columns + rows (equal 1fr tracks)
  * Scalebox: scales the first child to fit
@@ -24,6 +24,45 @@ import {
   PREFIXED_TAGS,
   baseTag,
 } from "./umc/builtin-tags.js";
+import { boxSize, scheduleFrame } from "./umc/reactivity.js";
+import { bindDragScroll, rebindDragScroll } from "./drag-scroll.js";
+
+/** Framework settings, mutate via `configure({ … })`. */
+const settings = {
+  /** Click-drag to scroll scrollboxes (mouse/pen). */
+  dragScroll: false,
+};
+
+/**
+ * Update framework settings. Returns a shallow copy of the active settings.
+ *
+ *   import { configure } from "slatehtml";
+ *   configure({ dragScroll: true });
+ *
+ * Per scrollbox: `drag-scroll` / `drag-scroll="false"` overrides the global flag.
+ */
+function configure(partial = {}) {
+  if (partial && typeof partial === "object") {
+    if ("dragScroll" in partial) settings.dragScroll = Boolean(partial.dragScroll);
+  }
+  if (typeof document !== "undefined") {
+    rebindDragScroll(document, { enabled: dragScrollEnabled });
+  }
+  return getSettings();
+}
+
+function getSettings() {
+  return { ...settings };
+}
+
+function dragScrollEnabled(el) {
+  if (el.hasAttribute("drag-scroll")) {
+    const v = el.getAttribute("drag-scroll");
+    if (v === "false" || v === "0" || v === "off") return false;
+    return true;
+  }
+  return settings.dragScroll;
+}
 
 const SIZE_ATTRS = [
   "width",
@@ -64,6 +103,7 @@ const OBSERVED_ATTRS = [
   "active",
   "blur",
   "pad",
+  "drag-scroll",
 ];
 
 const LENGTH = /^-?[\d.]+$/;
@@ -127,7 +167,7 @@ function setPercent(el, value) {
 }
 
 function applyLeafAttrs(el) {
-  const tag = baseTag(el.localName);
+  const tag = leafRole(el);
 
   if ((tag === "textblock" || tag === "editabletext") && el.hasAttribute("text")) {
     // Don't clobber editabletext while the user is typing
@@ -136,6 +176,11 @@ function applyLeafAttrs(el) {
         el.textContent = el.getAttribute("text");
       }
     }
+  }
+
+  // Keep contentEditable in sync when `readonly` is toggled after first bind.
+  if (tag === "editabletext") {
+    el.contentEditable = el.hasAttribute("readonly") ? "false" : "true";
   }
 
   if (tag === "image") {
@@ -174,9 +219,27 @@ function applyLeafAttrs(el) {
   }
 }
 
+/** Builtin leaf role, honors `extends: "textblock"` widgets via __umcExtends. */
+function leafRole(el) {
+  const tag = baseTag(el.localName);
+  if (
+    tag === "textblock" ||
+    tag === "editabletext" ||
+    tag === "image" ||
+    tag === "progressbar" ||
+    tag === "slider" ||
+    tag === "checkbox"
+  ) {
+    return tag;
+  }
+  const ext = el.__umcExtends || el.getAttribute?.("data-umc-extends");
+  if (ext) return baseTag(ext);
+  return tag;
+}
+
 function bindLeafInteractions(el) {
   if (!(el instanceof Element) || el._widgetBound) return;
-  const tag = baseTag(el.localName);
+  const tag = leafRole(el);
 
   if (tag === "checkbox") {
     el._widgetBound = true;
@@ -276,12 +339,16 @@ function bindLeafInteractions(el) {
     el.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !el.hasAttribute("multiline")) {
         e.preventDefault();
-        el.blur();
-        el.dispatchEvent(new CustomEvent("committed", {
-          bubbles: true,
-          detail: { text: el.textContent ?? "" },
-        }));
+        el.blur(); // blur handler emits `committed`
       }
+    });
+
+    el.addEventListener("blur", () => {
+      el.setAttribute("text", el.textContent ?? "");
+      el.dispatchEvent(new CustomEvent("committed", {
+        bubbles: true,
+        detail: { text: el.textContent ?? "" },
+      }));
     });
   }
 }
@@ -292,7 +359,7 @@ function applyFill(el) {
   const weight = raw === "" || raw == null ? 1 : Number(raw);
   if (!Number.isFinite(weight) || weight < 0) return;
   // Shorthand so stylesheet `flex:` rules can't partially override weights.
-  // Don't set minWidth/minHeight inline — that stomps attribute/CSS min-sizes
+  // Don't set minWidth/minHeight inline, that stomps attribute/CSS min-sizes
   // (e.g. canvaspanel min-height="340", overlay[kind=stage] min-height).
   el.style.flex = `${weight} 1 0%`;
 }
@@ -319,7 +386,7 @@ function parseAnchors(raw) {
 
   if (named[s]) return named[s];
 
-  // space-separated aliases: "left top", "fill", or corner pairs for edge stretch
+  // space-separated aliases: "left top" / "top left", or corner pairs for edge stretch
   const parts = s.split(/[\s_]+/).filter(Boolean);
   if (parts.length === 2) {
     const [a, b] = parts;
@@ -327,7 +394,9 @@ function parseAnchors(raw) {
     if (a === "bottom-left" && b === "bottom-right") return [0, 1, 1, 1];
     if (a === "top-left" && b === "bottom-left") return [0, 0, 0, 1];
     if (a === "top-right" && b === "bottom-right") return [1, 0, 1, 1];
+    // Accept either edge order: "left top" and "top left" → top-left
     if (named[`${a}-${b}`]) return named[`${a}-${b}`];
+    if (named[`${b}-${a}`]) return named[`${b}-${a}`];
   }
   if (parts.length === 1 && named[parts[0]]) return named[parts[0]];
 
@@ -366,7 +435,7 @@ function canvasLayoutParent(el) {
 
 function applyCanvasChild(el) {
   if (!canvasLayoutParent(el)) return;
-  // Contents hosts don't generate a box — position their stamped root instead.
+  // Contents hosts don't generate a box, position their stamped root instead.
   if (isDisplayContents(el)) return;
 
   const hasAttrs =
@@ -434,10 +503,14 @@ function applyCanvasChild(el) {
     }
 
     // Translate only when pinning via left/top percentage (not right/bottom pins).
+    // Skip 0% translates, they're no-ops but still create a containing block for
+    // position:fixed descendants (e.g. popup-anchor menus).
     const pinRight = !stretchX && minX >= 1 && right != null && left == null;
     const pinBottom = !stretchY && minY >= 1 && bottom != null && top == null;
-    const tx = stretchX || pinRight ? null : `translateX(-${minX * 100}%)`;
-    const ty = stretchY || pinBottom ? null : `translateY(-${minY * 100}%)`;
+    const tx =
+      stretchX || pinRight || minX === 0 ? null : `translateX(-${minX * 100}%)`;
+    const ty =
+      stretchY || pinBottom || minY === 0 ? null : `translateY(-${minY * 100}%)`;
     el.style.transform = [tx, ty].filter(Boolean).join(" ");
     return;
   }
@@ -576,12 +649,73 @@ function applyScaleBox(el) {
   }
 }
 
+/** Layout panels that emit `sizechanged` (not leaf widgets). */
+const SIZE_EVENT_TAGS = new Set([
+  "horizontalbox",
+  "verticalbox",
+  "wrapbox",
+  "overlay",
+  "canvaspanel",
+  "scrollbox",
+  "sizebox",
+  "spacer",
+  "gridpanel",
+  "uniformgridpanel",
+  "scalebox",
+  "border",
+  "safezone",
+  "widgetswitcher",
+  "namedslot",
+  "retainerbox",
+  "invalidationbox",
+  "backgroundblur",
+]);
+
+let panelSizeRO = null;
+const panelSizeLast = new WeakMap();
+
+function panelSizeObserver() {
+  if (typeof ResizeObserver === "undefined") return null;
+  if (panelSizeRO) return panelSizeRO;
+  panelSizeRO = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const el = entry.target;
+      if (!(el instanceof Element) || !el.isConnected) continue;
+      scheduleFrame(el, "panel-size", () => {
+        const size = boxSize(el);
+        const width = Math.round(size.width * 100) / 100;
+        const height = Math.round(size.height * 100) / 100;
+        const prev = panelSizeLast.get(el);
+        if (prev && prev.width === width && prev.height === height) return;
+        panelSizeLast.set(el, { width, height });
+        el.dispatchEvent(
+          new CustomEvent("sizechanged", {
+            bubbles: true,
+            detail: { width, height },
+          })
+        );
+      });
+    }
+  });
+  return panelSizeRO;
+}
+
+/** Observe layout panels and fire `sizechanged` when their box changes. */
+function bindPanelSize(el) {
+  if (!(el instanceof Element)) return;
+  if (!SIZE_EVENT_TAGS.has(baseTag(el.localName))) return;
+  if (el._sizeObserved) return;
+  el._sizeObserved = true;
+  panelSizeObserver()?.observe(el);
+}
+
 function enhance(el) {
   if (!(el instanceof Element)) return;
   applySizeAttrs(el);
   applyFill(el);
   applyLeafAttrs(el);
   bindLeafInteractions(el);
+  bindPanelSize(el);
   applyCanvasChild(el);
   applyGrid(el);
   applyUniformGrid(el);
@@ -589,6 +723,9 @@ function enhance(el) {
   applySafeZone(el);
   applyBackgroundBlur(el);
   applyScaleBox(el);
+  if (baseTag(el.localName) === "scrollbox") {
+    bindDragScroll(el, { enabled: dragScrollEnabled });
+  }
 }
 
 function enhanceTree(root) {
@@ -644,27 +781,42 @@ function boot() {
   registerPrefixedElements();
   enhanceTree(document.documentElement);
 
+  /** Coalesce attribute-driven enhance into one rAF (stamping sets many attrs). */
+  const attrQueue = new Set();
+  let attrRaf = 0;
+  const flushAttrs = () => {
+    attrRaf = 0;
+    const nodes = [...attrQueue];
+    attrQueue.clear();
+    for (const el of nodes) {
+      if (!(el instanceof Element) || !el.isConnected) continue;
+      enhance(el);
+      applyCanvasChild(el);
+      if (
+        el.hasAttribute("hidden") ||
+        el.hasAttribute("open") ||
+        isDisplayContents(el)
+      ) {
+        for (const root of el.children) applyCanvasChild(root);
+      }
+      if (baseTag(el.parentElement?.localName) === "canvaspanel") {
+        applyCanvasChild(el);
+        if (isDisplayContents(el)) {
+          for (const root of el.children) applyCanvasChild(root);
+        }
+      }
+      if (PANEL_TAGS.has(el.localName)) {
+        for (const child of el.children) enhance(child);
+      }
+    }
+  };
+
   const obs = new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (m.type === "attributes" && m.target instanceof Element) {
-        enhance(m.target);
-        applyCanvasChild(m.target);
-        if (
-          m.attributeName === "hidden" ||
-          m.attributeName === "open" ||
-          isDisplayContents(m.target)
-        ) {
-          for (const root of m.target.children) applyCanvasChild(root);
-        }
-        if (baseTag(m.target.parentElement?.localName) === "canvaspanel") {
-          applyCanvasChild(m.target);
-          if (isDisplayContents(m.target)) {
-            for (const root of m.target.children) applyCanvasChild(root);
-          }
-        }
-        if (PANEL_TAGS.has(m.target.localName)) {
-          for (const child of m.target.children) enhance(child);
-        }
+        attrQueue.add(m.target);
+        if (!attrRaf) attrRaf = requestAnimationFrame(flushAttrs);
+        continue;
       }
       for (const node of m.addedNodes) {
         if (node.nodeType === 1) enhanceTree(node);
@@ -697,4 +849,14 @@ function start() {
 // Auto-start in the browser when this module is imported.
 start();
 
-export { enhance, enhanceTree, boot, start, baseTag, PREFIX, parseAnchors };
+export {
+  enhance,
+  enhanceTree,
+  boot,
+  start,
+  baseTag,
+  PREFIX,
+  parseAnchors,
+  configure,
+  getSettings,
+};

@@ -1,6 +1,6 @@
 # Tutorial 2: Composing components
 
-Build a `user-message` row from smaller widgets — avatar, meta line, and body text. You'll learn auto-import, nesting `.umc` files, and the parent/child state pattern used across the Discord example.
+Build a `user-message` row from smaller widgets, avatar, meta line, and body text. You'll learn auto-import, nesting `.umc` files, and the parent/child state pattern used across the Discord example.
 
 **Prerequisites:** [Tutorial 1](./01-first-widget.md), [UMC components](../umc.md#composition--auto-import).
 
@@ -195,11 +195,11 @@ export default defineUmc({
 });
 ```
 
-The shell doesn't know about `user-message` directly — `matrix-chat-roll` → `matrix-message-list` does.
+The shell doesn't know about `user-message` directly, `matrix-chat-roll` → `matrix-message-list` does.
 
 ## Layout tip: `fill` and `min-width: 0`
 
-In a horizontal row, the text column needs `fill` on the `verticalbox` and `min-width: 0` so long text wraps instead of overflowing. This is a flex quirk, not a SlateHTML special case — but fix it in the tag tree / widget CSS, not with `width: 100%` hacks on random nodes.
+In a horizontal row, the text column needs `fill` on the `verticalbox` and `min-width: 0` so long text wraps instead of overflowing. This is a flex quirk, not a SlateHTML special case, but fix it in the tag tree / widget CSS, not with `width: 100%` hacks on random nodes.
 
 ## Checkpoint
 

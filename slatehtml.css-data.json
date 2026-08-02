@@ -32,7 +32,7 @@
     },
     {
       "name": "--widget-percent",
-      "description": "0–100 value used by `progressbar` and `slider`."
+      "description": "0-100 value used by `progressbar` and `slider`."
     },
     {
       "name": "--widget-fill",

@@ -3,6 +3,7 @@
   "name": "SlateHTML UMC",
   "scopeName": "source.umc",
   "patterns": [
+    { "include": "#parent-directive" },
     { "include": "#html-section" },
     { "include": "#preview-section" },
     { "include": "#style-section" },
@@ -10,6 +11,15 @@
     { "include": "#section-header" }
   ],
   "repository": {
+    "parent-directive": {
+      "match": "^(@)\\s*(parent|extends)\\s+<?([a-z][\\w-]*)>?\\s*$",
+      "name": "meta.directive.parent.umc",
+      "captures": {
+        "1": { "name": "keyword.control.import.umc" },
+        "2": { "name": "keyword.control.directive.umc" },
+        "3": { "name": "entity.other.inherited-class.umc" }
+      }
+    },
     "section-header": {
       "match": "^---\\s*(html|template|style|css|script|js|preview|demo)\\s*---\\s*$",
       "name": "keyword.control.section.umc",

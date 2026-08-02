@@ -1,0 +1,92 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Scrollbox"></slate-text>
+          <slate-text kind="hint" text="Clipped scrolling region, needs a bounded height. Drag to scroll when dragScroll is on."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Vertical"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <scrollbox kind="stage" height="160" max-height="160">
+                    <verticalbox gap="8">
+                      <border kind="chip"><textblock text="Inventory slot 01"></textblock></border>
+                      <border kind="chip"><textblock text="Inventory slot 02"></textblock></border>
+                      <border kind="chip"><textblock text="Inventory slot 03"></textblock></border>
+                      <border kind="chip"><textblock text="Inventory slot 04"></textblock></border>
+                      <border kind="chip"><textblock text="Inventory slot 05"></textblock></border>
+                      <border kind="chip"><textblock text="Inventory slot 06"></textblock></border>
+                    </verticalbox>
+                  </scrollbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<scrollbox kind="stage" height="160" max-height="160">
+  <verticalbox gap="8">
+    <border kind="chip"><textblock text="Inventory slot 01"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 02"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 03"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 04"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 05"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 06"></textblock></border>
+  </verticalbox>
+</scrollbox>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Horizontal"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <scrollbox orientation="horizontal" height="64" width="100%">
+                    <horizontalbox gap="8" padding="8">
+                      <border kind="chip"><textblock text="Alpha"></textblock></border>
+                      <border kind="chip"><textblock text="Bravo"></textblock></border>
+                      <border kind="chip"><textblock text="Charlie"></textblock></border>
+                      <border kind="chip"><textblock text="Delta"></textblock></border>
+                      <border kind="chip"><textblock text="Echo"></textblock></border>
+                      <border kind="chip"><textblock text="Foxtrot"></textblock></border>
+                    </horizontalbox>
+                  </scrollbox>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<scrollbox orientation="horizontal" height="64" width="100%">
+  <horizontalbox gap="8" padding="8">
+    <border kind="chip"><textblock text="Alpha"></textblock></border>
+    <border kind="chip"><textblock text="Bravo"></textblock></border>
+    <border kind="chip"><textblock text="Charlie"></textblock></border>
+    <border kind="chip"><textblock text="Delta"></textblock></border>
+    <border kind="chip"><textblock text="Echo"></textblock></border>
+    <border kind="chip"><textblock text="Foxtrot"></textblock></border>
+  </horizontalbox>
+</scrollbox>
+            </script>
+          </wrapbox>
+        </verticalbox>

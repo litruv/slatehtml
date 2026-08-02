@@ -4,20 +4,31 @@
  *   import "slatehtml";
  *   import "slatehtml-ui";
  *
- * Or import one control:
+ * Dev / Vite: loads every `.umc` under src (and input/).
+ * One widget failing to compile/load must not blank the whole kit.
+ * Definitions are deferred and flushed together so upgrades don't
+ * cascade into dozens of layout passes on first paint / reload.
+ *
+ * Publish: `npm run build` compiles this entry into `dist/index.js`.
+ *
+ * Tree-shake one control instead:
  *
  *   import "slatehtml-ui/button";
+ *   import "slatehtml-ui/input/select";
  */
 
-import "./slate-button.umc";
-import "./slate-dropdown.umc";
-import "./slate-combobox.umc";
-import "./slate-icon.umc";
-import "./slate-image.umc";
-import "./slate-media.umc";
-import "./slate-shadowbox.umc";
-import "./slate-avatar-tile.umc";
-import "./popup-anchor.umc";
-import "./scope-picker-option.umc";
-import "./slate-scope-picker.umc";
-import "./slate-server-picker.umc";
+import { deferCustomElementDefines } from "slatehtml/umc";
+
+const modules = import.meta.glob(["./*.umc", "./input/*.umc"]);
+
+await deferCustomElementDefines(async () => {
+  await Promise.all(
+    Object.entries(modules).map(async ([path, load]) => {
+      try {
+        await load();
+      } catch (err) {
+        console.error(`[slatehtml-ui] failed to load ${path}`, err);
+      }
+    })
+  );
+});

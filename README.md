@@ -1,6 +1,6 @@
 # SlateHTML
 
-UMG-style layout panels and UserWidgets for the web. Plain HTML tags for layout (`verticalbox`, `overlay`, `canvaspanel`, …), plus `.umc` single-file components with Unreal-like lifecycle, events, and a Vite plugin. No React/Vue required — custom elements in the light DOM.
+UMG-style layout panels and UserWidgets for the web. Plain HTML tags for layout (`verticalbox`, `overlay`, `canvaspanel`, …), plus `.umc` single-file components with Unreal-like lifecycle, events, and a Vite plugin. No React/Vue required, custom elements in the light DOM.
 
 ## Documentation
 
@@ -8,8 +8,8 @@ User guides and tutorials live in [`docs/`](./docs/README.md):
 
 | Guide | Topics |
 |-------|--------|
-| [Layout & positioning](./docs/layout.md) | Panel tags, `fill`, overlay, canvas anchors — layout gallery (`index.html`) |
-| [Component playground](./docs/component-playground.md) | Live `.umc` preview in VS Code — resizable stage, `--- preview ---` |
+| [Layout & positioning](./docs/layout.md) | Panel tags, `fill`, overlay, canvas anchors, layout gallery (`index.html`) |
+| [Component playground](./docs/component-playground.md) | Live `.umc` preview in VS Code, resizable stage, `--- preview ---` |
 | [UMC components](./docs/umc.md) | `.umc` sections, lifecycle, events, composition, Vite |
 | [Tutorials](./docs/tutorials/README.md) | First widget → composition → events → dynamic lists |
 
@@ -67,9 +67,9 @@ import "slatehtml/slate.js";
 
 ## Layout markup
 
-**Canonical demo:** root [`index.html`](./index.html) — layout and positioning live in panel attributes; CSS is mostly `kind` chrome via `--widget-*` tokens. Prefer that pattern over raw flex/grid/position CSS.
+**Canonical demo:** root [`index.html`](./index.html), layout and positioning live in panel attributes; CSS is mostly `kind` chrome via `--widget-*` tokens. Prefer that pattern over raw flex/grid/position CSS.
 
-Authors write **bare** tag names (`verticalbox`, `textblock`, …). With the Vite `.umc` loader those compile to **`umc-*` custom elements** (`umc-verticalbox`, …). Uncompiled HTML (`npm run demo`, or a plain link to `widget.css`) keeps bare names — `widget.css` matches both via `:is(verticalbox, umc-verticalbox)`, and `widget.js` still enhances bare tags via MutationObserver.
+Authors write **bare** tag names (`verticalbox`, `textblock`, …). With the Vite `.umc` loader those compile to **`umc-*` custom elements** (`umc-verticalbox`, …). Uncompiled HTML (`npm run demo`, or a plain link to `widget.css`) keeps bare names, `widget.css` matches both via `:is(verticalbox, umc-verticalbox)`, and `widget.js` still enhances bare tags via MutationObserver.
 
 > Note: bare `<image>` is rewritten by the HTML parser to `<img>`, so it never matched CSS. Prefer the compiled `umc-image` path (or write `umc-image` explicitly in static HTML).
 
@@ -95,7 +95,7 @@ Native leaf events (already wired by `widget.js`): `changed` (checkbox), `percen
 
 ## .umc components
 
-Single-file UserWidgets — HTML + CSS + JS in one file. Built for Vite via `slatehtml/umc/vite`.
+Single-file UserWidgets, HTML + CSS + JS in one file. Built for Vite via `slatehtml/umc/vite`.
 
 ```umc
 --- html ---
@@ -128,7 +128,7 @@ export default defineUmc({
 |---------|---------|---------|
 | `html` | `template` | Markup stamped into the host (light DOM) |
 | `style` | `css` | Look-only CSS (string-inlined). Write `self` for the host tag; bare layout tags compile to `umc-*`. Hosts default to `display: contents` (stamped panel does layout, as in root `index.html`); don't restate flex/margin layout in CSS |
-| `script` | `js` | `defineUmc({ … })` — **no import needed**; `defineUmc` is injected |
+| `script` | `js` | `defineUmc({ … })`, **no import needed**; `defineUmc` is injected |
 | `preview` | `demo` | Editor-only demo markup; **ignored by Vite builds** |
 
 External files via a one-line link:
@@ -147,7 +147,7 @@ External files via a one-line link:
 ### Composition & registration
 
 There is no component registry. Importing a `.umc` registers its custom element,
-and the Vite loader **auto-imports any custom tags in the HTML section** — so you
+and the Vite loader **auto-imports any custom tags in the HTML section**, so you
 don't write `import "./user-name.umc"` by hand:
 
 ```umc
@@ -168,20 +168,20 @@ Resolution order for each tag:
 2. Search under the nearest ancestor folder named `widgets/`
 3. Optional extra roots via `umc({ roots: […] })`
 
-Built-in SlateHTML tags (`verticalbox`, `textblock`, … — and their `umc-*`
+Built-in SlateHTML tags (`verticalbox`, `textblock`, …, and their `umc-*`
 forms) are skipped. The host's own tag is skipped. Explicit imports still work
 and aren't duplicated. In `.umc` files, bare layout tags in HTML / CSS / script
 are rewritten to `umc-*` at compile time (same as `self` → host tag).
 
 ```js
-// main.js — still just the root
+// main.js, still just the root
 import "slatehtml/css";
 import "slatehtml/slate.js";
 import "./widgets/app/discord-app.umc";
 ```
 
 Plain `.js` widgets that build children in script (not HTML) still need their
-own `import`s — auto-import only reads the `--- html ---` section and `{ tag: "…" }`
+own `import`s, auto-import only reads the `--- html ---` section and `{ tag: "…" }`
 create specs in the script. Prefer `.umc` with HTML composition when you can.
 
 Widgets can live in any folder tree under `widgets/`:
@@ -195,7 +195,7 @@ widgets/
 ```
 
 Parents pass state down in `SynchronizeProperties` and children report back with
-events — see `../matrix/widgets/matrix/matrix-shell.umc`.
+events, see `../matrix/widgets/matrix/matrix-shell.umc`.
 
 ### Declarative bind (`data-umc`)
 
@@ -220,7 +220,7 @@ el.set(/* replace */);
 el.clear();
 ```
 
-Hand-written widgets can `extends WidgetElement` (from `slatehtml/umc`) for the same API. Dynamic lists in `.umc` use `el.set({ tag: "user-message", … })` / `el.add(…)` into a `[data-content]` region — see `../matrix/widgets/matrix/matrix-chat-roll.umc`.
+Hand-written widgets can `extends WidgetElement` (from `slatehtml/umc`) for the same API. Dynamic lists in `.umc` use `el.set({ tag: "user-message", … })` / `el.add(…)` into a `[data-content]` region, see `../matrix/widgets/matrix/matrix-chat-roll.umc`.
 
 ### Lifecycle (UMG UserWidget-style)
 
@@ -334,11 +334,11 @@ import {
 } from "slatehtml/umc";
 ```
 
-Inside `.umc` scripts, **do not** import `defineUmc` — the loader injects it.
+Inside `.umc` scripts, **do not** import `defineUmc`, the loader injects it.
 
 ## Editor preview
 
-The [VS Code / Cursor extension](./editors/vscode-umc/README.md) is the **component playground** — live preview of `.umc` widgets. See [Component playground](./docs/component-playground.md).
+The [VS Code / Cursor extension](./editors/vscode-umc/README.md) is the **component playground**, live preview of `.umc` widgets. See [Component playground](./docs/component-playground.md).
 
 ```bash
 npm run umc:link-vscode
@@ -350,7 +350,7 @@ Then **Developer: Reload Window**.
 |---------|-----|
 | Syntax highlighting | HTML / CSS / JS per section |
 | Emmet | Works in `html` / `preview` blocks |
-| Autocomplete | SlateHTML tags, attrs, hooks, APIs, sibling `.umc` tags — sorted **above** generic HTML. Inside `events: { … }`, suggests native keys and published names; `OnClicked` etc. come from that map. |
+| Autocomplete | SlateHTML tags, attrs, hooks, APIs, sibling `.umc` tags, sorted **above** generic HTML. Inside `events: { … }`, suggests native keys and published names; `OnClicked` etc. come from that map. |
 | Live preview | Title-bar icon, `Ctrl+K V` / `Cmd+K V`, or **UMC: Open Preview to the Side** |
 
 Preview loads `widget.css` + `widget.js` + every `.umc` in the component’s folder (so composed children render). Re-renders as you type. Optional `--- preview ---` controls the demo markup; without it you get `<your-tag></your-tag>` with `attrs` defaults.
@@ -368,21 +368,31 @@ Workspace settings used by this repo:
 ## Library API
 
 ```js
-import { enhance, enhanceTree, injectStyles, boot, start } from "slatehtml";
+import { enhance, enhanceTree, injectStyles, boot, start, configure, getSettings } from "slatehtml";
 
 enhance(el);        // apply attrs on one element
 enhanceTree(root);  // walk a subtree
 injectStyles();     // ensure stylesheet is in <head>
 boot();             // enhance document + observe mutations
 start();            // same as boot (alias for controlled init)
+
+configure({ dragScroll: true }); // click-drag scrollboxes (mouse/pen)
+getSettings();                   // { dragScroll }
 ```
 
+Per scrollbox: `drag-scroll` enables, `drag-scroll="false"` opts out. Touch still uses native panning. Drag can start on buttons (click only if you don't move); it skips selectable text and pointer-owned controls (fields, sliders, menus).
 ## Demos
 
-**Layout gallery** (no Vite — all built-in tags). See [Layout & positioning](./docs/layout.md) for a guided tour of each section:
+**Layout gallery** (no Vite, all built-in tags). See [Layout & positioning](./docs/layout.md) for a guided tour of each section:
 
 ```bash
 npm run demo
+```
+
+**Component gallery** (Vite, built-in panels + every `slatehtml-ui` widget on one scroll page):
+
+```bash
+npm run ui
 ```
 
 **Matrix client** (sibling app at `~/dev/matrix`):
@@ -400,7 +410,8 @@ Uses [`matrix-js-sdk`](https://github.com/matrix-org/matrix-js-sdk) with `slateh
 | `widget.css` / `widget.js` | Layout engine |
 | `index.js` / `inject-styles.js` | Default entry |
 | `umc/` | `.umc` runtime + Vite plugin |
-| `packages/slatehtml-ui/` | Reusable UI widgets |
+| `packages/slatehtml-ui/` | Reusable UI widgets (`src/*.umc` → `dist/index.js` via `npm run build:ui`) |
+| `demo/` | Scrollable component gallery (`npm run ui`) |
 | `editors/vscode-umc/` | Language extension |
 | `test/` | Parser, preview, layout, reactivity tests |
 | `slatehtml.html-data.json` / `slatehtml.css-data.json` | Editor custom data |

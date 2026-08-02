@@ -41,7 +41,7 @@ const BUILTIN_TAGS = new Set(BUILTIN_TAG_LIST);
 
 const PREFIXED_TAGS = new Set(BUILTIN_TAG_LIST.map((t) => PREFIX + t));
 
-/** Bare + prefixed — never auto-imported as UserWidgets. */
+/** Bare + prefixed, never auto-imported as UserWidgets. */
 const BUILTIN_TAGS_ALL = new Set([...BUILTIN_TAGS, ...PREFIXED_TAGS]);
 
 function isBuiltinTag(name) {

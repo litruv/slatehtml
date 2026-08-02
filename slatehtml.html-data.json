@@ -128,7 +128,7 @@
     },
     {
       "name": "anchors",
-      "description": "Canvaspanel child anchors (UE-style). Named presets or `minX,minY,maxX,maxY` in 0–1.",
+      "description": "Canvaspanel child anchors (UE-style). Named presets or `minX,minY,maxX,maxY` in 0-1.",
       "valueSet": "anchors"
     },
     {
@@ -163,7 +163,7 @@
   "tags": [
     {
       "name": "horizontalbox",
-      "description": "UMG Horizontal Box — lays out children in a row (flex).",
+      "description": "UMG Horizontal Box, lays out children in a row (flex).",
       "attributes": [
         { "name": "halign", "valueSet": "halign" },
         { "name": "valign", "valueSet": "valign" },
@@ -180,7 +180,7 @@
     },
     {
       "name": "verticalbox",
-      "description": "UMG Vertical Box — lays out children in a column (flex).",
+      "description": "UMG Vertical Box, lays out children in a column (flex).",
       "attributes": [
         { "name": "halign", "valueSet": "halign" },
         { "name": "valign", "valueSet": "valign" },
@@ -191,7 +191,7 @@
     },
     {
       "name": "wrapbox",
-      "description": "UMG Wrap Box — horizontal flow that wraps to the next line.",
+      "description": "UMG Wrap Box, horizontal flow that wraps to the next line.",
       "attributes": [
         { "name": "halign", "valueSet": "halign" },
         { "name": "valign", "valueSet": "valign" },
@@ -202,7 +202,7 @@
     },
     {
       "name": "overlay",
-      "description": "UMG Overlay — stacks children in one cell. Use child `halign` / `valign`. Last child paints on top.",
+      "description": "UMG Overlay, stacks children in one cell. Use child `halign` / `valign`. Last child paints on top.",
       "attributes": [
         { "name": "padding" },
         { "name": "fill" }
@@ -210,7 +210,7 @@
     },
     {
       "name": "canvaspanel",
-      "description": "UMG Canvas Panel — absolute children with `anchors` and `top`/`left`/`right`/`bottom` offsets. (`<canvas>` is reserved by HTML.)",
+      "description": "UMG Canvas Panel, absolute children with `anchors` and `top`/`left`/`right`/`bottom` offsets. (`<canvas>` is reserved by HTML.)",
       "attributes": [
         { "name": "padding" },
         { "name": "fill" }
@@ -218,16 +218,20 @@
     },
     {
       "name": "scrollbox",
-      "description": "UMG Scroll Box — clips to allocated size and scrolls overflow. Needs `height` or a `fill` slot.",
+      "description": "UMG Scroll Box, clips to allocated size and scrolls overflow. Needs `height` or a `fill` slot.",
       "attributes": [
         { "name": "orientation", "valueSet": "orientation" },
         { "name": "padding" },
-        { "name": "fill" }
+        { "name": "fill" },
+        {
+          "name": "drag-scroll",
+          "description": "Click-drag to scroll (mouse/pen). Overrides configure({ dragScroll }). Use drag-scroll=\"false\" to opt out."
+        }
       ]
     },
     {
       "name": "sizebox",
-      "description": "UMG Size Box — forces child to the box size.",
+      "description": "UMG Size Box, forces child to the box size.",
       "attributes": [
         { "name": "width" },
         { "name": "height" },
@@ -236,7 +240,7 @@
     },
     {
       "name": "scalebox",
-      "description": "UMG Scale Box — scales the first child to fit the box.",
+      "description": "UMG Scale Box, scales the first child to fit the box.",
       "attributes": [
         { "name": "stretch", "valueSet": "stretch" },
         { "name": "fill" }
@@ -244,7 +248,7 @@
     },
     {
       "name": "gridpanel",
-      "description": "UMG Grid Panel — CSS grid of evenly divided cells.",
+      "description": "UMG Grid Panel, CSS grid of evenly divided cells.",
       "attributes": [
         {
           "name": "columns",
@@ -261,7 +265,7 @@
     },
     {
       "name": "uniformgridpanel",
-      "description": "UMG Uniform Grid Panel — equal `1fr` columns and rows.",
+      "description": "UMG Uniform Grid Panel, equal `1fr` columns and rows.",
       "attributes": [
         {
           "name": "columns",
@@ -278,12 +282,12 @@
     },
     {
       "name": "spacer",
-      "description": "UMG Spacer — flexible empty space that absorbs leftover room in a box.",
+      "description": "UMG Spacer, flexible empty space that absorbs leftover room in a box.",
       "attributes": []
     },
     {
       "name": "border",
-      "description": "UMG Border — chrome + padding around content. Flex column so a `[fill]` child can take remaining height.",
+      "description": "UMG Border, chrome + padding around content. Flex column so a `[fill]` child can take remaining height.",
       "attributes": [
         { "name": "padding" },
         { "name": "fill" },
@@ -294,7 +298,7 @@
     },
     {
       "name": "safezone",
-      "description": "UMG Safe Zone — pads with `env(safe-area-inset-*)` for notches / home indicators.",
+      "description": "UMG Safe Zone, pads with `env(safe-area-inset-*)` for notches / home indicators.",
       "attributes": [
         {
           "name": "pad",
@@ -305,7 +309,7 @@
     },
     {
       "name": "widgetswitcher",
-      "description": "UMG Widget Switcher — shows the child whose `page` (or `data-page`) matches `active`.",
+      "description": "UMG Widget Switcher, shows the child whose `page` (or `data-page`) matches `active`.",
       "attributes": [
         {
           "name": "active",
@@ -316,7 +320,7 @@
     },
     {
       "name": "namedslot",
-      "description": "UMG Named Slot — light-DOM placeholder for injected content. Use `name` to identify the slot.",
+      "description": "UMG Named Slot, light-DOM placeholder for injected content. Use `name` to identify the slot.",
       "attributes": [
         {
           "name": "name",
@@ -326,17 +330,17 @@
     },
     {
       "name": "retainerbox",
-      "description": "UMG Retainer Box — API-parity passthrough (no offscreen render cache in the browser).",
+      "description": "UMG Retainer Box, API-parity passthrough (no offscreen render cache in the browser).",
       "attributes": [{ "name": "fill" }]
     },
     {
       "name": "invalidationbox",
-      "description": "UMG Invalidation Box — API-parity passthrough (no layout/paint cache in the browser).",
+      "description": "UMG Invalidation Box, API-parity passthrough (no layout/paint cache in the browser).",
       "attributes": [{ "name": "fill" }]
     },
     {
       "name": "backgroundblur",
-      "description": "UMG Background Blur — empty (or sparse) layer that blurs content behind it via `backdrop-filter`. Stack under chrome in an `overlay`; do not wrap the modal content.",
+      "description": "UMG Background Blur, empty (or sparse) layer that blurs content behind it via `backdrop-filter`. Stack under chrome in an `overlay`; do not wrap the modal content.",
       "attributes": [
         {
           "name": "blur",
@@ -351,7 +355,7 @@
     },
     {
       "name": "textblock",
-      "description": "UMG Text Block — static text. Prefer `text=\"...\"` attribute.",
+      "description": "UMG Text Block, static text. Prefer `text=\"...\"` attribute.",
       "attributes": [
         {
           "name": "text",
@@ -362,7 +366,7 @@
     },
     {
       "name": "image",
-      "description": "UMG Image — brush / tint rectangle.",
+      "description": "UMG Image, brush / tint rectangle.",
       "attributes": [
         {
           "name": "brush",
@@ -378,11 +382,11 @@
     },
     {
       "name": "progressbar",
-      "description": "UMG Progress Bar — display-only bar driven by `percent` (0–100).",
+      "description": "UMG Progress Bar, display-only bar driven by `percent` (0-100).",
       "attributes": [
         {
           "name": "percent",
-          "description": "Fill amount 0–100."
+          "description": "Fill amount 0-100."
         },
         { "name": "width" },
         { "name": "height" }
@@ -390,11 +394,11 @@
     },
     {
       "name": "checkbox",
-      "description": "UMG Check Box — click / Space / Enter toggles `checked`. Fires `changed`.",
+      "description": "UMG Check Box, click / Space / Enter toggles `checked`. Fires `changed`.",
       "attributes": [
         {
           "name": "checked",
-          "description": "Boolean attribute — present when checked.",
+          "description": "Boolean attribute, present when checked.",
           "valueSet": "v"
         },
         {
@@ -406,11 +410,11 @@
     },
     {
       "name": "slider",
-      "description": "UMG Slider — drag or arrows to set `percent` (0–100). Fires `percentchanged`.",
+      "description": "UMG Slider, drag or arrows to set `percent` (0-100). Fires `percentchanged`.",
       "attributes": [
         {
           "name": "percent",
-          "description": "Value 0–100."
+          "description": "Value 0-100."
         },
         {
           "name": "disabled",
@@ -421,7 +425,7 @@
     },
     {
       "name": "editabletext",
-      "description": "UMG Editable Text — contenteditable. Syncs `text`. Enter commits (unless `multiline`).",
+      "description": "UMG Editable Text, contenteditable. Syncs `text`. Enter commits (unless `multiline`).",
       "attributes": [
         {
           "name": "text",

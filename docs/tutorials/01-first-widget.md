@@ -1,6 +1,6 @@
 # Tutorial 1: Your first widget
 
-Build a `title-bar` UserWidget — a small horizontal strip with a title and status label. You'll learn the `.umc` file format, declarative `data-umc` binding, and the editor preview.
+Build a `title-bar` UserWidget, a small horizontal strip with a title and status label. You'll learn the `.umc` file format, declarative `data-umc` binding, and the editor preview.
 
 **Prerequisites:** [Layout basics](../layout.md), Vite project with `slatehtml` (use `example/` or create your own).
 
@@ -46,12 +46,12 @@ export default defineUmc({
 
 ### What's going on
 
-- **`--- html ---`** — panel markup stamped into the custom element. Layout is all attributes: `horizontalbox`, `padding`, `gap`, `spacer`.
-- **`data-umc="title"`** — copies the host's `title` attribute onto this `textblock`'s `text`.
-- **`--- style ---`** — `self` means the host tag (`title-bar`). Only appearance here — no flex or sizing.
-- **`--- script ---`** — `defineUmc` is injected by the Vite loader; don't import it.
-- **`attrs`** — declares observed attributes and their defaults. Changing `title` or `status` on `<title-bar>` updates bindings.
-- **`--- preview ---`** — editor-only markup for the VS Code preview.
+- **`--- html ---`**, panel markup stamped into the custom element. Layout is all attributes: `horizontalbox`, `padding`, `gap`, `spacer`.
+- **`data-umc="title"`**, copies the host's `title` attribute onto this `textblock`'s `text`.
+- **`--- style ---`**, `self` means the host tag (`title-bar`). Only appearance here, no flex or sizing.
+- **`--- script ---`**, `defineUmc` is injected by the Vite loader; don't import it.
+- **`attrs`**, declares observed attributes and their defaults. Changing `title` or `status` on `<title-bar>` updates bindings.
+- **`--- preview ---`**, editor-only markup for the VS Code preview.
 
 ## Step 2: Register the widget
 
@@ -75,7 +75,7 @@ Use it in HTML or another `.umc`:
 2. Open `title-bar.umc` in VS Code / Cursor.
 3. Click the preview icon or press `Ctrl+K V`.
 
-You should see your title bar with the preview markup. Edit `title` in the preview section — the preview updates as you type.
+You should see your title bar with the preview markup. Edit `title` in the preview section, the preview updates as you type.
 
 ## Step 4: Add theme CSS (optional)
 
@@ -122,7 +122,7 @@ You should understand:
 
 ## Next
 
-[Composing components →](./02-composing-components.md) — nest widgets and push state to children.
+[Composing components →](./02-composing-components.md), nest widgets and push state to children.
 
 ## Reference
 

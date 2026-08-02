@@ -1,7 +1,7 @@
 --- html ---
-<overlay class="media-stage" fill>
-  <video class="media-video" halign="fill" valign="fill" playsinline preload="auto"></video>
-  <img class="media-image" halign="fill" valign="fill" alt="" hidden />
+<overlay class="media-stage">
+  <video class="media-video" playsinline preload="auto"></video>
+  <img class="media-image" alt="" hidden />
   <verticalbox class="media-bar-wrap" halign="fill" valign="bottom">
     <horizontalbox class="media-bar" gap="8" padding="8 10" valign="center" halign="fill">
       <slate-icon class="media-play" name="play" size="16"></slate-icon>
@@ -9,21 +9,39 @@
       <border class="media-scrub" fill padding="0" valign="center">
         <input class="media-range" type="range" min="0" max="1000" value="0" step="1" />
       </border>
-      <slate-icon class="media-fs" name="maximize" size="16"></slate-icon>
+      <slate-icon class="media-fs" name="maximize-2" size="16"></slate-icon>
     </horizontalbox>
   </verticalbox>
 </overlay>
 
 --- style ---
 self {
+  display: block; /* umc-layout-ok, painted media host */
+  position: relative; /* umc-layout-ok, stage fills the host box */
   overflow: hidden;
+  max-width: 100%; /* umc-layout-ok, stay inside parent panels */
+  box-sizing: border-box;
   background: transparent;
   border-radius: var(--widget-radius, 8px);
   color: #fff;
+  aspect-ratio: var(--media-aspect, 16 / 9); /* umc-layout-ok, height from width */
 }
 
 .media-stage {
   --widget-padding: 0;
+  position: absolute; /* umc-layout-ok, fill host */
+  inset: 0; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+}
+
+.media-video,
+.media-image {
+  display: block; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  object-fit: contain;
+  background: #000;
 }
 
 .media-image[hidden],
@@ -39,6 +57,7 @@ self {
 
 .media-bar {
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+  min-width: 0; /* umc-layout-ok, scrubber can shrink */
 }
 
 self:hover .media-bar-wrap,
@@ -74,10 +93,13 @@ self[kind="image"] .media-time {
 .media-scrub {
   --widget-background: transparent;
   --widget-border: none;
+  min-width: 0; /* umc-layout-ok */
 }
 
 .media-range {
   display: block;
+  width: 100%; /* umc-layout-ok */
+  min-width: 0; /* umc-layout-ok */
   accent-color: var(--blurple, #5865f2);
   cursor: pointer;
 }
@@ -85,6 +107,10 @@ self[kind="image"] .media-time {
 self:fullscreen,
 self:-webkit-full-screen {
   background: #000;
+  aspect-ratio: auto; /* umc-layout-ok */
+  width: 100% !important; /* umc-layout-ok */
+  height: 100% !important; /* umc-layout-ok */
+  max-width: none; /* umc-layout-ok */
 }
 
 self:fullscreen .media-video,
@@ -145,11 +171,13 @@ function paintAspect(el, video, api) {
   const w = video?.videoWidth || 0;
   const h = video?.videoHeight || 0;
   if (w > 0 && h > 0) {
+    // Drive host height from width, never stamp intrinsic pixels (overflows panels).
+    el.style.setProperty("--media-aspect", `${w} / ${h}`);
     const stage = el.querySelector(".media-stage");
-    if (stage) {
-      stage.setAttribute("width", String(w));
-      stage.setAttribute("height", String(h));
-    }
+    stage?.removeAttribute("width");
+    stage?.removeAttribute("height");
+    stage?.style?.removeProperty("width");
+    stage?.style?.removeProperty("height");
     api?.emit?.("aspectchange", { width: w, height: h });
   }
 }
@@ -208,7 +236,7 @@ async function maybeAutoplaySilent(el, video) {
   try {
     await video.play();
   } catch {
-    /* autoplay blocked — leave muted attrs for a later gesture */
+    /* autoplay blocked, leave muted attrs for a later gesture */
   }
 }
 
@@ -263,7 +291,7 @@ async function toggleFullscreen(el, api) {
   }
   el.querySelector(".media-fs")?.setAttribute(
     "name",
-    isFullscreen(el) ? "minimize" : "maximize"
+    isFullscreen(el) ? "minimize-2" : "maximize-2"
   );
 }
 
@@ -323,7 +351,7 @@ export default defineUmc({
         toggleFullscreen(el, api);
         return;
       }
-      // Scrubber / range — don't steal seeking clicks.
+      // Scrubber / range, don't steal seeking clicks.
       if (event.target?.closest?.(".media-scrub, .media-range")) return;
       event.preventDefault();
       if (!video) return;
@@ -347,7 +375,7 @@ export default defineUmc({
     const onFs = () => {
       el.querySelector(".media-fs")?.setAttribute(
         "name",
-        isFullscreen(el) ? "minimize" : "maximize"
+        isFullscreen(el) ? "minimize-2" : "maximize-2"
       );
     };
     document.addEventListener("fullscreenchange", onFs);
@@ -445,7 +473,8 @@ export default defineUmc({
 <verticalbox gap="12" padding="16" width="420">
   <slate-media
     kind="video"
+    width="100%"
     src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
   ></slate-media>
-  <textblock kind="hint" text="Play / scrub / fullscreen. mxc:// resolves to blob."></textblock>
+  <textblock kind="hint" text="Play / scrub / fullscreen. Fits the parent width."></textblock>
 </verticalbox>

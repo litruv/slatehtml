@@ -3,6 +3,8 @@
  *
  * Format:
  *
+ *   @parent textblock   (optional, subclass a builtin / parent widget)
+ *
  *   --- html ---
  *   ...markup, or a single line: @ ./relative.html
  *
@@ -18,11 +20,19 @@
  * Sections are optional. Separators are lines matching
  *   --- html|template|style|css|script|js|preview|demo ---
  * Content may be blank.
+ *
+ * File-level directives (before any section, or between sections on their
+ * own line):
+ *   @parent textblock
+ *   @parent <textblock>
+ *   @extends textblock
  */
 
 const SECTION_RE =
   /^---\s*(html|template|style|css|script|js|preview|demo)\s*---\s*$/i;
 const LINK_RE = /^@\s+(.+?)\s*$/;
+/** `@parent textblock` / `@parent <textblock>` / `@extends umc-textblock` */
+const PARENT_RE = /^@\s*(?:parent|extends)\s+<?([a-z][\w-]*)>?\s*$/i;
 
 const ALIASES = {
   html: "html",
@@ -38,6 +48,7 @@ const ALIASES = {
 /**
  * @param {string} source
  * @returns {{
+ *   parent: string,
  *   html: { kind: 'inline'|'link', value: string },
  *   style: { kind: 'inline'|'link', value: string },
  *   script: { kind: 'inline'|'link', value: string },
@@ -46,6 +57,7 @@ const ALIASES = {
  */
 export function parseUmc(source) {
   const sections = {
+    parent: "",
     html: { kind: "inline", value: "" },
     style: { kind: "inline", value: "" },
     script: { kind: "inline", value: "" },
@@ -69,12 +81,23 @@ export function parseUmc(source) {
   };
 
   for (const line of lines) {
-    const m = line.match(SECTION_RE);
-    if (m) {
+    const section = line.match(SECTION_RE);
+    if (section) {
       flush();
-      current = ALIASES[m[1].toLowerCase()];
+      current = ALIASES[section[1].toLowerCase()];
       continue;
     }
+
+    // File-level @parent / @extends, only when not inside a section buffer
+    // that already has content, or always when current is null (preamble).
+    if (!current || buf.length === 0) {
+      const parent = line.match(PARENT_RE);
+      if (parent) {
+        sections.parent = parent[1].toLowerCase();
+        continue;
+      }
+    }
+
     if (current) buf.push(line);
   }
   flush();
