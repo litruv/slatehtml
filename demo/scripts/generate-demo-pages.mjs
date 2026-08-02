@@ -682,17 +682,17 @@ const pages = {
 
   "box.html": page({
     title: "Box & Border",
-    hint: "Boxes lay out children. Border is padding + optional kind chrome.",
+    hint: "Boxes lay out children. Border wraps content with padding and optional kind chrome.",
     events: "",
     mount: "verticalbox",
     variants: [
       {
         name: "Box · Row",
         code: `<horizontalbox gap="8" valign="center" width="100%">
-  <border kind="chip"><textblock text="A"></textblock></border>
-  <border kind="chip"><textblock text="B"></textblock></border>
+  <border kind="slot"><slate-text kind="mono" text="A"></slate-text></border>
+  <border kind="slot"><slate-text kind="mono" text="B"></slate-text></border>
   <spacer></spacer>
-  <border kind="chip"><textblock text="pinned right"></textblock></border>
+  <border kind="slot"><slate-text kind="mono" text="end"></slate-text></border>
 </horizontalbox>`,
       },
       {
@@ -706,29 +706,44 @@ const pages = {
       {
         name: "Box · Stack",
         code: `<verticalbox gap="8" width="100%">
-  <border kind="chip"><textblock text="One"></textblock></border>
-  <border kind="chip"><textblock text="Two"></textblock></border>
-  <border kind="chip"><textblock text="Three"></textblock></border>
+  <border kind="slot"><slate-text kind="mono" text="One"></slate-text></border>
+  <border kind="slot"><slate-text kind="mono" text="Two"></slate-text></border>
+  <border kind="slot"><slate-text kind="mono" text="Three"></slate-text></border>
 </verticalbox>`,
       },
       {
         name: "Border · Kinds",
-        code: `<wrapbox gap="8" width="100%">
-  <border kind="panel" padding="12"><textblock text="panel"></textblock></border>
-  <border kind="well" padding="12"><textblock text="well"></textblock></border>
-  <border kind="chip"><textblock text="chip"></textblock></border>
-  <border kind="slot" min-height="40" min-width="72"><textblock kind="mono" text="slot"></textblock></border>
-  <border kind="hud" padding="8 12"><textblock text="hud"></textblock></border>
-  <border kind="stretch" padding="8 12"><textblock text="stretch"></textblock></border>
-</wrapbox>`,
+        code: `<verticalbox gap="8" width="100%">
+  <border kind="panel" padding="12" width="100%">
+    <slate-text kind="mono" text='kind="panel"'></slate-text>
+  </border>
+  <border kind="well" padding="12" width="100%">
+    <slate-text kind="mono" text='kind="well"'></slate-text>
+  </border>
+  <border kind="chip" padding="12" width="100%">
+    <slate-text kind="mono" text='kind="chip"'></slate-text>
+  </border>
+  <border kind="slot" padding="12" width="100%">
+    <slate-text kind="mono" text='kind="slot"'></slate-text>
+  </border>
+  <border kind="hud" padding="12" width="100%">
+    <slate-text kind="mono" text='kind="hud"'></slate-text>
+  </border>
+</verticalbox>`,
       },
       {
         name: "Border · Padding",
-        code: `<horizontalbox gap="10" valign="center" width="100%">
-  <border kind="chip" padding="4"><textblock text="4"></textblock></border>
-  <border kind="chip" padding="8 16"><textblock text="8 16"></textblock></border>
-  <border kind="chip" padding="16"><textblock text="16"></textblock></border>
-</horizontalbox>`,
+        code: `<verticalbox gap="8" width="100%">
+  <border kind="panel" padding="4" width="100%">
+    <slate-text kind="mono" text='padding="4"'></slate-text>
+  </border>
+  <border kind="panel" padding="8 20" width="100%">
+    <slate-text kind="mono" text='padding="8 20"'></slate-text>
+  </border>
+  <border kind="panel" padding="16" width="100%">
+    <slate-text kind="mono" text='padding="16"'></slate-text>
+  </border>
+</verticalbox>`,
       },
     ],
   }),
