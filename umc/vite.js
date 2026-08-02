@@ -21,7 +21,8 @@
  * Bare layout tags (`verticalbox`) compile to `umc-*` custom elements.
  *
  * Uses resolveId + load (not transform) so Vite never tries to parse .umc as JS.
- * Also transforms app HTML / CSS so bare tags in index.html and *.css match.
+ * Also transforms app HTML (bare → umc-*) and dualizes app CSS type selectors
+ * so styles match both stamped umc-* hosts and bare tags (e.g. SPA-injected demos).
  *
  * Optional companion: `singleFile()`, collapses a Vite app build into one
  * self-contained `index.html` (JS + CSS inlined).
@@ -44,6 +45,7 @@ const {
   prefixBuiltinTagsInHtml,
   prefixBuiltinTagsInCss,
   prefixBuiltinTagsInScript,
+  dualizeBuiltinSelectors,
 } = require("./auto-import.cjs");
 const { assertUmcStyle } = require("./lint-style.cjs");
 
@@ -260,7 +262,9 @@ export function umc(options = {}) {
       if (!path.endsWith(".css")) return null;
       // widget.css is already dualized (:is(bare, umc-bare)); leave it.
       if (/[/\\]widget\.css$/.test(path)) return null;
-      const next = prefixBuiltinTagsInCss(code);
+      // Dualize so app chrome matches both Vite-prefixed index.html hosts and
+      // bare tags injected at runtime (docs pages, editable demo mounts).
+      const next = dualizeBuiltinSelectors(code);
       if (next === code) return null;
       return { code: next, map: null };
     },
