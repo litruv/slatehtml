@@ -31,10 +31,10 @@ ${js}
     : "";
   return `          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example${ev}>
             <border kind="panel" class="demo-live" padding="16">
-              <verticalbox gap="10" data-demo-stage>
+              <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="${title}"></slate-text>
                 <scalebox class="demo-live-scale" stretch="down-x" width="100%">
-                  <${mountTag} gap="${mountGap}" valign="center" data-demo-mount>
+                  <${mountTag} gap="${mountGap}" valign="center" width="100%" data-demo-mount>
 ${html.split("\n").map((l) => `                    ${l}`).join("\n")}
                   </${mountTag}>
                 </scalebox>

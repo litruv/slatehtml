@@ -595,6 +595,22 @@ slate-combobox {
 .demo-live-scale {
   width: 100%; /* umc-layout-ok */
   min-width: 0; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
+}
+
+.demo-live [data-demo-stage],
+.demo-live [data-demo-mount] {
+  width: 100%; /* umc-layout-ok */
+  max-width: 100%; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
+}
+
+.demo-live slate-title-bar,
+.demo-live slate-footer,
+.demo-live slate-app-bar {
+  width: 100% !important; /* umc-layout-ok */
+  max-width: 100%; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
 }
 
 /* Inputs: live demo | umc code box + events */
