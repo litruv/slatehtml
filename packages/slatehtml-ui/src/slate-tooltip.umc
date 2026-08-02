@@ -1,0 +1,265 @@
+--- html ---
+<span class="slate-tooltip-anchor" data-slot="default"></span>
+<span class="slate-tooltip-bubble" role="tooltip" hidden>
+  <span class="slate-tooltip-tail" aria-hidden="true"></span>
+  <textblock class="slate-tooltip-label" data-umc="text"></textblock>
+</span>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok */
+  vertical-align: middle;
+  position: relative; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-tooltip-anchor {
+  display: contents; /* umc-layout-ok */
+}
+
+.slate-tooltip-bubble {
+  position: fixed; /* umc-layout-ok, escape overflow */
+  z-index: var(--tooltip-z, 240); /* umc-layout-ok */
+  box-sizing: border-box;
+  max-width: 220px; /* umc-layout-ok */
+  padding: 5px 8px; /* umc-layout-ok */
+  border-radius: 4px;
+  background: var(--hud, #11111b);
+  color: var(--hud-ink, #cdd6f4);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  pointer-events: none;
+  /* drop-shadow so the tail shares the same cast as the bubble */
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.3));
+}
+
+.slate-tooltip-bubble[hidden] {
+  display: none !important;
+}
+
+.slate-tooltip-bubble[data-tail="off"] .slate-tooltip-tail {
+  display: none;
+}
+
+.slate-tooltip-label {
+  color: inherit;
+  white-space: normal;
+}
+
+/* Caret points toward the anchor; edge depends on placement. */
+.slate-tooltip-tail {
+  position: absolute; /* umc-layout-ok */
+  width: 0; /* umc-layout-ok */
+  height: 0; /* umc-layout-ok */
+  border-style: solid;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.slate-tooltip-bubble[data-placement="top"] .slate-tooltip-tail {
+  top: 100%; /* umc-layout-ok */
+  left: var(--tail-along, 50%); /* umc-layout-ok */
+  transform: translateX(-50%);
+  border-width: var(--tail-size, 6px) var(--tail-size, 6px) 0;
+  border-top-color: var(--hud, #11111b);
+}
+
+.slate-tooltip-bubble[data-placement="bottom"] .slate-tooltip-tail {
+  bottom: 100%; /* umc-layout-ok */
+  left: var(--tail-along, 50%); /* umc-layout-ok */
+  transform: translateX(-50%);
+  border-width: 0 var(--tail-size, 6px) var(--tail-size, 6px);
+  border-bottom-color: var(--hud, #11111b);
+}
+
+.slate-tooltip-bubble[data-placement="left"] .slate-tooltip-tail {
+  left: 100%; /* umc-layout-ok */
+  top: var(--tail-along, 50%); /* umc-layout-ok */
+  transform: translateY(-50%);
+  border-width: var(--tail-size, 6px) 0 var(--tail-size, 6px) var(--tail-size, 6px);
+  border-left-color: var(--hud, #11111b);
+}
+
+.slate-tooltip-bubble[data-placement="right"] .slate-tooltip-tail {
+  right: 100%; /* umc-layout-ok */
+  top: var(--tail-along, 50%); /* umc-layout-ok */
+  transform: translateY(-50%);
+  border-width: var(--tail-size, 6px) var(--tail-size, 6px) var(--tail-size, 6px) 0;
+  border-right-color: var(--hud, #11111b);
+}
+
+--- script ---
+/**
+ * Hover / focus tip for slotted content.
+ *
+ *   <slate-tooltip text="Delete forever" offset="20">
+ *     <slate-button text="Delete"></slate-button>
+ *   </slate-tooltip>
+ *
+ * Attrs: text, placement (top | bottom | left | right), offset, tail, disabled
+ *   offset — 0–100 maps to 15%–85% along the near edge. Moves the tail on the
+ *            bubble and shifts the bubble so the tip stays aimed at the control.
+ *            Default 50 (center). top/bottom → width; left/right → height.
+ *   tail — "" (on) | "off"
+ */
+const TAIL = 6;
+const TIP_GAP = 4;
+/** Usable edge band: offset 0 → 15%, offset 100 → 85%. */
+const TAIL_ALONG_MIN = 0.15;
+const TAIL_ALONG_MAX = 0.85;
+
+function bubbleOf(el) {
+  return el.querySelector(".slate-tooltip-bubble");
+}
+
+/** Tail position as 0–100 along the bubble edge (default 50). */
+function tailAlongPercent(el) {
+  const raw = String(el.getAttribute("offset") ?? "").trim();
+  if (!raw) return 50;
+  const n = Number(raw.endsWith("%") ? raw.slice(0, -1) : raw);
+  if (!Number.isFinite(n)) return 50;
+  return Math.min(100, Math.max(0, n));
+}
+
+function clearance(el) {
+  const bubble = bubbleOf(el);
+  const tailed = bubble?.getAttribute("data-tail") !== "off";
+  return TIP_GAP + (tailed ? TAIL : 0);
+}
+
+function anchorBox(el) {
+  const kids = [...el.children].filter(
+    (n) => n.nodeType === 1 && !n.classList?.contains("slate-tooltip-bubble")
+  );
+  for (const kid of kids) {
+    if (getComputedStyle(kid).display === "contents") {
+      for (const nested of kid.children) {
+        const r = nested.getBoundingClientRect();
+        if (r.width || r.height) return r;
+      }
+    }
+    const r = kid.getBoundingClientRect();
+    if (r.width || r.height) return r;
+  }
+  return el.getBoundingClientRect();
+}
+
+function place(el) {
+  const bubble = bubbleOf(el);
+  if (!bubble || bubble.hasAttribute("hidden")) return;
+  const placement = el.getAttribute("placement") || "top";
+  const gap = clearance(el);
+  const tailed = bubble.getAttribute("data-tail") !== "off";
+  const anchor = anchorBox(el);
+  const br = bubble.getBoundingClientRect();
+  const bw = br.width || bubble.offsetWidth;
+  const bh = br.height || bubble.offsetHeight;
+  const t = tailAlongPercent(el) / 100;
+  const alongFrac = TAIL_ALONG_MIN + t * (TAIL_ALONG_MAX - TAIL_ALONG_MIN);
+  const aimX = anchor.left + anchor.width / 2;
+  const aimY = anchor.top + anchor.height / 2;
+  let top = 0;
+  let left = 0;
+  if (placement === "bottom") {
+    top = anchor.bottom + gap;
+    // Align the offset point on the bubble with the anchor center.
+    left = tailed ? aimX - bw * alongFrac : aimX - bw / 2;
+  } else if (placement === "left") {
+    top = tailed ? aimY - bh * alongFrac : aimY - bh / 2;
+    left = anchor.left - bw - gap;
+  } else if (placement === "right") {
+    top = tailed ? aimY - bh * alongFrac : aimY - bh / 2;
+    left = anchor.right + gap;
+  } else {
+    top = anchor.top - bh - gap;
+    left = tailed ? aimX - bw * alongFrac : aimX - bw / 2;
+  }
+  left = Math.min(Math.max(8, left), window.innerWidth - bw - 8);
+  top = Math.min(Math.max(8, top), window.innerHeight - bh - 8);
+  bubble.style.top = `${Math.round(top)}px`;
+  bubble.style.left = `${Math.round(left)}px`;
+  bubble.dataset.placement = placement;
+
+  // Tail at the same along-fraction; after viewport clamp, re-aim at the control.
+  if (tailed) {
+    if (placement === "top" || placement === "bottom") {
+      const along = Math.min(Math.max(aimX - left, bw * TAIL_ALONG_MIN), bw * TAIL_ALONG_MAX);
+      bubble.style.setProperty("--tail-along", `${Math.round(along)}px`);
+    } else {
+      const along = Math.min(Math.max(aimY - top, bh * TAIL_ALONG_MIN), bh * TAIL_ALONG_MAX);
+      bubble.style.setProperty("--tail-along", `${Math.round(along)}px`);
+    }
+    bubble.style.setProperty("--tail-size", `${TAIL}px`);
+  }
+}
+
+function show(el) {
+  if (el.hasAttribute("disabled")) return;
+  const text = (el.getAttribute("text") || "").trim();
+  if (!text) return;
+  const bubble = bubbleOf(el);
+  if (!bubble) return;
+  bubble.dataset.tail = el.getAttribute("tail") === "off" ? "off" : "on";
+  bubble.dataset.placement = el.getAttribute("placement") || "top";
+  bubble.removeAttribute("hidden");
+  place(el);
+}
+
+function hide(el) {
+  bubbleOf(el)?.setAttribute("hidden", "");
+}
+
+export default defineUmc({
+  tag: "slate-tooltip",
+  attrs: {
+    text: "",
+    placement: "top",
+    offset: "",
+    tail: "",
+    disabled: "",
+  },
+
+  Construct(el) {
+    if (el._tipBound) return;
+    el._tipBound = true;
+    el.addEventListener("pointerenter", () => show(el));
+    el.addEventListener("pointerleave", () => hide(el));
+    el.addEventListener("focusin", () => show(el));
+    el.addEventListener("focusout", (event) => {
+      if (!el.contains(event.relatedTarget)) hide(el);
+    });
+    el._onScroll = () => {
+      if (!bubbleOf(el)?.hasAttribute("hidden")) place(el);
+    };
+    window.addEventListener("scroll", el._onScroll, true);
+    window.addEventListener("resize", el._onScroll);
+  },
+
+  Destroyed(el) {
+    hide(el);
+    if (el._onScroll) {
+      window.removeEventListener("scroll", el._onScroll, true);
+      window.removeEventListener("resize", el._onScroll);
+      el._onScroll = null;
+    }
+    el._tipBound = false;
+  },
+
+  SynchronizeProperties(el, { bind }) {
+    bind();
+    if (el.hasAttribute("disabled")) hide(el);
+    const bubble = bubbleOf(el);
+    if (bubble && !bubble.hasAttribute("hidden")) place(el);
+  },
+});
+
+--- preview ---
+<horizontalbox gap="12" padding="24" valign="center">
+  <slate-tooltip text="Primary action">
+    <slate-button text="Hover me"></slate-button>
+  </slate-tooltip>
+  <slate-tooltip text="On the right" placement="right">
+    <slate-icon name="info" size="18"></slate-icon>
+  </slate-tooltip>
+</horizontalbox>

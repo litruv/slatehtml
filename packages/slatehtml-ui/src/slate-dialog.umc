@@ -1,0 +1,291 @@
+--- html ---
+<overlay class="slate-dialog-root">
+  <border class="slate-dialog-backdrop" halign="fill" valign="fill"></border>
+  <border class="slate-dialog-card" kind="panel" halign="center" valign="center" padding="16" min-width="280" max-width="min(92vw, 420px)">
+    <verticalbox gap="12" width="100%">
+      <horizontalbox gap="8" valign="center" width="100%">
+        <textblock class="slate-dialog-title" data-umc="title" fill min-width="0"></textblock>
+        <slate-icon class="slate-dialog-close" name="x" size="16"></slate-icon>
+      </horizontalbox>
+      <textblock class="slate-dialog-text" data-umc="text"></textblock>
+      <horizontalbox class="slate-dialog-actions" data-slot="default" gap="8" halign="right" width="100%"></horizontalbox>
+    </verticalbox>
+  </border>
+</overlay>
+
+--- style ---
+self:not([open]) > .slate-dialog-root {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+self[open] > .slate-dialog-root {
+  position: fixed; /* umc-layout-ok, modal layer */
+  top: 0; /* umc-layout-ok */
+  left: 0; /* umc-layout-ok */
+  right: 0; /* umc-layout-ok */
+  bottom: 0; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+  z-index: var(--dialog-z, 220); /* umc-layout-ok */
+}
+
+.slate-dialog-root[hidden] {
+  display: none !important;
+}
+
+.slate-dialog-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.55);
+  --widget-border: none;
+  --widget-radius: 0;
+  cursor: pointer;
+}
+
+.slate-dialog-card {
+  --widget-background: var(--panel, #eff1f5);
+  --widget-border: 1px solid var(--line, #ccd0da);
+  --widget-radius: 10px;
+  color: var(--ink, inherit);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  pointer-events: auto;
+}
+
+.slate-dialog-title {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.slate-dialog-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted, inherit);
+  white-space: pre-wrap;
+}
+
+.slate-dialog-close {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.75;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-dialog-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.slate-dialog-actions:empty {
+  display: none !important;
+}
+
+--- script ---
+/**
+ * Modal dialog.
+ *
+ *   <slate-dialog open title="Delete?" text="This cannot be undone.">
+ *     <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+ *     <slate-button text="Delete" dialog-action="confirm"></slate-button>
+ *   </slate-dialog>
+ *
+ * Attrs: open, title, text, close-backdrop, close-escape
+ * Action buttons: dialog-action="cancel" | "confirm" | custom
+ * Events: opened, closed, confirmed, cancelled
+ */
+function attrOn(el, name, fallback = true) {
+  if (!el.hasAttribute(name)) return fallback;
+  const v = String(el.getAttribute(name) ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "" || v === "true" || v === "1" || v === "on") return true;
+  if (v === "false" || v === "0" || v === "off") return false;
+  return fallback;
+}
+
+const CANCEL_LABELS = new Set(["cancel", "close", "stay", "no", "dismiss", "back"]);
+const CONFIRM_LABELS = new Set([
+  "ok",
+  "confirm",
+  "yes",
+  "delete",
+  "leave",
+  "submit",
+  "save",
+  "continue",
+  "accept",
+]);
+
+/** Resolve which action a footer button represents. */
+function resolveDialogAction(btn) {
+  if (!(btn instanceof Element)) return "action";
+  const explicit = btn.getAttribute("dialog-action");
+  if (explicit != null && String(explicit).trim() !== "") {
+    return String(explicit).trim().toLowerCase();
+  }
+  const label = (btn.getAttribute("text") || btn.textContent || "")
+    .trim()
+    .toLowerCase();
+  if (CANCEL_LABELS.has(label)) return "cancel";
+  if (CONFIRM_LABELS.has(label)) return "confirm";
+  return label || "action";
+}
+
+function closeDialog(el, api, reason, detail = {}) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  const payload = { reason: reason || "dismiss", ...detail };
+  api.emit("closed", payload);
+  if (payload.reason === "confirm") api.emit("confirmed", payload);
+  if (payload.reason === "cancel") api.emit("cancelled", payload);
+}
+
+const liveDialogs = new Set();
+let dialogDocBound = false;
+
+function onDialogDocClick(event) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  let trigger = null;
+  for (const node of path) {
+    if (node instanceof Element && node.hasAttribute("dialog")) {
+      trigger = node;
+      break;
+    }
+  }
+  if (!trigger) {
+    const t = event.target;
+    trigger =
+      t instanceof Element
+        ? t.closest("[dialog]")
+        : t?.parentElement?.closest?.("[dialog]") || null;
+  }
+  if (!trigger) return;
+  const id = trigger.getAttribute("dialog");
+  if (!id) return;
+  for (const el of liveDialogs) {
+    if (el.id !== id && el.getAttribute("name") !== id) continue;
+    if (el.contains(trigger)) return;
+    event.preventDefault();
+    const title = trigger.getAttribute("dialog-title");
+    const text = trigger.getAttribute("dialog-text");
+    if (title != null) el.setAttribute("title", title);
+    if (text != null) el.setAttribute("text", text);
+    el.setAttribute("open", "");
+    return;
+  }
+}
+
+export default defineUmc({
+  tag: "slate-dialog",
+  attrs: {
+    open: "",
+    title: "",
+    text: "",
+    "close-backdrop": "",
+    "close-escape": "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+    liveDialogs.add(el);
+    if (!dialogDocBound) {
+      dialogDocBound = true;
+      document.addEventListener("click", onDialogDocClick, true);
+    }
+
+    if (el._dialogBound) return;
+    el._dialogBound = true;
+
+    el.addEventListener("click", (event) => {
+      const close = event.target?.closest?.(".slate-dialog-close");
+      if (close && el.contains(close)) {
+        closeDialog(el, api, "close");
+        return;
+      }
+      const backdrop = event.target?.closest?.(".slate-dialog-backdrop");
+      if (backdrop && el.contains(backdrop) && attrOn(el, "close-backdrop", true)) {
+        closeDialog(el, api, "backdrop");
+      }
+    });
+
+    el.addEventListener("clicked", (event) => {
+      const actions = el.querySelector(".slate-dialog-actions");
+      if (!actions) return;
+      const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+      let btn = null;
+      for (const node of path) {
+        if (!(node instanceof Element)) continue;
+        if (!actions.contains(node)) continue;
+        if (
+          node.localName === "slate-button" ||
+          node.matches?.("button, [role='button']")
+        ) {
+          btn = node;
+          break;
+        }
+      }
+      if (!btn) {
+        const t = event.target;
+        btn =
+          t instanceof Element
+            ? t.closest?.(".slate-dialog-actions slate-button, .slate-dialog-actions button, .slate-dialog-actions [role='button']")
+            : null;
+      }
+      if (!btn || !el.contains(btn)) return;
+      const action = resolveDialogAction(btn);
+      closeDialog(el, api, action, { action });
+    });
+
+    el._onKey = (event) => {
+      if (!el.hasAttribute("open")) return;
+      if (event.key === "Escape" && attrOn(el, "close-escape", true)) {
+        event.preventDefault();
+        closeDialog(el, api, "escape");
+      }
+    };
+    document.addEventListener("keydown", el._onKey);
+  },
+
+  Destroyed(el, api) {
+    liveDialogs.delete(el);
+    if (!liveDialogs.size && dialogDocBound) {
+      dialogDocBound = false;
+      document.removeEventListener("click", onDialogDocClick, true);
+    }
+    if (el._onKey) {
+      document.removeEventListener("keydown", el._onKey);
+      el._onKey = null;
+    }
+    closeDialog(el, api, "destroy");
+    el._dialogBound = false;
+  },
+
+  SynchronizeProperties(el, api) {
+    const { attr, bind } = api;
+    bind();
+    const open = el.hasAttribute("open");
+    const root = el.querySelector(".slate-dialog-root");
+    const textEl = el.querySelector(".slate-dialog-text");
+    const titleEl = el.querySelector(".slate-dialog-title");
+    root?.toggleAttribute("hidden", !open);
+    if (root) root.inert = !open;
+    el.setAttribute("aria-hidden", open ? "false" : "true");
+    textEl?.toggleAttribute("hidden", !(attr("text", "") || "").trim());
+    titleEl?.toggleAttribute("hidden", !(attr("title", "") || "").trim());
+
+    if (open && !el._wasOpen) {
+      el._wasOpen = true;
+      api.emit("opened", {});
+    } else if (!open) {
+      el._wasOpen = false;
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="520" height="320" kind="stage">
+  <slate-dialog open title="Delete file?" text="This cannot be undone.">
+    <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+    <slate-button text="Delete" dialog-action="confirm"></slate-button>
+  </slate-dialog>
+</canvaspanel>

@@ -8,16 +8,32 @@ import { fileURLToPath } from "node:url";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "../pages");
 
-function exampleBlock({ title, events, mount, code }) {
+function exampleBlock({ title, events, mount, code, script }) {
   const mountTag = mount;
-  const body = code.trim();
+  const html = code.trim();
+  const js = script ? script.trim() : "";
+  // Keep JS in a sibling text/plain script so a nested </script> cannot
+  // prematurely close data-demo-snippet. demo/main.js merges them for display.
+  const scriptBlock = js
+    ? `
+            <script type="text/plain" data-demo-script>
+${js}
+            </script>`
+    : "";
   const ev = events ? ` data-events="${events}"` : "";
+  const eventsPanel = events
+    ? `
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>`
+    : "";
   return `          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example${ev}>
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="${title}"></slate-text>
                 <${mountTag} gap="10" valign="center" data-demo-mount>
-${body.split("\n").map((l) => `                  ${l}`).join("\n")}
+${html.split("\n").map((l) => `                  ${l}`).join("\n")}
                 </${mountTag}>
               </verticalbox>
             </border>
@@ -25,16 +41,12 @@ ${body.split("\n").map((l) => `                  ${l}`).join("\n")}
               <verticalbox gap="10" fill>
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
-                </scrollbox>
-                <slate-text kind="label" text="Events"></slate-text>
-                <scrollbox class="demo-events-scroll" max-height="140">
-                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
-                </scrollbox>
+                </scrollbox>${eventsPanel}
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-${body}
-            </script>
+${html}
+            </script>${scriptBlock}
           </wrapbox>`;
 }
 
@@ -46,6 +58,7 @@ function page({ title, hint, events = "", mount = "verticalbox", label, variants
         events,
         mount,
         code: v.code,
+        script: v.script,
       })
     )
     .join("\n\n");
@@ -404,7 +417,7 @@ const pages = {
     ],
   }),
 
-  // --- Pickers ---
+  // --- Input (menus / combos) ---
   "dropdown.html": page({
     title: "Dropdown",
     hint: "Edit the UMC on the right, blur or Ctrl+Enter applies it.",
@@ -469,29 +482,480 @@ const pages = {
   }),
 
   // --- Display ---
-  "icon.html": page({
-    title: "Icon",
-    hint: "Lucide icons, any kebab-case name from lucide.dev/icons.",
+  "chip.html": page({
+    title: "Chip",
+    hint: "Compact labels. Optional icon, selected, deletable, clickable.",
+    events: "clicked,deleted",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-chip text="Default"></slate-chip>
+<slate-chip text="Soft" kind="soft"></slate-chip>
+<slate-chip text="Outlined" kind="outlined"></slate-chip>
+<slate-chip text="Selected" selected></slate-chip>`,
+      },
+      {
+        name: "Icon",
+        code: `<slate-chip text="Docs" icon="book"></slate-chip>
+<slate-chip text="Search" icon="search" kind="outlined"></slate-chip>
+<slate-chip text="Starred" icon="star" selected></slate-chip>`,
+      },
+      {
+        name: "Clickable",
+        code: `<slate-chip text="Filter" icon="list-filter" clickable></slate-chip>
+<slate-chip text="Tag" clickable kind="soft"></slate-chip>`,
+      },
+      {
+        name: "Deletable",
+        code: `<slate-chip text="Draft" deletable></slate-chip>
+<slate-chip text="Review" icon="eye" deletable></slate-chip>`,
+      },
+      {
+        name: "Disabled",
+        code: `<slate-chip text="Locked" disabled></slate-chip>
+<slate-chip text="Locked" icon="lock" deletable disabled></slate-chip>`,
+      },
+    ],
+  }),
+
+  "badge.html": page({
+    title: "Badge",
+    hint: "Count or dot mark over an icon / control. Use max for 99+ style caps.",
+    events: "",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Count",
+        code: `<slate-badge text="3">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="12">
+  <slate-icon name="mail" size="20"></slate-icon>
+</slate-badge>`,
+      },
+      {
+        name: "Max",
+        code: `<slate-badge text="120" max="99">
+  <slate-button text="Inbox"></slate-button>
+</slate-badge>
+<slate-badge text="8" max="9" kind="warn">
+  <slate-icon name="message-square" size="20"></slate-icon>
+</slate-badge>`,
+      },
+      {
+        name: "Dot",
+        code: `<slate-badge dot>
+  <slate-icon name="mail" size="20"></slate-icon>
+</slate-badge>
+<slate-badge dot kind="warn">
+  <slate-button text="Status"></slate-button>
+</slate-badge>`,
+      },
+      {
+        name: "Kinds",
+        code: `<slate-badge text="2">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="2" kind="muted">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="2" kind="warn">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>`,
+      },
+      {
+        name: "Invisible",
+        code: `<slate-badge text="3" invisible>
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>`,
+      },
+    ],
+  }),
+
+  "divider.html": page({
+    title: "Divider",
+    hint: "Hairline rule. Use orientation=\"vertical\" in a row. kind: strong, muted.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Horizontal",
+        code: `<slate-text kind="body" text="Above"></slate-text>
+<slate-divider></slate-divider>
+<slate-text kind="body" text="Below"></slate-text>`,
+      },
+      {
+        name: "Vertical",
+        code: `<horizontalbox gap="10" valign="center">
+  <slate-text kind="body" text="Left"></slate-text>
+  <slate-divider orientation="vertical"></slate-divider>
+  <slate-text kind="body" text="Right"></slate-text>
+</horizontalbox>`,
+      },
+      {
+        name: "Kinds",
+        code: `<slate-divider></slate-divider>
+<slate-divider kind="strong"></slate-divider>
+<slate-divider kind="muted"></slate-divider>`,
+      },
+    ],
+  }),
+
+  "list.html": page({
+    title: "List",
+    hint: "List view. options: value|Label|icon|secondary. --- separator, # Category. Events: selectionchanged, activated (Enter).",
+    events: "selectionchanged,activated",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-list
+  options="inbox|Inbox|inbox, starred|Starred|star, sent|Sent|send"
+  selected="inbox"
+  width="280"
+></slate-list>`,
+      },
+      {
+        name: "Sections",
+        code: `<slate-list
+  options="# Mail, inbox|Inbox|inbox|3 new, starred|Starred|star, ---, # People, ada|Ada|user|Admin, linus|Linus|user|Dev"
+  selected="ada"
+  width="280"
+></slate-list>`,
+      },
+      {
+        name: "Dense + plain",
+        code: `<slate-list
+  kind="plain"
+  dense
+  options="one|One, two|Two, three|Three"
+  selected="two"
+  width="240"
+></slate-list>`,
+      },
+      {
+        name: "List items",
+        code: `<slate-list selected="docs" width="280">
+  <slate-list-item value="docs" text="Documentation" icon="book" selected></slate-list-item>
+  <slate-list-item value="api" text="API reference" secondary="slatehtml/umc" icon="code"></slate-list-item>
+  <slate-list-item value="gallery" text="Gallery" meta="Live" icon="layout-grid"></slate-list-item>
+</slate-list>`,
+      },
+    ],
+  }),
+
+  "table.html": page({
+    title: "Table",
+    hint: "slate-row + slate-column; header kind inherits. Set width on header columns to size the column (copied to body). Shorthand: columns=\"Name|140, Email, Role|72\".",
+    events: "selectionchanged",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Rows + columns",
+        code: `<slate-table selectable selected="ada" width="100%">
+  <slate-row kind="header">
+    <slate-column text="Name"></slate-column>
+    <slate-column text="Email"></slate-column>
+    <slate-column text="Role"></slate-column>
+  </slate-row>
+  <slate-row value="ada">
+    <slate-column text="Ada"></slate-column>
+    <slate-column text="ada@x.dev"></slate-column>
+    <slate-column text="Admin"></slate-column>
+  </slate-row>
+  <slate-row value="linus">
+    <slate-column text="Linus"></slate-column>
+    <slate-column text="linus@x.dev"></slate-column>
+    <slate-column text="Dev"></slate-column>
+  </slate-row>
+  <slate-row value="grace">
+    <slate-column text="Grace"></slate-column>
+    <slate-column text="grace@x.dev"></slate-column>
+    <slate-column text="Ops"></slate-column>
+  </slate-row>
+</slate-table>`,
+      },
+      {
+        name: "Column widths",
+        code: `<slate-table selectable selected="ada" width="100%">
+  <slate-row kind="header">
+    <slate-column text="Name" width="120"></slate-column>
+    <slate-column text="Email"></slate-column>
+    <slate-column text="Role" width="72"></slate-column>
+  </slate-row>
+  <slate-row value="ada">
+    <slate-column text="Ada"></slate-column>
+    <slate-column text="ada@x.dev"></slate-column>
+    <slate-column text="Admin"></slate-column>
+  </slate-row>
+  <slate-row value="linus">
+    <slate-column text="Linus"></slate-column>
+    <slate-column text="linus@x.dev"></slate-column>
+    <slate-column text="Dev"></slate-column>
+  </slate-row>
+</slate-table>`,
+      },
+      {
+        name: "Shorthand attrs",
+        code: `<slate-table
+  columns="Name|120, Role|72, Status"
+  rows="ada|Ada|Admin|Active, linus|Linus|Dev|Away, grace|Grace|Ops|Active"
+  selectable
+  selected="ada"
+  width="100%"
+></slate-table>`,
+      },
+      {
+        name: "Striped + dense",
+        code: `<slate-table
+  columns="File, Size|64, Modified|88"
+  rows="readme.md|4 KB|Today, umc.md|18 KB|Yesterday, layout.md|12 KB|Mon"
+  striped
+  dense
+  width="100%"
+></slate-table>`,
+      },
+    ],
+  }),
+
+  "tooltip.html": page({
+    title: "Tooltip",
+    hint: "Hover or focus. placement: top, bottom, left, right. offset 0–100 maps to 15%–85% on the near edge — moves the tail and shifts the bubble so the tip stays on the control. tail=\"off\" hides the caret.",
     events: "",
     mount: "horizontalbox",
     variants: [
       {
         name: "Basic",
+        code: `<slate-tooltip text="Save changes">
+  <slate-button text="Save"></slate-button>
+</slate-tooltip>`,
+      },
+      {
+        name: "Placements",
+        code: `<slate-tooltip text="Top" placement="top">
+  <slate-button text="Top"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Bottom" placement="bottom">
+  <slate-button text="Bottom"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Left" placement="left">
+  <slate-button text="Left"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Right" placement="right">
+  <slate-button text="Right"></slate-button>
+</slate-tooltip>`,
+      },
+      {
+        name: "Tail offset",
+        code: `<slate-tooltip text="Tail at start" offset="0">
+  <slate-button text="0"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Centered" offset="50">
+  <slate-button text="50"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Tail at end" offset="100">
+  <slate-button text="100"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="No caret" tail="off">
+  <slate-button text="No tail"></slate-button>
+</slate-tooltip>`,
+      },
+      {
+        name: "On icon",
+        code: `<slate-tooltip text="Notifications">
+  <slate-icon name="bell" size="18"></slate-icon>
+</slate-tooltip>`,
+      },
+    ],
+  }),
+
+  "alert.html": page({
+    title: "Alert",
+    hint: "Inline feedback. kind: success, warn, error. Optional title + closable.",
+    events: "closed",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-alert text="Something needs your attention."></slate-alert>`,
+      },
+      {
+        name: "Kinds",
+        code: `<slate-alert kind="success" text="Profile updated."></slate-alert>
+<slate-alert kind="warn" text="Disk space is low."></slate-alert>
+<slate-alert kind="error" text="Could not reach the server."></slate-alert>`,
+      },
+      {
+        name: "Title + closable",
+        code: `<slate-alert
+  kind="warn"
+  title="Slow network"
+  text="Uploads may take longer than usual."
+  closable
+></slate-alert>`,
+      },
+    ],
+  }),
+
+  "snackbar.html": page({
+    title: "Snackbar",
+    hint: "Declarative: snackbar=\"id\". Or Construct(el, { self, on, bump, e }) with ref=\"toast\" → on(self.show, e.clicked, () => bump(self.toast)). Timed toasts show a countdown bar.",
+    events: "closed,action",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Show",
+        code: `<slate-button snackbar="demo-snack" text="Show toast"></slate-button>
+<slate-snackbar id="demo-snack" text="Copied to clipboard"></slate-snackbar>`,
+      },
+      {
+        name: "Timed",
+        code: `<slate-button ref="show" text="Show 6s toast"></slate-button>
+<slate-snackbar ref="toast" text="This fades out with a countdown bar" duration="6000"></slate-snackbar>`,
+        script: `on(self.show, e.clicked, () => bump(self.toast));`,
+      },
+      {
+        name: "With action",
+        code: `<slate-button ref="archive" text="Archive"></slate-button>
+<slate-snackbar ref="toast" text="Message archived" action="Undo" duration="5000"></slate-snackbar>`,
+        script: `on(self.archive, e.clicked, () => bump(self.toast));`,
+      },
+      {
+        name: "Stack",
+        code: `<slate-button ref="showA" text="Toast A"></slate-button>
+<slate-button ref="showB" text="Toast B"></slate-button>
+<slate-button ref="showC" text="Toast C"></slate-button>
+<slate-snackbar ref="toastA" text="First notification" duration="0"></slate-snackbar>
+<slate-snackbar ref="toastB" text="Second notification" action="Undo" duration="0"></slate-snackbar>
+<slate-snackbar ref="toastC" text="Third notification" duration="0"></slate-snackbar>`,
+        script: `on(self.showA, e.clicked, () => bump(self.toastA));
+on(self.showB, e.clicked, () => bump(self.toastB));
+on(self.showC, e.clicked, () => bump(self.toastC));`,
+      },
+    ],
+  }),
+
+  "dialog.html": page({
+    title: "Dialog",
+    hint: "Declarative: dialog=\"id\". Or Construct(el, { self, on, bump, e }) with ref + bump(self.dlg). Footer buttons use dialog-action=\"cancel\"|\"confirm\" → cancelled / confirmed (+ closed).",
+    events: "opened,closed,confirmed,cancelled",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Open",
+        code: `<slate-button dialog="demo-dialog" text="Open dialog"></slate-button>
+<slate-dialog
+  id="demo-dialog"
+  title="Delete file?"
+  text="This cannot be undone."
+>
+  <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+  <slate-button text="Delete" dialog-action="confirm"></slate-button>
+</slate-dialog>`,
+      },
+      {
+        name: "From script",
+        code: `<slate-button ref="show" text="Open dialog"></slate-button>
+<slate-dialog
+  ref="dlg"
+  title="Delete file?"
+  text="This cannot be undone."
+>
+  <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+  <slate-button text="Delete" dialog-action="confirm"></slate-button>
+</slate-dialog>`,
+        script: `on(self.show, e.clicked, () => bump(self.dlg));
+on(self.dlg, e.confirmed, () => console.log("confirmed"));
+on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
+      },
+      {
+        name: "Trigger settings",
+        code: `<slate-button
+  dialog="demo-dialog-2"
+  dialog-title="Leave page?"
+  dialog-text="Unsaved changes will be lost."
+  text="Navigate away"
+></slate-button>
+<slate-dialog id="demo-dialog-2" title="Leave page?" text="Unsaved changes will be lost.">
+  <slate-button text="Stay" dialog-action="cancel"></slate-button>
+  <slate-button text="Leave" dialog-action="confirm"></slate-button>
+</slate-dialog>`,
+      },
+    ],
+  }),
+
+  "skeleton.html": page({
+    title: "Skeleton",
+    hint: "Loading placeholders. kind: circle, button. Optional width / height.",
+    events: "",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Lines",
+        code: `<slate-skeleton></slate-skeleton>
+<slate-skeleton width="80%"></slate-skeleton>
+<slate-skeleton width="55%"></slate-skeleton>`,
+      },
+      {
+        name: "Avatar row",
+        code: `<horizontalbox gap="10" valign="center" width="100%">
+  <slate-skeleton kind="circle"></slate-skeleton>
+  <verticalbox gap="6" fill>
+    <slate-skeleton></slate-skeleton>
+    <slate-skeleton width="70%"></slate-skeleton>
+  </verticalbox>
+</horizontalbox>`,
+      },
+      {
+        name: "Block + button",
+        code: `<slate-skeleton height="72"></slate-skeleton>
+<slate-skeleton kind="button"></slate-skeleton>`,
+      },
+    ],
+  }),
+
+  "icon.html": page({
+    title: "Icon",
+    hint: "Lucide by default. Prefix fas:/far:/fab: for Font Awesome (docs compose both).",
+    events: "",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Lucide",
         code: `<slate-icon name="search" size="18"></slate-icon>
 <slate-icon name="settings" size="18"></slate-icon>
 <slate-icon name="bell" size="18"></slate-icon>`,
       },
       {
-        name: "Sizes",
+        name: "Lucide · Sizes",
         code: `<slate-icon name="star" size="14"></slate-icon>
 <slate-icon name="star" size="20"></slate-icon>
 <slate-icon name="star" size="28"></slate-icon>`,
       },
       {
-        name: "Stroke",
+        name: "Lucide · Stroke",
         code: `<slate-icon name="heart" size="22" stroke-width="1"></slate-icon>
 <slate-icon name="heart" size="22" stroke-width="2"></slate-icon>
 <slate-icon name="heart" size="22" stroke-width="2.5"></slate-icon>`,
+      },
+      {
+        name: "Font Awesome · Solid",
+        code: `<slate-icon name="fas:magnifying-glass" size="18"></slate-icon>
+<slate-icon name="fas:gear" size="18"></slate-icon>
+<slate-icon name="fas:bell" size="18"></slate-icon>`,
+      },
+      {
+        name: "Font Awesome · Regular",
+        code: `<slate-icon name="far:user" size="18"></slate-icon>
+<slate-icon name="far:heart" size="18"></slate-icon>
+<slate-icon name="far:star" size="18"></slate-icon>`,
+      },
+      {
+        name: "Font Awesome · Brands",
+        code: `<slate-icon name="fab:github" size="18"></slate-icon>
+<slate-icon name="fab:discord" size="18"></slate-icon>
+<slate-icon name="fab:apple" size="18"></slate-icon>`,
       },
     ],
   }),
@@ -633,18 +1097,36 @@ const pages = {
 
   "shadowbox.html": page({
     title: "Shadowbox",
-    hint: "Fullscreen overlay, Esc / backdrop to close. Shell hosts the lightbox.",
-    events: "clicked",
+    hint: "shadowbox-button owns its lightbox (src, title, text). Or wire commandfor to a slate-shadowbox id.",
+    events: "",
     mount: "horizontalbox",
     variants: [
       {
         name: "Open",
-        code: `<slate-button data-demo-open-shadow text="Open image lightbox"></slate-button>`,
+        code: `<shadowbox-button
+  src="https://i.pravatar.cc/800?img=12"
+  title="Preview"
+  text="Open image lightbox"
+></shadowbox-button>`,
       },
       {
-        name: "Hint",
-        code: `<slate-button data-demo-open-shadow text="Preview"></slate-button>
-<slate-text kind="hint" text="Uses the page-level slate-shadowbox."></slate-text>`,
+        name: "Other image",
+        code: `<shadowbox-button
+  src="https://i.pravatar.cc/800?img=32"
+  title="Another photo"
+  text="Open other image"
+></shadowbox-button>`,
+      },
+      {
+        name: "Invoker command",
+        code: `<button type="button" commandfor="demo-shadowbox" command="--open">
+  Open (commandfor)
+</button>
+<slate-shadowbox
+  id="demo-shadowbox"
+  src="https://i.pravatar.cc/800?img=12"
+  title="Invoker target"
+></slate-shadowbox>`,
       },
     ],
   }),
@@ -698,7 +1180,7 @@ const pages = {
       {
         name: "Box · Fill",
         code: `<horizontalbox gap="8" min-height="56" width="100%">
-  <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
+z yqoqej vb  <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
   <border kind="slot" fill="2" min-height="40"><slate-text kind="mono" text="fill 2"></slate-text></border>
   <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
 </horizontalbox>`,
@@ -713,13 +1195,13 @@ const pages = {
       },
       {
         name: "Border · Kinds",
-        code: `<wrapbox gap="8">
+        code: `<verticalbox gap="8">
   <border kind="panel" padding="12"><slate-text kind="mono" text="panel"></slate-text></border>
   <border kind="well" padding="12"><slate-text kind="mono" text="well"></slate-text></border>
   <border kind="chip"><slate-text kind="mono" text="chip"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="slot"></slate-text></border>
   <border kind="hud"><slate-text kind="mono" text="hud"></slate-text></border>
-</wrapbox>`,
+</verticalbox>`,
       },
       {
         name: "Border · Padding",

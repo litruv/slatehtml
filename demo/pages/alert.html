@@ -1,0 +1,95 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Alert"></slate-text>
+          <slate-text kind="hint" text="Inline feedback. kind: success, warn, error. Optional title + closable."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-alert text="Something needs your attention."></slate-alert>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-alert text="Something needs your attention."></slate-alert>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Kinds"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-alert kind="success" text="Profile updated."></slate-alert>
+                  <slate-alert kind="warn" text="Disk space is low."></slate-alert>
+                  <slate-alert kind="error" text="Could not reach the server."></slate-alert>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-alert kind="success" text="Profile updated."></slate-alert>
+<slate-alert kind="warn" text="Disk space is low."></slate-alert>
+<slate-alert kind="error" text="Could not reach the server."></slate-alert>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="closed">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Title + closable"></slate-text>
+                <verticalbox gap="10" valign="center" data-demo-mount>
+                  <slate-alert
+                    kind="warn"
+                    title="Slow network"
+                    text="Uploads may take longer than usual."
+                    closable
+                  ></slate-alert>
+                </verticalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-alert
+  kind="warn"
+  title="Slow network"
+  text="Uploads may take longer than usual."
+  closable
+></slate-alert>
+            </script>
+          </wrapbox>
+        </verticalbox>

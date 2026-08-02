@@ -1,0 +1,91 @@
+--- html ---
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok, placeholder block */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  height: 14px; /* umc-layout-ok */
+  border-radius: var(--widget-radius, 4px);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--line, #ccd0da) 85%, transparent) 0%,
+    color-mix(in srgb, var(--panel, #eff1f5) 70%, var(--line, #ccd0da)) 45%,
+    color-mix(in srgb, var(--line, #ccd0da) 85%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: slate-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+self[kind="circle"] {
+  width: 40px; /* umc-layout-ok */
+  height: 40px; /* umc-layout-ok */
+  border-radius: 999px;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self[kind="button"] {
+  width: 88px; /* umc-layout-ok */
+  height: 32px; /* umc-layout-ok */
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+@keyframes slate-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  self {
+    animation: none;
+  }
+}
+
+--- script ---
+/**
+ * Loading placeholder.
+ *
+ *   <slate-skeleton></slate-skeleton>
+ *   <slate-skeleton kind="circle"></slate-skeleton>
+ *   <slate-skeleton height="48"></slate-skeleton>
+ *
+ * Attrs: kind ("" | circle | button), width, height
+ */
+export default defineUmc({
+  tag: "slate-skeleton",
+  attrs: {
+    kind: "",
+    width: "",
+    height: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("aria-hidden", "true");
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const width = (attr("width", "") || "").trim();
+    const height = (attr("height", "") || "").trim();
+    if (width) el.style.width = /^\d+$/.test(width) ? `${width}px` : width;
+    else el.style.removeProperty("width");
+    if (height) el.style.height = /^\d+$/.test(height) ? `${height}px` : height;
+    else el.style.removeProperty("height");
+  },
+});
+
+--- preview ---
+<verticalbox gap="10" padding="16" width="280">
+  <horizontalbox gap="10" valign="center">
+    <slate-skeleton kind="circle"></slate-skeleton>
+    <verticalbox gap="6" fill>
+      <slate-skeleton></slate-skeleton>
+      <slate-skeleton width="70%"></slate-skeleton>
+    </verticalbox>
+  </horizontalbox>
+  <slate-skeleton height="72"></slate-skeleton>
+  <slate-skeleton kind="button"></slate-skeleton>
+</verticalbox>

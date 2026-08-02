@@ -1,15 +1,19 @@
         <verticalbox gap="8">
           <slate-text kind="section" text="Shadowbox"></slate-text>
-          <slate-text kind="hint" text="Fullscreen overlay, Esc / backdrop to close. Shell hosts the lightbox."></slate-text>
+          <slate-text kind="hint" text="shadowbox-button owns its lightbox (src, title, text). Or wire commandfor to a slate-shadowbox id."></slate-text>
         </verticalbox>
 
         <verticalbox gap="22" data-demo-examples>
-          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Open"></slate-text>
                 <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button data-demo-open-shadow text="Open image lightbox"></slate-button>
+                  <shadowbox-button
+                    src="https://i.pravatar.cc/800?img=12"
+                    title="Preview"
+                    text="Open image lightbox"
+                  ></shadowbox-button>
                 </horizontalbox>
               </verticalbox>
             </border>
@@ -18,24 +22,27 @@
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
                 </scrollbox>
-                <slate-text kind="label" text="Events"></slate-text>
-                <scrollbox class="demo-events-scroll" max-height="140">
-                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
-                </scrollbox>
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<slate-button data-demo-open-shadow text="Open image lightbox"></slate-button>
+<shadowbox-button
+  src="https://i.pravatar.cc/800?img=12"
+  title="Preview"
+  text="Open image lightbox"
+></shadowbox-button>
             </script>
           </wrapbox>
 
-          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked">
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
             <border kind="panel" fill padding="16" min-width="280">
               <verticalbox gap="10" data-demo-stage>
-                <slate-text kind="label" text="Hint"></slate-text>
+                <slate-text kind="label" text="Other image"></slate-text>
                 <horizontalbox gap="10" valign="center" data-demo-mount>
-                  <slate-button data-demo-open-shadow text="Preview"></slate-button>
-                  <slate-text kind="hint" text="Uses the page-level slate-shadowbox."></slate-text>
+                  <shadowbox-button
+                    src="https://i.pravatar.cc/800?img=32"
+                    title="Another photo"
+                    text="Open other image"
+                  ></shadowbox-button>
                 </horizontalbox>
               </verticalbox>
             </border>
@@ -44,15 +51,49 @@
                 <scrollbox class="demo-code-box" max-height="220" padding="10 12">
                   <pre><code class="language-umc" data-demo-code></code></pre>
                 </scrollbox>
-                <slate-text kind="label" text="Events"></slate-text>
-                <scrollbox class="demo-events-scroll" max-height="140">
-                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<shadowbox-button
+  src="https://i.pravatar.cc/800?img=32"
+  title="Another photo"
+  text="Open other image"
+></shadowbox-button>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Invoker command"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <button type="button" commandfor="demo-shadowbox" command="--open">
+                    Open (commandfor)
+                  </button>
+                  <slate-shadowbox
+                    id="demo-shadowbox"
+                    src="https://i.pravatar.cc/800?img=12"
+                    title="Invoker target"
+                  ></slate-shadowbox>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
                 </scrollbox>
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<slate-button data-demo-open-shadow text="Preview"></slate-button>
-<slate-text kind="hint" text="Uses the page-level slate-shadowbox."></slate-text>
+<button type="button" commandfor="demo-shadowbox" command="--open">
+  Open (commandfor)
+</button>
+<slate-shadowbox
+  id="demo-shadowbox"
+  src="https://i.pravatar.cc/800?img=12"
+  title="Invoker target"
+></slate-shadowbox>
             </script>
           </wrapbox>
         </verticalbox>

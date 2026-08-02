@@ -1,0 +1,136 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Dialog"></slate-text>
+          <slate-text kind="hint" text="Declarative: dialog="id". Or Construct(el, { self, on, bump, e }) with ref + bump(self.dlg). Footer buttons use dialog-action="cancel"|"confirm" → cancelled / confirmed (+ closed)."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Open"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button dialog="demo-dialog" text="Open dialog"></slate-button>
+                  <slate-dialog
+                    id="demo-dialog"
+                    title="Delete file?"
+                    text="This cannot be undone."
+                  >
+                    <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+                    <slate-button text="Delete" dialog-action="confirm"></slate-button>
+                  </slate-dialog>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button dialog="demo-dialog" text="Open dialog"></slate-button>
+<slate-dialog
+  id="demo-dialog"
+  title="Delete file?"
+  text="This cannot be undone."
+>
+  <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+  <slate-button text="Delete" dialog-action="confirm"></slate-button>
+</slate-dialog>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="From script"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button ref="show" text="Open dialog"></slate-button>
+                  <slate-dialog
+                    ref="dlg"
+                    title="Delete file?"
+                    text="This cannot be undone."
+                  >
+                    <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+                    <slate-button text="Delete" dialog-action="confirm"></slate-button>
+                  </slate-dialog>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button ref="show" text="Open dialog"></slate-button>
+<slate-dialog
+  ref="dlg"
+  title="Delete file?"
+  text="This cannot be undone."
+>
+  <slate-button text="Cancel" dialog-action="cancel"></slate-button>
+  <slate-button text="Delete" dialog-action="confirm"></slate-button>
+</slate-dialog>
+            </script>
+            <script type="text/plain" data-demo-script>
+on(self.show, e.clicked, () => bump(self.dlg));
+on(self.dlg, e.confirmed, () => console.log("confirmed"));
+on(self.dlg, e.cancelled, () => console.log("cancelled"));
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed,confirmed,cancelled">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Trigger settings"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-button
+                    dialog="demo-dialog-2"
+                    dialog-title="Leave page?"
+                    dialog-text="Unsaved changes will be lost."
+                    text="Navigate away"
+                  ></slate-button>
+                  <slate-dialog id="demo-dialog-2" title="Leave page?" text="Unsaved changes will be lost.">
+                    <slate-button text="Stay" dialog-action="cancel"></slate-button>
+                    <slate-button text="Leave" dialog-action="confirm"></slate-button>
+                  </slate-dialog>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button
+  dialog="demo-dialog-2"
+  dialog-title="Leave page?"
+  dialog-text="Unsaved changes will be lost."
+  text="Navigate away"
+></slate-button>
+<slate-dialog id="demo-dialog-2" title="Leave page?" text="Unsaved changes will be lost.">
+  <slate-button text="Stay" dialog-action="cancel"></slate-button>
+  <slate-button text="Leave" dialog-action="confirm"></slate-button>
+</slate-dialog>
+            </script>
+          </wrapbox>
+        </verticalbox>

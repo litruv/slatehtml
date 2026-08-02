@@ -117,13 +117,6 @@ umc-border[kind="panel"] {
   --widget-border: 1px solid var(--line);
   --widget-radius: var(--radius);
 }
-/* Nested panel inside a panel — slightly deeper so chrome stays visible in demos */
-border[kind="panel"] border[kind="panel"],
-umc-border[kind="panel"] umc-border[kind="panel"],
-border[kind="panel"] umc-border[kind="panel"],
-umc-border[kind="panel"] border[kind="panel"] {
-  --widget-background: var(--panel-deep);
-}
 border[kind="well"],
 umc-border[kind="well"] {
   --widget-background: var(--stage);
@@ -406,7 +399,7 @@ slate-combobox {
 .docs-hub-tile {
   color: inherit;
   text-decoration: none;
-  min-height: 108px; /* umc-layout-ok, docs hub tile chrome */
+  min-height: 132px; /* umc-layout-ok, docs hub tile chrome */
 }
 
 .docs-hub-tile border[kind="panel"],
@@ -421,6 +414,77 @@ slate-combobox {
 }
 
 .docs-hub-tile slate-icon {
+  color: var(--accent);
+}
+
+/* Live component miniature inside each palette tile */
+.docs-hub-preview,
+.docs-hub-preview[kind="well"] {
+  --widget-background: var(--ctp-mantle);
+  --widget-border: 1px solid var(--line);
+  overflow: hidden; /* umc-layout-ok, clip oversized widgets */
+  pointer-events: none;
+  width: 100%; /* umc-layout-ok */
+}
+
+.docs-hub-preview-stage {
+  max-width: 100%; /* umc-layout-ok */
+  transform: scale(0.92); /* umc-layout-ok, fit chrome in tile */
+  transform-origin: center center; /* umc-layout-ok */
+}
+
+.docs-hub-snack-fake {
+  --widget-background: var(--hud);
+  --widget-border: none;
+  color: var(--hud-ink);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.docs-hub-dialog-fake {
+  --widget-background: transparent;
+  --widget-border: 1px solid var(--line);
+  --widget-radius: 8px;
+  overflow: hidden; /* umc-layout-ok */
+  background: var(--ctp-crust);
+}
+
+.docs-hub-dialog-scrim {
+  --widget-background: rgba(0, 0, 0, 0.45);
+  --widget-border: none;
+  --widget-radius: 0;
+}
+
+.docs-hub-dialog-card {
+  --widget-background: var(--panel);
+  --widget-border: 1px solid var(--line-strong);
+  --widget-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+}
+
+.docs-hub-dialog-title {
+  font-weight: 650;
+  font-size: 12px;
+}
+
+.docs-hub-dialog-body {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.docs-hub-dialog-btn {
+  --widget-background: transparent;
+  --widget-border: 1px solid var(--line);
+  --widget-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.docs-hub-dialog-btn-accent {
+  --widget-background: color-mix(in srgb, var(--accent) 22%, transparent);
+  --widget-border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--accent);
 }
 
@@ -509,6 +573,23 @@ slate-combobox {
 }
 .demo-code-box .token.class-name {
   color: var(--ctp-teal);
+}
+.demo-code-box .token.function {
+  color: var(--ctp-blue);
+}
+.demo-code-box .token.number {
+  color: var(--ctp-peach);
+}
+.demo-code-box .token.boolean,
+.demo-code-box .token.constant,
+.demo-code-box .token.builtin {
+  color: var(--ctp-peach);
+}
+.demo-code-box .token.operator {
+  color: var(--ctp-sky);
+}
+.demo-code-box .token.regex {
+  color: var(--ctp-green);
 }
 .demo-code-box .token.directive .token.keyword {
   color: var(--ctp-pink);

@@ -122,6 +122,7 @@ const GLOBAL_ATTRS = [
   "data-umc",
   "data-umc-prop",
   "data-content",
+  "ref",
 ];
 
 const VALUES = {
@@ -516,6 +517,26 @@ function generalScriptItems(declared, published, document, position) {
     ],
     ["attr", "Read one host attribute with its UMC default.", 'api.attr("${1:name}", ${2:null})'],
     ["attrs", "Read multiple host attributes.", "api.attrs($1)"],
+    [
+      "self",
+      "Template nodes by ref for this host only (ref=\"toast\" → self.toast). Destructure: Construct(el, { self }).",
+      "self",
+    ],
+    [
+      "e",
+      "Published event name constants (e.clicked, e.closed, e.changed, …).",
+      "e",
+    ],
+    [
+      "on",
+      "addEventListener with auto-remove on Destroyed. on(self.show, e.clicked, () => bump(self.toast))",
+      "on(${1:self.show}, e.${2:clicked}, ${3:() => {}})",
+    ],
+    [
+      "bump",
+      "Rising-edge boolean attr (default open). bump(self.toast)",
+      'bump(${1:self.toast}${2:, "${3:open}"})',
+    ],
     ["bind", "Refresh `data-umc` bindings.", "api.bind()"],
     ["stamp", "Replace the host with template markup.", "api.stamp($1)"],
     ["sync", "Re-stamp and bind the template.", "api.sync()"],
@@ -698,6 +719,7 @@ function attributeDoc(name, published = []) {
     "data-umc": "Bind a host attr/default into this node.",
     "data-umc-prop": "Target property/attribute for `data-umc` (default: `text`).",
     "data-content": "Content region targeted by widget `add`, `set`, and `clear`.",
+    ref: "Host-local name for api.self (ref=\"toast\" → self.toast). Not a document id.",
   };
   return docs[name] ?? "SlateHTML widget attribute";
 }

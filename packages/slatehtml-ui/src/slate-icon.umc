@@ -14,9 +14,18 @@ self > svg {
   display: block;
   width: var(--icon-size, 16px);
   height: var(--icon-size, 16px);
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+/* Lucide (stroke). Font Awesome sets data-icon-fill + path fill. */
+self > svg:not([data-icon-fill]) {
   stroke: currentColor;
   fill: none;
-  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+self > svg[data-icon-fill] {
+  fill: currentColor;
+  stroke: none;
 }
 
 self[hidden] {
@@ -25,12 +34,15 @@ self[hidden] {
 
 --- script ---
 /**
- * Icon leaf for UMG widgets (Lucide by default).
+ * Icon leaf for UMG widgets (Lucide by default; Font Awesome optional).
  *
  *   <slate-icon name="chevron-down" size="16"></slate-icon>
  *   <slate-icon name="log-out" size="14" stroke-width="2"></slate-icon>
  *
- * Swap or extend the set via configure() from slatehtml-ui/configure.
+ * Swap provider via configure() — Lucide (default) or Font Awesome:
+ *   import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
+ *   configure({ icons: fontAwesomeSvg });
+ *
  * Color follows `currentColor` / parent text color.
  */
 import {

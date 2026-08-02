@@ -380,17 +380,19 @@ configure({ dragScroll: true }); // click-drag scrollboxes (mouse/pen)
 getSettings();                   // { dragScroll }
 ```
 
-Per scrollbox: `drag-scroll` enables, `drag-scroll="false"` opts out. Touch still uses native panning. Drag can start on buttons (click only if you don't move); it skips selectable text and pointer-owned controls (fields, sliders, menus).
+Per scrollbox: `drag-scroll` enables, `drag-scroll="false"` opts out. Touch still uses native panning. Drag can start on buttons (click only if you don't move); it skips pointer-owned controls (fields, sliders, menus) and selectable text glyphs (not empty padding in those boxes).
 
 **UI kit** (`slatehtml-ui/configure`): icon provider and defaults for `slate-icon`.
 
 ```js
 import { configure, lucideSvg } from "slatehtml-ui/configure";
+import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 
 configure({
   iconSize: "18",
   iconStrokeWidth: "1.75",
   icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+  // or: icons: fontAwesomeSvg,  // FA names: user, fas:gear, fab:github
 });
 ```
 

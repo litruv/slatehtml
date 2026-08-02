@@ -37,16 +37,19 @@ import "slatehtml-ui"; // one prebuilt bundle, registers every widget
 
 ```js
 import { configure, lucideSvg } from "slatehtml-ui/configure";
+import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 
 configure({
   iconSize: "18",
   iconStrokeWidth: "1.75",
   // Default provider is Lucide; compose or replace:
   icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+  // Or Font Awesome Free (solid / regular / brands):
+  // icons: fontAwesomeSvg,  // names: user, fas:gear, far:user, fab:github
 });
 ```
 
-Mounted `slate-icon` elements refresh when `configure()` runs. Per-icon `size` / `stroke-width` attrs still win over the defaults.
+Mounted `slate-icon` elements refresh when `configure()` runs. Per-icon `size` / `stroke-width` attrs still win over the defaults (`stroke-width` applies to Lucide; FA is fill-based).
 
 ```html
 <verticalbox gap="8" padding="16">

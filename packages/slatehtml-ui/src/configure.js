@@ -2,11 +2,14 @@
  * Runtime settings for slatehtml-ui (icons, defaults).
  *
  *   import { configure, getSettings, lucideSvg } from "slatehtml-ui/configure";
+ *   // Optional alternate set:
+ *   // import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
  *
  *   configure({
  *     iconSize: "18",
  *     iconStrokeWidth: "1.75",
  *     icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+ *     // or: icons: fontAwesomeSvg,
  *   });
  */
 import { lucideSvg } from "./lucide-icons.js";

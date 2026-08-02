@@ -1,0 +1,131 @@
+--- html ---
+<horizontalbox class="slate-alert-row" gap="10" valign="center" padding="10 12">
+  <slate-icon class="slate-alert-icon" name="info" size="16"></slate-icon>
+  <verticalbox class="slate-alert-copy" gap="2" fill min-width="0">
+    <textblock class="slate-alert-title" data-umc="title" hidden></textblock>
+    <textblock class="slate-alert-text" data-umc="text"></textblock>
+  </verticalbox>
+  <slate-icon class="slate-alert-close" name="x" size="14" hidden></slate-icon>
+</horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok, painted banner */
+  box-sizing: border-box;
+  --widget-radius: 6px;
+  --widget-border: 1px solid color-mix(in srgb, var(--accent, currentColor) 35%, var(--line, transparent));
+  --widget-background: color-mix(in srgb, var(--accent, currentColor) 14%, var(--panel, transparent));
+  border: var(--widget-border);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: var(--ink, inherit);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+self[kind="success"] {
+  --widget-border: 1px solid color-mix(in srgb, #40a02b 40%, var(--line, transparent));
+  --widget-background: color-mix(in srgb, #40a02b 14%, var(--panel, transparent));
+}
+
+self[kind="warn"] {
+  --widget-border: 1px solid color-mix(in srgb, var(--warn, #fe640b) 45%, var(--line, transparent));
+  --widget-background: color-mix(in srgb, var(--warn, #fe640b) 16%, var(--panel, transparent));
+}
+
+self[kind="error"] {
+  --widget-border: 1px solid color-mix(in srgb, #d20f39 40%, var(--line, transparent));
+  --widget-background: color-mix(in srgb, #d20f39 14%, var(--panel, transparent));
+}
+
+.slate-alert-title {
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.slate-alert-text {
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.slate-alert-title[hidden],
+.slate-alert-close[hidden] {
+  display: none !important;
+}
+
+.slate-alert-close {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.75;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-alert-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+--- script ---
+/**
+ * Inline feedback banner.
+ *
+ *   <slate-alert text="Saved." kind="success"></slate-alert>
+ *   <slate-alert title="Heads up" text="Check your connection." closable></slate-alert>
+ *
+ * kind: "" | success | warn | error
+ * Events: closed
+ */
+const ICONS = {
+  "": "info",
+  info: "info",
+  success: "circle-check",
+  warn: "triangle-alert",
+  error: "circle-alert",
+};
+
+export default defineUmc({
+  tag: "slate-alert",
+  attrs: {
+    text: "",
+    title: "",
+    kind: "",
+    closable: "",
+    icon: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "status");
+    if (el._alertBound) return;
+    el._alertBound = true;
+    el.addEventListener("click", (event) => {
+      const close = event.target?.closest?.(".slate-alert-close");
+      if (!close || !el.contains(close)) return;
+      event.preventDefault();
+      el.setAttribute("hidden", "");
+      api.emit("closed", {});
+    });
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const kind = (attr("kind", "") || "").trim().toLowerCase();
+    const title = (attr("title", "") || "").trim();
+    const iconName = (attr("icon", "") || "").trim() || ICONS[kind] || ICONS.info;
+    const closable = el.hasAttribute("closable");
+    const icon = el.querySelector(".slate-alert-icon");
+    const titleEl = el.querySelector(".slate-alert-title");
+    const close = el.querySelector(".slate-alert-close");
+    icon?.setAttribute("name", iconName);
+    titleEl?.toggleAttribute("hidden", !title);
+    close?.toggleAttribute("hidden", !closable);
+    el.setAttribute("role", kind === "error" ? "alert" : "status");
+  },
+});
+
+--- preview ---
+<verticalbox gap="10" padding="16" width="360">
+  <slate-alert text="Something needs your attention."></slate-alert>
+  <slate-alert kind="success" text="Profile updated."></slate-alert>
+  <slate-alert kind="warn" title="Slow network" text="Uploads may take longer." closable></slate-alert>
+</verticalbox>

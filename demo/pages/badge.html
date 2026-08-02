@@ -1,0 +1,161 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Badge"></slate-text>
+          <slate-text kind="hint" text="Count or dot mark over an icon / control. Use max for 99+ style caps."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Count"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-badge text="3">
+                    <slate-icon name="bell" size="20"></slate-icon>
+                  </slate-badge>
+                  <slate-badge text="12">
+                    <slate-icon name="mail" size="20"></slate-icon>
+                  </slate-badge>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-badge text="3">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="12">
+  <slate-icon name="mail" size="20"></slate-icon>
+</slate-badge>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Max"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-badge text="120" max="99">
+                    <slate-button text="Inbox"></slate-button>
+                  </slate-badge>
+                  <slate-badge text="8" max="9" kind="warn">
+                    <slate-icon name="message-square" size="20"></slate-icon>
+                  </slate-badge>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-badge text="120" max="99">
+  <slate-button text="Inbox"></slate-button>
+</slate-badge>
+<slate-badge text="8" max="9" kind="warn">
+  <slate-icon name="message-square" size="20"></slate-icon>
+</slate-badge>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Dot"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-badge dot>
+                    <slate-icon name="mail" size="20"></slate-icon>
+                  </slate-badge>
+                  <slate-badge dot kind="warn">
+                    <slate-button text="Status"></slate-button>
+                  </slate-badge>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-badge dot>
+  <slate-icon name="mail" size="20"></slate-icon>
+</slate-badge>
+<slate-badge dot kind="warn">
+  <slate-button text="Status"></slate-button>
+</slate-badge>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Kinds"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-badge text="2">
+                    <slate-icon name="bell" size="20"></slate-icon>
+                  </slate-badge>
+                  <slate-badge text="2" kind="muted">
+                    <slate-icon name="bell" size="20"></slate-icon>
+                  </slate-badge>
+                  <slate-badge text="2" kind="warn">
+                    <slate-icon name="bell" size="20"></slate-icon>
+                  </slate-badge>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-badge text="2">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="2" kind="muted">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+<slate-badge text="2" kind="warn">
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Invisible"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-badge text="3" invisible>
+                    <slate-icon name="bell" size="20"></slate-icon>
+                  </slate-badge>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-badge text="3" invisible>
+  <slate-icon name="bell" size="20"></slate-icon>
+</slate-badge>
+            </script>
+          </wrapbox>
+        </verticalbox>

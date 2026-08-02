@@ -5,8 +5,9 @@
  * Opt out: `drag-scroll="false"`.
  *
  * Works over buttons, links, labels, and list chrome inside a scrollbox.
- * Skips only explicit selection/editing surfaces: `user-select: text|all`,
- * `pre`/`code`/`[selectable]`, text fields, and pointer-owned controls.
+ * Skips pointer-owned controls (fields, sliders, menus). For selectable text
+ * (`user-select: text|all`, `pre`/`code`/`[selectable]`), skips only when a
+ * glyph is under the pointer — empty padding in those boxes still scrolls.
  */
 
 /** Controls that own the pointer gesture, don't steal for scroll. */
@@ -18,13 +19,11 @@ const SKIP_POINTER_OWNED =
   "slate-slider,slate-text-field,slate-select," +
   "slate-dropdown,slate-combobox,slate-autocomplete";
 
-/** Explicit selection / editing surfaces. */
-const SELECTABLE_MARK =
-  "pre,code,[selectable],[data-selectable]," +
-  "input,textarea,[contenteditable=''],[contenteditable=true]," +
-  "editabletext,umc-editabletext";
+/** Explicit selection surfaces (glyph hit-tested; not whole-box). */
+const SELECTABLE_MARK = "pre,code,[selectable],[data-selectable]";
 
 const THRESHOLD_PX = 3;
+const GLYPH_HIT_PAD = 3;
 const SCROLLBOX_SEL = "scrollbox, umc-scrollbox";
 
 /** @type {{ enabled: (el: Element) => boolean } | null} */
@@ -42,7 +41,62 @@ let docBound = false;
  * }} */
 let gesture = null;
 
-function isSelectableTextTarget(target, scrollbox) {
+/**
+ * True when (x,y) lands on a rendered text glyph, not just a text element's box.
+ * Uses caret hit-testing + character rect proximity.
+ */
+function hasGlyphAtPoint(x, y) {
+  let range = null;
+  if (typeof document.caretRangeFromPoint === "function") {
+    range = document.caretRangeFromPoint(x, y);
+  } else if (typeof document.caretPositionFromPoint === "function") {
+    const pos = document.caretPositionFromPoint(x, y);
+    if (pos?.offsetNode) {
+      range = document.createRange();
+      try {
+        range.setStart(pos.offsetNode, pos.offset);
+        range.collapse(true);
+      } catch {
+        return false;
+      }
+    }
+  }
+  if (!range) return false;
+
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return false;
+  const text = node.textContent ?? "";
+  if (!text.length) return false;
+
+  const offset = Math.min(range.startOffset, text.length);
+  const probe = document.createRange();
+  try {
+    if (offset > 0) {
+      probe.setStart(node, offset - 1);
+      probe.setEnd(node, offset);
+    } else {
+      probe.setStart(node, 0);
+      probe.setEnd(node, Math.min(1, text.length));
+    }
+  } catch {
+    return false;
+  }
+
+  const pad = GLYPH_HIT_PAD;
+  for (const rect of probe.getClientRects()) {
+    if (
+      x >= rect.left - pad &&
+      x <= rect.right + pad &&
+      y >= rect.top - pad &&
+      y <= rect.bottom + pad
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isSelectableTextTarget(target, scrollbox, x, y) {
   let node =
     target instanceof Element
       ? target
@@ -51,31 +105,42 @@ function isSelectableTextTarget(target, scrollbox) {
         : null;
   if (!node) return false;
 
+  let selectable = false;
   if (node.closest(SELECTABLE_MARK)) {
     const zone = node.closest(SELECTABLE_MARK);
     if (zone && getComputedStyle(zone).userSelect === "none") return false;
-    return true;
+    selectable = true;
+  } else {
+    // Only block when something under the finger opts into selection.
+    let walk = node;
+    while (walk && walk !== scrollbox) {
+      if (walk instanceof Element) {
+        const us = getComputedStyle(walk).userSelect;
+        if (us === "none") return false;
+        if (us === "text" || us === "all") {
+          selectable = true;
+          break;
+        }
+      }
+      walk = walk.parentElement;
+    }
   }
 
-  // Only block when something under the finger opts into selection.
-  while (node && node !== scrollbox) {
-    if (node instanceof Element) {
-      const us = getComputedStyle(node).userSelect;
-      if (us === "none") return false;
-      if (us === "text" || us === "all") return true;
-    }
-    node = node.parentElement;
+  if (!selectable) return false;
+  // Prefer glyph hit-test so padding / empty lines still drag-scroll.
+  if (typeof x === "number" && typeof y === "number") {
+    return hasGlyphAtPoint(x, y);
   }
-  return false;
+  return true;
 }
 
-function shouldSkipDrag(target, scrollbox) {
+function shouldSkipDrag(target, scrollbox, x, y) {
   if (!(target instanceof Element) && !(target && target.parentElement)) {
     return true;
   }
   const el = target instanceof Element ? target : target.parentElement;
   if (el.closest(SKIP_POINTER_OWNED)) return true;
-  return isSelectableTextTarget(el, scrollbox);
+  return isSelectableTextTarget(el, scrollbox, x, y);
 }
 
 function canScroll(el) {
@@ -165,7 +230,7 @@ function onPointerDownCapture(e) {
 
   const scrollbox = findScrollbox(e.target, apiRef.enabled);
   if (!scrollbox) return;
-  if (shouldSkipDrag(e.target, scrollbox)) return;
+  if (shouldSkipDrag(e.target, scrollbox, e.clientX, e.clientY)) return;
 
   gesture = {
     pointerId: e.pointerId,

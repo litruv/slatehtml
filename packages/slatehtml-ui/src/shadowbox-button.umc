@@ -1,0 +1,74 @@
+--- html ---
+<slate-button data-umc="text"></slate-button>
+<slate-shadowbox></slate-shadowbox>
+
+--- script ---
+/**
+ * Button that owns its own <slate-shadowbox> — no id / for wiring.
+ *
+ *   <shadowbox-button
+ *     src="https://…"
+ *     title="Photo"
+ *     text="Open"
+ *   ></shadowbox-button>
+ *
+ * Attrs: text, src, title, kind, disabled
+ */
+function boxOf(el) {
+  return el.querySelector(":scope > slate-shadowbox");
+}
+
+function syncBox(el, { attr }) {
+  const box = boxOf(el);
+  if (!box) return;
+  const src = (attr("src", "") || "").trim();
+  const kind = (attr("kind", "image") || "image").trim() || "image";
+  const title = attr("title", "") ?? "";
+  if (src) box.setAttribute("src", src);
+  else box.removeAttribute("src");
+  box.setAttribute("kind", kind);
+  box.setAttribute("title", title);
+}
+
+export default defineUmc({
+  tag: "shadowbox-button",
+  attrs: {
+    text: "Open",
+    src: "",
+    title: "",
+    kind: "image",
+    disabled: "",
+  },
+
+  Construct(el) {
+    if (el._shadowBtnBound) return;
+    el._shadowBtnBound = true;
+    el.addEventListener("clicked", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      event.stopPropagation();
+      const box = boxOf(el);
+      if (!box) return;
+      box.setAttribute("open", "");
+    });
+  },
+
+  SynchronizeProperties(el, api) {
+    const { attr, bind } = api;
+    bind();
+    syncBox(el, api);
+    const btn = el.querySelector(":scope > slate-button");
+    if (!btn) return;
+    if (el.hasAttribute("disabled")) btn.setAttribute("disabled", "");
+    else btn.removeAttribute("disabled");
+    btn.setAttribute("text", attr("text", "Open"));
+  },
+});
+
+--- preview ---
+<horizontalbox gap="10" padding="16">
+  <shadowbox-button
+    src="https://i.pravatar.cc/800?img=12"
+    title="Preview"
+    text="Open lightbox"
+  ></shadowbox-button>
+</horizontalbox>

@@ -1,0 +1,70 @@
+--- html ---
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok, painted rule */
+  border: 0;
+  border-top: 1px solid var(--line, color-mix(in srgb, currentColor 18%, transparent));
+  background: transparent;
+  margin: 0;
+  flex: 0 0 auto; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
+  min-width: 0;
+  height: 0; /* umc-layout-ok */
+}
+
+self[orientation="vertical"] {
+  display: inline-block; /* umc-layout-ok */
+  width: 0; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+  min-height: 1em; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
+  border-top: 0;
+  border-left: 1px solid var(--line, color-mix(in srgb, currentColor 18%, transparent));
+}
+
+self[kind="strong"] {
+  border-color: var(--line-strong, color-mix(in srgb, currentColor 32%, transparent));
+}
+
+self[kind="muted"] {
+  border-color: color-mix(in srgb, var(--line, currentColor) 55%, transparent);
+}
+
+--- script ---
+/**
+ * Hairline separator.
+ *
+ *   <slate-divider></slate-divider>
+ *   <slate-divider orientation="vertical"></slate-divider>
+ *
+ * Attrs: orientation ("" | vertical), kind ("" | strong | muted)
+ */
+export default defineUmc({
+  tag: "slate-divider",
+  attrs: {
+    orientation: "",
+    kind: "",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "separator");
+  },
+
+  SynchronizeProperties(el) {
+    const vertical = el.getAttribute("orientation") === "vertical";
+    el.setAttribute("aria-orientation", vertical ? "vertical" : "horizontal");
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="280">
+  <slate-text kind="body" text="Above"></slate-text>
+  <slate-divider></slate-divider>
+  <slate-text kind="body" text="Below"></slate-text>
+  <horizontalbox gap="10" valign="center">
+    <slate-text kind="body" text="Left"></slate-text>
+    <slate-divider orientation="vertical"></slate-divider>
+    <slate-text kind="body" text="Right"></slate-text>
+  </horizontalbox>
+</verticalbox>

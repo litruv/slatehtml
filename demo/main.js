@@ -1,11 +1,24 @@
 import "slatehtml";
 import "slatehtml-ui";
-import { configure as configureUi } from "slatehtml-ui/configure";
+import { e as umcEvents } from "slatehtml/umc";
+import { configure as configureUi, lucideSvg } from "slatehtml-ui/configure";
+import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 import { Prism } from "./prism-umc.js";
 import { initDocsOptions, wireDocsOptions } from "./docs-options.js";
+import { HUB_PREVIEWS } from "./hub-previews.js";
 // Don't import prism's default (light) theme, gallery.css owns Catppuccin tokens.
 
 initDocsOptions();
+
+/** Lucide by default; `fas:` / `far:` / `fab:` (and aliases) → Font Awesome. */
+configureUi({
+  icons(name, attrs) {
+    if (/^(fa[srb]?|solid|regular|brands):/i.test(String(name || ""))) {
+      return fontAwesomeSvg(name, attrs);
+    }
+    return lucideSvg(name, attrs);
+  },
+});
 
 /** Bundled at build time so GitHub Pages (and `vite build`) do not need a fetch of loose HTML. */
 const PAGE_HTML = import.meta.glob("./pages/*.html", {
@@ -16,7 +29,7 @@ const PAGE_HTML = import.meta.glob("./pages/*.html", {
 
 /**
  * Sidebar: Getting started + UMG-style palette hubs (Panel, Common, Input, …).
- * Hubs are icon grids; each tile opens one widget HTML page.
+ * Hubs are preview grids; each tile shows a live mini component + opens its page.
  */
 const NAV = [
   {
@@ -63,7 +76,7 @@ const NAV = [
       {
         id: "input",
         title: "Input",
-        blurb: "Form controls from slatehtml-ui.",
+        blurb: "Form controls, menus, and combo pickers from slatehtml-ui.",
         items: [
           { id: "button", title: "Button", icon: "rectangle-ellipsis" },
           { id: "toggle-button", title: "Toggle Button", icon: "toggle-left" },
@@ -75,18 +88,11 @@ const NAV = [
           { id: "slider", title: "Slider", icon: "sliders-horizontal" },
           { id: "text-field", title: "Text Field", icon: "text-cursor-input" },
           { id: "select", title: "Select", icon: "list-filter" },
+          { id: "dropdown", title: "Dropdown", icon: "chevron-down" },
+          { id: "combobox", title: "Combobox", icon: "chevrons-up-down" },
           { id: "autocomplete", title: "Autocomplete", icon: "search" },
           { id: "tabs", title: "Tabs", icon: "layout-panel-top" },
           { id: "transfer-list", title: "Transfer List", icon: "arrow-left-right" },
-        ],
-      },
-      {
-        id: "pickers",
-        title: "Pickers",
-        blurb: "Menus and combo-style pickers.",
-        items: [
-          { id: "dropdown", title: "Dropdown", icon: "chevron-down" },
-          { id: "combobox", title: "Combobox", icon: "chevrons-up-down" },
         ],
       },
       {
@@ -95,11 +101,28 @@ const NAV = [
         blurb: "Icons, images, media, and overlays.",
         items: [
           { id: "icon", title: "Icon", icon: "smile" },
+          { id: "chip", title: "Chip", icon: "tags" },
+          { id: "badge", title: "Badge", icon: "badge" },
+          { id: "divider", title: "Divider", icon: "minus" },
+          { id: "list", title: "List", icon: "list" },
+          { id: "table", title: "Table", icon: "table" },
+          { id: "tooltip", title: "Tooltip", icon: "message-square" },
           { id: "breadcrumb", title: "Breadcrumb", icon: "chevrons-right" },
           { id: "image", title: "Image", icon: "image" },
           { id: "media", title: "Media", icon: "play" },
           { id: "popup-anchor", title: "Popup Anchor", icon: "anchor" },
           { id: "shadowbox", title: "Shadowbox", icon: "maximize-2" },
+        ],
+      },
+      {
+        id: "feedback",
+        title: "Feedback",
+        blurb: "Alerts, toasts, dialogs, and loading placeholders.",
+        items: [
+          { id: "alert", title: "Alert", icon: "info" },
+          { id: "snackbar", title: "Snackbar", icon: "message-circle" },
+          { id: "dialog", title: "Dialog", icon: "app-window" },
+          { id: "skeleton", title: "Skeleton", icon: "rectangle-ellipsis" },
         ],
       },
     ],
@@ -111,6 +134,7 @@ const HUB_REDIRECTS = {
   foundation: "panel",
   leaf: "common",
   inputs: "input",
+  pickers: "input",
   uniformgridpanel: "gridpanel",
   canvaspanel: "overlay",
 };
@@ -223,17 +247,25 @@ function setActiveNav(id) {
 
 function renderHub(hub) {
   const tiles = (hub.items || [])
-    .map(
-      (item) => `
+    .map((item) => {
+      const hasPreview = Boolean(HUB_PREVIEWS[item.id]);
+      const face = hasPreview
+        ? `<border class="docs-hub-preview" kind="well" height="88" padding="10">
+              <overlay fill halign="center" valign="center">
+                <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" gap="0" valign="center" halign="center"></horizontalbox>
+              </overlay>
+            </border>`
+        : `<slate-icon name="${item.icon || "box"}" size="28"></slate-icon>`;
+      return `
       <a class="docs-hub-tile" href="#/${item.id}">
-        <border kind="panel" padding="18" height="100%">
-          <verticalbox gap="12" valign="center" halign="center" height="100%">
-            <slate-icon name="${item.icon || "box"}" size="28"></slate-icon>
+        <border kind="panel" padding="12" height="100%">
+          <verticalbox gap="10" height="100%">
+            ${face}
             <slate-text kind="label" text="${item.title}"></slate-text>
           </verticalbox>
         </border>
-      </a>`
-    )
+      </a>`;
+    })
     .join("");
   return `
     <verticalbox gap="8">
@@ -244,6 +276,16 @@ function renderHub(hub) {
       ${tiles}
     </gridpanel>
   `;
+}
+
+/** Stamp live component miniatures into hub tiles. */
+function wireHubPreviews(root = document) {
+  for (const mount of root.querySelectorAll("[data-hub-preview]")) {
+    const id = mount.getAttribute("data-hub-preview");
+    const html = HUB_PREVIEWS[id];
+    if (!html) continue;
+    mount.innerHTML = html;
+  }
 }
 
 function breadcrumbFor(id) {
@@ -269,16 +311,10 @@ function wirePageChrome(root) {
   root._docsChromeBound = true;
 
   const pages = ["one", "two", "three"];
-  const shadow = document.querySelector("slate-shadowbox");
 
   root.addEventListener("clicked", (e) => {
     const t = e.target;
     if (!(t instanceof Element)) return;
-
-    if (t.closest("[data-demo-open-shadow]")) {
-      shadow?.setAttribute("open", "");
-      return;
-    }
 
     const iconDefaults = t.closest("[data-docs-icon-defaults]");
     if (iconDefaults) {
@@ -346,15 +382,91 @@ function paintCode(code, source) {
   Prism.highlightElement(code);
 }
 
+/**
+ * Mirror umc `api.self`: ref="toast" → self.toast (mount-local).
+ * Gallery snippets aren't full widgets; `self` matches Construct(el, { self }).
+ */
+function demoSelf(root) {
+  const self = Object.create(null);
+  for (const node of root.querySelectorAll("[ref]")) {
+    const id = node.getAttribute("ref");
+    if (!id || Object.prototype.hasOwnProperty.call(self, id)) continue;
+    self[id] = node;
+  }
+  return self;
+}
+
+/** Rising-edge attr helper (mirrors umc `api.bump`). */
+function demoBump(target, name = "open") {
+  if (!target?.setAttribute) return target;
+  const attr = name || "open";
+  if (target.hasAttribute(attr)) target.removeAttribute(attr);
+  target.setAttribute(attr, "");
+  return target;
+}
+
 /** Stamp edited UMC into the live mount (label / hints stay outside). */
-function applySnippet(mount, source) {
+function applySnippet(mount, source, runScript) {
   if (!mount) return;
-  const html = normalizeSnippet(source);
-  mount.innerHTML = html;
+  mount.innerHTML = normalizeSnippet(source);
+  const js = normalizeSnippet(runScript || "");
+  if (!js) return;
+  const self = demoSelf(mount);
+  const on = (target, type, handler, options) => {
+    target?.addEventListener?.(type, handler, options);
+  };
+  try {
+    // Demo-authored snippets only. Locals match Construct(el, { self, on, bump, e }).
+    const run = new Function("self", "on", "bump", "e", js);
+    run(self, on, demoBump, umcEvents);
+  } catch (err) {
+    console.error("[demo script]", err);
+  }
 }
 
 function demoSnippets(example) {
   return [...example.querySelectorAll(":scope > script[type='text/plain'][data-demo-snippet]")];
+}
+
+function demoScript(example) {
+  return example.querySelector(":scope > script[type='text/plain'][data-demo-script]");
+}
+
+/** Merge HTML + optional wiring script as a mini `.umc` file for the code panel. */
+function displaySource(htmlSource, scriptEl) {
+  const html = normalizeSnippet(htmlSource);
+  const js = scriptEl ? normalizeSnippet(scriptEl.textContent) : "";
+  if (!js) return html;
+  return `--- html ---\n${html}\n\n--- script ---\n${js}`;
+}
+
+/** Split an edited code buffer into mount HTML + runnable script. */
+function parseDemoSource(source) {
+  const text = normalizeSnippet(source);
+  if (/^---\s*(?:html|template|script|js)\s*---/m.test(text)) {
+    const sections = { html: "", script: "" };
+    let cur = null;
+    for (const line of text.split("\n")) {
+      const m = line.match(/^---\s*(html|template|script|js)\s*---\s*$/i);
+      if (m) {
+        const name = m[1].toLowerCase();
+        cur = name === "template" || name === "html" ? "html" : "script";
+        continue;
+      }
+      if (!cur) continue;
+      sections[cur] = sections[cur] ? `${sections[cur]}\n${line}` : line;
+    }
+    return {
+      html: normalizeSnippet(sections.html),
+      script: normalizeSnippet(sections.script),
+    };
+  }
+  // Legacy: trailing <script> block
+  const m = text.match(/^([\s\S]*?)\n\s*<script\b[^>]*>\n?([\s\S]*?)\n?\s*<\/script>\s*$/i);
+  if (m) {
+    return { html: normalizeSnippet(m[1]), script: normalizeSnippet(m[2]) };
+  }
+  return { html: text, script: "" };
 }
 
 function defaultSnippet(scripts) {
@@ -366,6 +478,7 @@ function wireDemoExamples(root = document) {
   for (const example of root.querySelectorAll("[data-demo-example]")) {
     const scripts = demoSnippets(example);
     let active = defaultSnippet(scripts);
+    const scriptEl = demoScript(example);
     const code = example.querySelector("[data-demo-code]");
     const log = example.querySelector("[data-demo-events]");
     const stage = example.querySelector("[data-demo-stage]");
@@ -378,14 +491,15 @@ function wireDemoExamples(root = document) {
     const lines = [];
 
     if (active && code) {
-      const source = normalizeSnippet(active.textContent);
+      const htmlSource = normalizeSnippet(active.textContent);
+      const source = displaySource(htmlSource, scriptEl);
       paintCode(code, source);
       code.setAttribute("contenteditable", "true");
       code.setAttribute("spellcheck", "false");
       code.setAttribute("role", "textbox");
       code.setAttribute("aria-label", "Editable UMC example");
       code.dataset.plain = source;
-      applySnippet(mount, source);
+      applySnippet(mount, htmlSource, scriptEl?.textContent);
 
       const commit = () => {
         const next = readCodePlain(code);
@@ -394,8 +508,10 @@ function wireDemoExamples(root = document) {
           return;
         }
         code.dataset.plain = next;
-        if (active) active.textContent = `\n${next}\n`;
-        applySnippet(mount, next);
+        const { html: nextHtml, script: nextJs } = parseDemoSource(next);
+        if (active) active.textContent = `\n${nextHtml}\n`;
+        if (scriptEl) scriptEl.textContent = `\n${nextJs}\n`;
+        applySnippet(mount, nextHtml, nextJs);
         paintCode(code, next);
         code.classList.remove("is-editing");
       };
@@ -445,6 +561,7 @@ async function renderRoute(id) {
   if (route.hub === true) {
     const hub = navEntry(id);
     pageRoot.innerHTML = hub ? breadcrumbFor(id) + renderHub(hub) : "";
+    wireHubPreviews(pageRoot);
   } else {
     const html = await loadPageHtml(id);
     pageRoot.innerHTML = breadcrumbFor(id) + html;

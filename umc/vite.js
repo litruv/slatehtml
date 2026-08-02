@@ -253,6 +253,9 @@ export function umc(options = {}) {
       const path = id.split("?")[0];
       if (!path.endsWith(ext)) return null;
       if (!existsSync(path)) return null;
+      // .umc often lives outside Vite root (e.g. packages/ from demo/).
+      // Without this, edits never invalidate the module graph.
+      this.addWatchFile(path);
       const source = readFileSync(path, "utf8");
       return compileUmc(source, path, autoImport, runtimeId);
     },

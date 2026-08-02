@@ -1,0 +1,134 @@
+--- html ---
+<span class="slate-badge-anchor" data-slot="default"></span>
+<span class="slate-badge-mark">
+  <textblock class="slate-badge-label" data-umc="text"></textblock>
+</span>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok, painted control host */
+  vertical-align: middle;
+  position: relative; /* umc-layout-ok, badge anchor */
+  flex: 0 0 auto; /* umc-layout-ok */
+  max-width: 100%; /* umc-layout-ok */
+}
+
+.slate-badge-anchor {
+  display: contents; /* umc-layout-ok, size host to slotted content */
+}
+
+.slate-badge-mark {
+  position: absolute; /* umc-layout-ok, corner mark */
+  top: 0; /* umc-layout-ok */
+  right: 0; /* umc-layout-ok */
+  z-index: 2; /* umc-layout-ok */
+  box-sizing: border-box;
+  min-width: 16px; /* umc-layout-ok */
+  height: 16px; /* umc-layout-ok */
+  padding: 0 4px; /* umc-layout-ok */
+  border-radius: 999px;
+  background: var(--accent, #8839ef);
+  color: var(--hud-ink, #fff);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+  transform: translate(40%, -40%); /* umc-layout-ok, sit on the corner */
+  pointer-events: none;
+}
+
+self[kind="muted"] .slate-badge-mark {
+  background: var(--muted, #6c6f85);
+}
+
+self[kind="warn"] .slate-badge-mark {
+  background: var(--warn, #fe640b);
+}
+
+self[dot] .slate-badge-mark {
+  min-width: 8px; /* umc-layout-ok */
+  width: 8px; /* umc-layout-ok */
+  height: 8px; /* umc-layout-ok */
+  padding: 0; /* umc-layout-ok */
+}
+
+self[dot] .slate-badge-label {
+  display: none !important;
+}
+
+self[invisible] .slate-badge-mark,
+.slate-badge-mark[hidden] {
+  display: none !important;
+}
+
+.slate-badge-label {
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+}
+
+--- script ---
+/**
+ * Small count / dot mark over slotted content.
+ *
+ *   <slate-badge text="3">
+ *     <slate-icon name="bell" size="18"></slate-icon>
+ *   </slate-badge>
+ *
+ *   <slate-badge text="120" max="99" kind="warn">
+ *     <slate-button text="Inbox"></slate-button>
+ *   </slate-badge>
+ *
+ *   <slate-badge dot>
+ *     <slate-icon name="mail" size="18"></slate-icon>
+ *   </slate-badge>
+ *
+ * Attrs: text, max, kind ("" | muted | warn), dot, invisible
+ */
+function formatBadgeText(raw, maxRaw) {
+  const s = String(raw ?? "").trim();
+  if (!s) return "";
+  const n = Number(s);
+  const max = Number(maxRaw);
+  if (Number.isFinite(n) && Number.isFinite(max) && max > 0 && n > max) {
+    return `${Math.trunc(max)}+`;
+  }
+  return s;
+}
+
+export default defineUmc({
+  tag: "slate-badge",
+  attrs: {
+    text: "",
+    max: "",
+    kind: "",
+    dot: "",
+    invisible: "",
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    const dot = el.hasAttribute("dot");
+    const invisible = el.hasAttribute("invisible");
+    const shown = formatBadgeText(attr("text", ""), attr("max", ""));
+    bind();
+    const label = el.querySelector(".slate-badge-label");
+    const mark = el.querySelector(".slate-badge-mark");
+    if (label) label.setAttribute("text", dot ? "" : shown);
+    const hide = invisible || (!dot && !shown);
+    mark?.toggleAttribute("hidden", hide);
+  },
+});
+
+--- preview ---
+<horizontalbox gap="18" padding="16" valign="center">
+  <slate-badge text="3">
+    <slate-icon name="bell" size="18"></slate-icon>
+  </slate-badge>
+  <slate-badge text="120" max="99" kind="warn">
+    <slate-button text="Inbox"></slate-button>
+  </slate-badge>
+  <slate-badge dot>
+    <slate-icon name="mail" size="18"></slate-icon>
+  </slate-badge>
+</horizontalbox>

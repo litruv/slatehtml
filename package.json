@@ -45,7 +45,7 @@
     "build:ui": "npm run build -w slatehtml-ui",
     "umc:link-vscode": "node editors/vscode-umc/link.mjs",
     "umc:unlink-vscode": "node editors/vscode-umc/link.mjs --unlink",
-    "test": "node --import ./test/dom-shim.mjs test/parse.test.mjs && node test/lint-style.test.mjs && node test/preview-inspect.test.mjs && node test/widget-layout.test.mjs && node test/parse-options.test.mjs && node --import ./test/dom-shim.mjs test/reactivity.test.mjs && node --import ./test/dom-shim.mjs test/configure.test.mjs && node --import ./test/dom-shim.mjs test/ui-configure.test.mjs"
+    "test": "node --import ./test/dom-shim.mjs test/parse.test.mjs && node test/lint-style.test.mjs && node test/preview-inspect.test.mjs && node test/widget-layout.test.mjs && node test/parse-options.test.mjs && node --import ./test/dom-shim.mjs test/reactivity.test.mjs && node --import ./test/dom-shim.mjs test/configure.test.mjs && node --import ./test/dom-shim.mjs test/ui-configure.test.mjs && node --import ./test/dom-shim.mjs test/ui-fontawesome.test.mjs && node --import ./test/dom-shim.mjs test/umc-self.test.mjs"
   },
   "keywords": [
     "css",

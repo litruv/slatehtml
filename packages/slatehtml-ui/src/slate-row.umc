@@ -1,0 +1,137 @@
+--- html ---
+<horizontalbox class="slate-row-cells" data-content gap="0" width="100%" valign="center"></horizontalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-background: transparent;
+  background: var(--widget-background);
+  border-bottom: 1px solid color-mix(in srgb, var(--line, currentColor) 70%, transparent);
+  color: inherit;
+  font: inherit;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+self:last-child {
+  border-bottom: none;
+}
+
+self[kind="header"] {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  border-bottom: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  cursor: default;
+}
+
+self[selected] {
+  --widget-background: color-mix(in srgb, var(--accent, currentColor) 14%, transparent);
+  background: var(--widget-background);
+}
+
+self[stripe]:not([selected]):not([kind="header"]) {
+  --widget-background: color-mix(in srgb, currentColor 4%, transparent);
+  background: var(--widget-background);
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: -2px;
+}
+
+--- script ---
+/**
+ * One table row — header or body — of slate-column children.
+ *
+ *   <slate-row kind="header">
+ *     <slate-column text="Name"></slate-column>
+ *   </slate-row>
+ *   <slate-row value="ada" selected>
+ *     <slate-column text="Ada"></slate-column>
+ *   </slate-row>
+ *
+ * kind="header" is inherited by child slate-column (style + columnheader role).
+ *
+ * Attrs: value, kind ("" | header), selected, stripe, dense, disabled
+ * Events: clicked { value }
+ */
+function columnsOf(el) {
+  return [
+    ...el.querySelectorAll(":scope > slate-column, :scope > .slate-row-cells > slate-column"),
+  ];
+}
+
+function syncColumns(el) {
+  const header = el.getAttribute("kind") === "header";
+  const dense = el.hasAttribute("dense");
+  for (const col of columnsOf(el)) {
+    col.toggleAttribute("dense", dense);
+    // Reflect row kind onto columns (CSS also matches slate-row[kind=header] self).
+    if (header) col.setAttribute("kind", "header");
+    else if (col.getAttribute("kind") === "header") col.removeAttribute("kind");
+    // Equal-width columns across rows (horizontalbox only flexes [fill] children).
+    // Fixed widths come from the header via slate-table (or an explicit width here).
+    const minW = col.getAttribute("min-width");
+    const pinned =
+      col.hasAttribute("width") ||
+      (minW != null && minW !== "" && minW !== "0" && minW !== "0px");
+    if (!pinned && !col.hasAttribute("fill")) col.setAttribute("fill", "");
+    if (pinned) col.removeAttribute("fill");
+  }
+}
+
+export default defineUmc({
+  tag: "slate-row",
+  attrs: {
+    value: "",
+    kind: "",
+    selected: "",
+    stripe: "",
+    dense: "",
+    disabled: "",
+  },
+
+  events: {
+    click: "clicked",
+  },
+
+  Construct(el) {
+    el.setAttribute("role", "row");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const header = attr("kind", "") === "header";
+    const selected = el.hasAttribute("selected");
+    el.setAttribute("aria-selected", header ? "false" : selected ? "true" : "false");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    el.tabIndex = header ? -1 : selected ? 0 : -1;
+
+    syncColumns(el);
+    // Children may land in data-content after the first sync pass.
+    queueMicrotask(() => syncColumns(el));
+  },
+});
+
+--- preview ---
+<verticalbox gap="0" width="360" padding="12">
+  <slate-row kind="header">
+    <slate-column text="Name"></slate-column>
+    <slate-column text="Role"></slate-column>
+  </slate-row>
+  <slate-row value="ada" selected>
+    <slate-column text="Ada"></slate-column>
+    <slate-column text="Admin"></slate-column>
+  </slate-row>
+  <slate-row value="linus" stripe>
+    <slate-column text="Linus"></slate-column>
+    <slate-column text="Dev"></slate-column>
+  </slate-row>
+</verticalbox>

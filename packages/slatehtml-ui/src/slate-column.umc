@@ -1,0 +1,113 @@
+--- html ---
+<textblock class="slate-column-label" data-umc="text" fill min-width="0"></textblock>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  /* Equal share via host fill attr (horizontalbox > [fill]); don't fight widget.css. */
+  min-width: 0; /* umc-layout-ok */
+  --widget-padding: 8px 12px;
+  padding: var(--widget-padding);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow: hidden; /* umc-layout-ok */
+  text-overflow: ellipsis;
+}
+
+/* Own kind, or inherited from slate-row kind="header". */
+self[kind="header"],
+slate-row[kind="header"] self {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+self[dense],
+slate-row[dense] self {
+  --widget-padding: 4px 10px;
+  font-size: 12px;
+}
+
+self[kind="header"][dense],
+slate-row[kind="header"][dense] self,
+slate-row[kind="header"] self[dense] {
+  font-size: 11px;
+}
+
+.slate-column-label {
+  color: inherit;
+  min-width: 0; /* umc-layout-ok */
+}
+
+--- script ---
+/**
+ * One cell (or header cell) in a slate-row.
+ *
+ *   <slate-column text="Ada"></slate-column>
+ *
+ * Header chrome is inherited from the parent row:
+ *
+ *   <slate-row kind="header">
+ *     <slate-column text="Name"></slate-column>
+ *   </slate-row>
+ *
+ * Attrs: text, kind ("" | header — usually omit; row kind="header" inherits), dense
+ * Layout: defaults to fill so columns line up across rows. Pin with width on the
+ * header column — slate-table copies that width onto body cells in the same slot.
+ */
+function isHeader(el) {
+  if (el.getAttribute("kind") === "header") return true;
+  return el.closest("slate-row")?.getAttribute("kind") === "header";
+}
+
+function isPinnedSize(el) {
+  if (el.hasAttribute("width")) return true;
+  const minW = el.getAttribute("min-width");
+  return minW != null && minW !== "" && minW !== "0" && minW !== "0px";
+}
+
+function syncFill(el) {
+  // Pinning width (or a real min-width) opts out of equal-flex columns.
+  if (isPinnedSize(el)) {
+    el.removeAttribute("fill");
+    return;
+  }
+  if (!el.hasAttribute("fill")) el.setAttribute("fill", "");
+}
+
+export default defineUmc({
+  tag: "slate-column",
+  attrs: {
+    text: "",
+    kind: "",
+    dense: "",
+  },
+
+  Construct(el) {
+    syncFill(el);
+    el.setAttribute("role", isHeader(el) ? "columnheader" : "cell");
+  },
+
+  SynchronizeProperties(el, { bind }) {
+    bind();
+    syncFill(el);
+    el.setAttribute("role", isHeader(el) ? "columnheader" : "cell");
+  },
+});
+
+--- preview ---
+<verticalbox gap="0" width="320" padding="12">
+  <slate-row kind="header">
+    <slate-column text="Name"></slate-column>
+    <slate-column text="Role"></slate-column>
+  </slate-row>
+  <slate-row>
+    <slate-column text="Ada Lovelace"></slate-column>
+    <slate-column text="Admin"></slate-column>
+  </slate-row>
+</verticalbox>

@@ -128,7 +128,7 @@ From the gallery's **Horizontal / Vertical / Spacer / Fill** panel:
 
 Set `orientation="horizontal"`, `"vertical"`, or `"both"` (default is both axes when omitted).
 
-**Click-drag scroll** (mouse/pen, phone-like): enable globally with `configure({ dragScroll: true })`, or per box with `drag-scroll` / `drag-scroll="false"`. Touch keeps native panning. Works over buttons and list chrome; skips `user-select: text` / `pre` / `code` / `[selectable]` and pointer-owned controls (fields, sliders, menus).
+**Click-drag scroll** (mouse/pen, phone-like): enable globally with `configure({ dragScroll: true })`, or per box with `drag-scroll` / `drag-scroll="false"`. Touch keeps native panning. Works over buttons and list chrome; skips pointer-owned controls (fields, sliders, menus). Over selectable text (`user-select: text` / `pre` / `code` / `[selectable]`), only the glyphs themselves block drag — empty padding still scrolls.
 
 ## Canvas panel: the positioning playground
 

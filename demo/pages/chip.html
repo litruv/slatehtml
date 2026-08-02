@@ -1,0 +1,147 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Chip"></slate-text>
+          <slate-text kind="hint" text="Compact labels. Optional icon, selected, deletable, clickable."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,deleted">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-chip text="Default"></slate-chip>
+                  <slate-chip text="Soft" kind="soft"></slate-chip>
+                  <slate-chip text="Outlined" kind="outlined"></slate-chip>
+                  <slate-chip text="Selected" selected></slate-chip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-chip text="Default"></slate-chip>
+<slate-chip text="Soft" kind="soft"></slate-chip>
+<slate-chip text="Outlined" kind="outlined"></slate-chip>
+<slate-chip text="Selected" selected></slate-chip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,deleted">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Icon"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-chip text="Docs" icon="book"></slate-chip>
+                  <slate-chip text="Search" icon="search" kind="outlined"></slate-chip>
+                  <slate-chip text="Starred" icon="star" selected></slate-chip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-chip text="Docs" icon="book"></slate-chip>
+<slate-chip text="Search" icon="search" kind="outlined"></slate-chip>
+<slate-chip text="Starred" icon="star" selected></slate-chip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,deleted">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Clickable"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-chip text="Filter" icon="list-filter" clickable></slate-chip>
+                  <slate-chip text="Tag" clickable kind="soft"></slate-chip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-chip text="Filter" icon="list-filter" clickable></slate-chip>
+<slate-chip text="Tag" clickable kind="soft"></slate-chip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,deleted">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Deletable"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-chip text="Draft" deletable></slate-chip>
+                  <slate-chip text="Review" icon="eye" deletable></slate-chip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-chip text="Draft" deletable></slate-chip>
+<slate-chip text="Review" icon="eye" deletable></slate-chip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="clicked,deleted">
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Disabled"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-chip text="Locked" disabled></slate-chip>
+                  <slate-chip text="Locked" icon="lock" deletable disabled></slate-chip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-chip text="Locked" disabled></slate-chip>
+<slate-chip text="Locked" icon="lock" deletable disabled></slate-chip>
+            </script>
+          </wrapbox>
+        </verticalbox>

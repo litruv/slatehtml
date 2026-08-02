@@ -14,14 +14,16 @@ import {
   getSettings as getUiSettings,
   lucideSvg,
 } from "slatehtml-ui/configure";
+// import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 
 configure({ dragScroll: true });
 
 configureUi({
   iconSize: "18",
   iconStrokeWidth: "1.75",
-  // Replace or compose with Lucide:
+  // Lucide (default), Font Awesome, or compose:
   icons: (name, attrs) => myIcon(name, attrs) ?? lucideSvg(name, attrs),
+  // icons: fontAwesomeSvg,
 });
 
 console.log(getSettings(), getUiSettings());</code></pre>
@@ -53,7 +55,7 @@ console.log(getSettings(), getUiSettings());</code></pre>
             <verticalbox gap="10">
               <verticalbox gap="4">
                 <slate-text kind="body" text="icons (fn, default Lucide)"></slate-text>
-                <slate-text kind="hint" text="(name, attrs) => SVGElement | null. Default resolves kebab-case Lucide names. Return null for unknown. Compose with lucideSvg when you only override some names."></slate-text>
+                <slate-text kind="hint" text="(name, attrs) => SVGElement | null. Default is Lucide. Built-in alternate: fontAwesomeSvg from slatehtml-ui/icons/fontawesome (Free solid/regular/brands). Return null for unknown; compose providers as needed."></slate-text>
               </verticalbox>
               <verticalbox gap="4">
                 <slate-text kind="body" text='iconSize (string, default "16")'></slate-text>
@@ -66,13 +68,19 @@ console.log(getSettings(), getUiSettings());</code></pre>
             </verticalbox>
             <scrollbox class="demo-code-box" max-height="200" padding="10 12">
               <pre><code class="language-js">import { configure, lucideSvg } from "slatehtml-ui/configure";
+import { fontAwesomeSvg } from "slatehtml-ui/icons/fontawesome";
 
+// Compose with Lucide (default):
 configure({
   icons(name, attrs) {
     if (name === "brand") return brandSvg(attrs);
     return lucideSvg(name, attrs);
   },
-});</code></pre>
+});
+
+// Or switch the whole set to Font Awesome Free:
+// configure({ icons: fontAwesomeSvg });
+// Names: "user", "fas:gear", "far:user", "fab:github"</code></pre>
             </scrollbox>
           </verticalbox>
         </border>

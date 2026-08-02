@@ -31,6 +31,9 @@ import {
   watchSize as observeSize,
   watchSource,
 } from "./reactivity.js";
+import { e } from "./events.js";
+
+export { e } from "./events.js";
 
 const styleIds = new Set();
 
@@ -117,6 +120,23 @@ function ownsNode(host, node) {
     if (isUserWidgetTag(p.localName)) return false;
   }
   return true;
+}
+
+/**
+ * Map of this host's template nodes with `ref` → element, for `api.self.toast`.
+ * Use `ref` (not HTML `id`) so instances can share names without document-wide
+ * uniqueness. Nested UserWidgets are opaque. Duplicate keys: first match wins.
+ */
+export function collectSelf(host) {
+  const self = Object.create(null);
+  if (!host || typeof host.querySelectorAll !== "function") return self;
+  for (const node of host.querySelectorAll("[ref]")) {
+    const id = node.getAttribute("ref");
+    if (!id || !ownsNode(host, node)) continue;
+    if (Object.prototype.hasOwnProperty.call(self, id)) continue;
+    self[id] = node;
+  }
+  return self;
 }
 
 /**
@@ -725,8 +745,21 @@ function syncExtendedLeaf(el, extendsBare) {
   if (el.textContent !== next) el.textContent = next;
 }
 
+/**
+ * Rising-edge boolean attr: remove then set so listeners / UMC sync see a fresh open.
+ *   bump(self.toast)         → open=""
+ *   bump(self.toast, "open")
+ */
+export function bump(target, name = "open") {
+  if (!target || typeof target.setAttribute !== "function") return target;
+  const attr = name || "open";
+  if (target.hasAttribute(attr)) target.removeAttribute(attr);
+  target.setAttribute(attr, "");
+  return target;
+}
+
 function makeApi(el, html, defaults) {
-  return {
+  const api = {
     html,
     defaults,
     stamp: (markup = html) => stamp(el, markup),
@@ -739,6 +772,27 @@ function makeApi(el, html, defaults) {
       el.hasAttribute(name) ? el.getAttribute(name) : (defaults[name] ?? fallback),
     attrs: (list) => readAttrs(el, list ?? Object.keys(defaults), defaults),
     emit: (type, detail, options) => emit(el, type, detail, options),
+    /** Public event name constants (`e.clicked`, `e.closed`, …). */
+    e,
+    /**
+     * addEventListener + auto-remove on Destroyed.
+     *   on(self.show, e.clicked, () => bump(self.toast))
+     */
+    on(target, type, handler, options) {
+      if (!target || typeof target.addEventListener !== "function") return () => {};
+      if (typeof handler !== "function" || !type) return () => {};
+      target.addEventListener(type, handler, options);
+      const off = () => {
+        try {
+          target.removeEventListener(type, handler, options);
+        } catch {
+          /* ignore */
+        }
+      };
+      disposeBag(el).push(off);
+      return off;
+    },
+    bump,
     /** Register teardown, runs on Destroyed / disconnect. */
     dispose(fn) {
       if (typeof fn === "function") disposeBag(el).push(fn);
@@ -766,6 +820,16 @@ function makeApi(el, html, defaults) {
       cancelScheduledFrame(el, key);
     },
   };
+  /**
+   * Template nodes by ref, owned by this host only (`ref="toast"` → `self.toast`).
+   * Prefer destructuring: `Construct(el, { self }) { self.toast… }`.
+   */
+  Object.defineProperty(api, "self", {
+    enumerable: true,
+    configurable: true,
+    get: () => collectSelf(el),
+  });
+  return api;
 }
 
 function startTick(el, Tick, apiFactory) {

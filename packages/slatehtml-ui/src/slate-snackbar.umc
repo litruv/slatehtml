@@ -1,0 +1,430 @@
+--- html ---
+<verticalbox class="slate-snackbar-shell">
+  <horizontalbox class="slate-snackbar-row" gap="8" valign="center">
+    <textblock class="slate-snackbar-text" data-umc="text" fill min-width="0"></textblock>
+    <slate-button class="slate-snackbar-action" text="" hidden></slate-button>
+    <slate-icon class="slate-snackbar-close" name="x" size="14"></slate-icon>
+  </horizontalbox>
+  <span class="slate-snackbar-progress" hidden>
+    <span class="slate-snackbar-progress-fill"></span>
+  </span>
+</verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  position: fixed; /* umc-layout-ok, toast layer */
+  left: 50%; /* umc-layout-ok */
+  bottom: var(--snack-bottom, 20px); /* umc-layout-ok, stacked by script */
+  /* Scale from bottom center so older toasts shrink upward cleanly. */
+  transform: translateX(-50%) scale(var(--snack-scale, 1)); /* umc-layout-ok */
+  transform-origin: center bottom; /* umc-layout-ok */
+  z-index: var(--snack-z, 260); /* umc-layout-ok */
+  box-sizing: border-box;
+  width: min(420px, calc(100vw - 24px)); /* umc-layout-ok */
+  border-radius: 8px;
+  overflow: hidden; /* umc-layout-ok, clip countdown bar to radius */
+  background: var(--hud, #11111b);
+  color: var(--hud-ink, #cdd6f4);
+  /* Soft shadow; stack layout overrides older toasts to a hairline. */
+  box-shadow: var(--snack-shadow, 0 6px 16px rgba(0, 0, 0, 0.28));
+  opacity: var(--snack-opacity, 1);
+  font: inherit;
+  font-size: 13px;
+  transition: bottom 0.18s ease, transform 0.18s ease, opacity 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+self:not([open]) {
+  display: none !important;
+}
+
+.slate-snackbar-shell {
+  width: 100%; /* umc-layout-ok */
+}
+
+.slate-snackbar-row {
+  /* Keep bar padding here so action buttons can't skew the chrome. */
+  --widget-padding: 6px 8px 6px 14px;
+  padding: 6px 8px 6px 14px; /* umc-layout-ok */
+  box-sizing: border-box;
+  min-height: 44px; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+}
+
+.slate-snackbar-text {
+  color: inherit;
+  line-height: 1.3;
+}
+
+/* Beat app-level filled slate-button chrome (e.g. gallery mauve). */
+.slate-snackbar-action {
+  --widget-background: transparent;
+  --widget-border: none;
+  --widget-padding: 6px 10px;
+  --widget-radius: 4px;
+  --button-fg: var(--accent, #cba6f7);
+  color: var(--accent, #cba6f7);
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  min-height: 32px; /* umc-layout-ok */
+}
+
+.slate-snackbar-action .slate-button-label {
+  color: var(--accent, #cba6f7);
+}
+
+.slate-snackbar-action:hover:not([disabled]) {
+  filter: none;
+  background: color-mix(in srgb, var(--accent, #cba6f7) 16%, transparent);
+}
+
+.slate-snackbar-action[hidden] {
+  display: none !important;
+}
+
+.slate-snackbar-close {
+  cursor: pointer;
+  opacity: 0.75;
+  border-radius: 4px;
+  padding: 9px; /* umc-layout-ok, match action hit height */
+  flex: 0 0 auto; /* umc-layout-ok */
+  box-sizing: border-box;
+}
+
+.slate-snackbar-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+/* KDE-style countdown strip along the bottom edge. */
+.slate-snackbar-progress {
+  display: block; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 3px; /* umc-layout-ok */
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  overflow: hidden; /* umc-layout-ok */
+}
+
+.slate-snackbar-progress[hidden] {
+  display: none !important;
+}
+
+.slate-snackbar-progress-fill {
+  display: block; /* umc-layout-ok */
+  width: 100%; /* umc-layout-ok */
+  height: 100%; /* umc-layout-ok */
+  background: var(--accent, #cba6f7);
+  transform-origin: left center; /* umc-layout-ok */
+  transform: scaleX(1); /* umc-layout-ok */
+}
+
+@keyframes slate-snack-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+--- script ---
+/**
+ * Short-lived toast. Multiple open snackbars stack upward from the bottom.
+ * Timed toasts (duration > 0) show a KDE-style countdown bar; hover pauses.
+ *
+ *   <slate-snackbar open text="Copied to clipboard"></slate-snackbar>
+ *   <slate-snackbar open text="Archived" action="Undo" duration="4000"></slate-snackbar>
+ *
+ * Attrs: open, text, action, duration (ms, default 4000; 0 = stay)
+ * Events: closed, action
+ */
+const liveSnacks = new Set();
+let snackDocBound = false;
+let snackSeq = 0;
+let layoutQueued = false;
+
+function openSnacks() {
+  return [...liveSnacks]
+    .filter((el) => el.isConnected && el.hasAttribute("open"))
+    .sort((a, b) => (a._snackSeq || 0) - (b._snackSeq || 0));
+}
+
+/** Newest on the bottom edge; older ones stack above, slightly smaller. */
+function layoutSnacks() {
+  layoutQueued = false;
+  const newestFirst = openSnacks().reverse();
+  let bottom = 20;
+  // Negative gap = slight overlap so the stack reads as one pile.
+  const overlap = 12;
+  newestFirst.forEach((el, i) => {
+    const scale = Math.max(0.88, 1 - i * 0.05);
+    const opacity = Math.max(0.55, 1 - i * 0.18);
+    el.style.setProperty("--snack-bottom", `${bottom}px`);
+    el.style.setProperty("--snack-scale", String(scale));
+    el.style.setProperty("--snack-opacity", String(opacity));
+    el.style.setProperty("--snack-z", String(260 + (newestFirst.length - i)));
+    // Only the front toast keeps a real shadow; older ones use a hairline
+    // so blur doesn't wash onto the snack below.
+    el.style.setProperty(
+      "--snack-shadow",
+      i === 0
+        ? "0 6px 16px rgba(0, 0, 0, 0.28)"
+        : "0 1px 0 rgba(0, 0, 0, 0.35)"
+    );
+    const h = Math.max(el.offsetHeight || 0, 44) * scale;
+    bottom += h - overlap;
+  });
+}
+
+function queueLayout() {
+  if (layoutQueued) return;
+  layoutQueued = true;
+  requestAnimationFrame(() => {
+    layoutSnacks();
+    // Second pass after paint so newly shown toasts have real height.
+    requestAnimationFrame(layoutSnacks);
+  });
+}
+
+function parseDuration(el) {
+  const ms = Number(el.getAttribute("duration"));
+  return Number.isFinite(ms) ? ms : 4000;
+}
+
+function progressEls(el) {
+  return {
+    track: el.querySelector(".slate-snackbar-progress"),
+    fill: el.querySelector(".slate-snackbar-progress-fill"),
+  };
+}
+
+function stopProgress(el) {
+  const { track, fill } = progressEls(el);
+  if (track) track.setAttribute("hidden", "");
+  if (fill) {
+    fill.style.animation = "none";
+    fill.style.animationPlayState = "";
+  }
+}
+
+function startProgress(el, duration) {
+  const { track, fill } = progressEls(el);
+  if (!track || !fill) return;
+  if (duration <= 0) {
+    stopProgress(el);
+    return;
+  }
+  track.removeAttribute("hidden");
+  fill.style.animation = "none";
+  fill.style.animationPlayState = "";
+  void fill.offsetWidth;
+  fill.style.animation = `slate-snack-progress ${duration}ms linear forwards`;
+}
+
+function clearSnackLayout(el) {
+  el.style.removeProperty("--snack-bottom");
+  el.style.removeProperty("--snack-scale");
+  el.style.removeProperty("--snack-opacity");
+  el.style.removeProperty("--snack-z");
+  el.style.removeProperty("--snack-shadow");
+}
+
+function closeSnack(el, api, reason) {
+  if (!el.hasAttribute("open")) return;
+  el.removeAttribute("open");
+  clearTimeout(el._snackTimer);
+  el._snackTimer = null;
+  el._snackDeadline = 0;
+  el._snackRemaining = null;
+  el._snackPaused = false;
+  stopProgress(el);
+  clearSnackLayout(el);
+  queueLayout();
+  api.emit("closed", { reason: reason || "dismiss" });
+}
+
+function armTimer(el, api, overrideMs) {
+  clearTimeout(el._snackTimer);
+  el._snackTimer = null;
+  el._snackRemaining = null;
+  el._snackPaused = false;
+  if (!el.hasAttribute("open")) return;
+  const duration = overrideMs != null ? overrideMs : parseDuration(el);
+  if (duration <= 0) {
+    el._snackDeadline = 0;
+    stopProgress(el);
+    return;
+  }
+  el._snackDeadline = Date.now() + duration;
+  startProgress(el, duration);
+  el._snackTimer = setTimeout(() => closeSnack(el, api, "timeout"), duration);
+}
+
+function pauseTimer(el) {
+  if (el._snackPaused || !el._snackDeadline) return;
+  if (!el.hasAttribute("open")) return;
+  const left = Math.max(0, el._snackDeadline - Date.now());
+  clearTimeout(el._snackTimer);
+  el._snackTimer = null;
+  el._snackRemaining = left;
+  el._snackPaused = true;
+  const { fill } = progressEls(el);
+  if (fill) fill.style.animationPlayState = "paused";
+}
+
+function resumeTimer(el, api) {
+  if (!el._snackPaused || !el.hasAttribute("open")) return;
+  el._snackPaused = false;
+  const left = el._snackRemaining;
+  el._snackRemaining = null;
+  if (left == null) return;
+  if (left <= 0) {
+    closeSnack(el, api, "timeout");
+    return;
+  }
+  const { fill } = progressEls(el);
+  if (fill) fill.style.animationPlayState = "running";
+  el._snackDeadline = Date.now() + left;
+  el._snackTimer = setTimeout(() => closeSnack(el, api, "timeout"), left);
+}
+
+function openFromTrigger(el, trigger) {
+  if (trigger instanceof Element) {
+    const text = trigger.getAttribute("snackbar-text");
+    const action = trigger.getAttribute("snackbar-action");
+    if (text != null) el.setAttribute("text", text);
+    if (action != null) el.setAttribute("action", action);
+  }
+  // Rising-edge open in SynchronizeProperties assigns stack order.
+  if (el.hasAttribute("open")) el.removeAttribute("open");
+  el.setAttribute("open", "");
+}
+
+function onSnackDocClick(event) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  let trigger = null;
+  for (const node of path) {
+    if (node instanceof Element && node.hasAttribute("snackbar")) {
+      trigger = node;
+      break;
+    }
+  }
+  if (!trigger) {
+    const t = event.target;
+    trigger =
+      t instanceof Element
+        ? t.closest("[snackbar]")
+        : t?.parentElement?.closest?.("[snackbar]") || null;
+  }
+  if (!trigger) return;
+  const id = trigger.getAttribute("snackbar");
+  if (!id) return;
+  for (const el of liveSnacks) {
+    if (el.id !== id && el.getAttribute("name") !== id) continue;
+    if (el.contains(trigger)) return;
+    event.preventDefault();
+    openFromTrigger(el, trigger);
+    return;
+  }
+}
+
+export default defineUmc({
+  tag: "slate-snackbar",
+  attrs: {
+    open: "",
+    text: "",
+    action: "",
+    duration: "4000",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "status");
+    liveSnacks.add(el);
+    if (!snackDocBound) {
+      snackDocBound = true;
+      document.addEventListener("click", onSnackDocClick, true);
+      window.addEventListener("resize", queueLayout);
+    }
+    if (el._snackBound) return;
+    el._snackBound = true;
+    el.addEventListener("mouseenter", () => pauseTimer(el));
+    el.addEventListener("mouseleave", () => resumeTimer(el, api));
+    el.addEventListener("click", (event) => {
+      const close = event.target?.closest?.(".slate-snackbar-close");
+      if (close && el.contains(close)) {
+        closeSnack(el, api, "close");
+        return;
+      }
+      const action = event.target?.closest?.(".slate-snackbar-action");
+      if (action && el.contains(action)) {
+        api.emit("action", { text: el.getAttribute("text") || "" });
+        closeSnack(el, api, "action");
+      }
+    });
+    el.addEventListener("clicked", (event) => {
+      if (event.target?.closest?.(".slate-snackbar-action")) {
+        api.emit("action", { text: el.getAttribute("text") || "" });
+        closeSnack(el, api, "action");
+      }
+    });
+  },
+
+  Destroyed(el, api) {
+    liveSnacks.delete(el);
+    if (!liveSnacks.size && snackDocBound) {
+      snackDocBound = false;
+      document.removeEventListener("click", onSnackDocClick, true);
+      window.removeEventListener("resize", queueLayout);
+    }
+    clearTimeout(el._snackTimer);
+    el._snackTimer = null;
+    closeSnack(el, api, "destroy");
+    el._snackBound = false;
+    queueLayout();
+  },
+
+  SynchronizeProperties(el, api) {
+    const { attr, bind } = api;
+    bind();
+    const action = (attr("action", "") || "").trim();
+    const btn = el.querySelector(".slate-snackbar-action");
+    if (btn) {
+      btn.toggleAttribute("hidden", !action);
+      btn.setAttribute("text", action || "");
+    }
+    const durationAttr = attr("duration", "4000");
+    if (el.hasAttribute("open")) {
+      if (!el._wasSnackOpen) {
+        el._snackSeq = ++snackSeq;
+        el._wasSnackOpen = true;
+        el._snackDurationAttr = durationAttr;
+        armTimer(el, api);
+        queueLayout();
+      } else if (el._snackDurationAttr !== durationAttr) {
+        el._snackDurationAttr = durationAttr;
+        armTimer(el, api);
+      }
+    } else {
+      el._wasSnackOpen = false;
+      el._snackDurationAttr = durationAttr;
+      clearTimeout(el._snackTimer);
+      el._snackTimer = null;
+      el._snackDeadline = 0;
+      el._snackRemaining = null;
+      el._snackPaused = false;
+      stopProgress(el);
+      clearSnackLayout(el);
+      queueLayout();
+    }
+  },
+});
+
+--- preview ---
+<canvaspanel width="480" height="240" kind="stage">
+  <slate-snackbar open text="Timed toast (hover pauses)" duration="6000"></slate-snackbar>
+  <slate-snackbar open text="Pinned toast" action="Undo" duration="0"></slate-snackbar>
+</canvaspanel>

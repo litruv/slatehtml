@@ -1,0 +1,244 @@
+--- html ---
+<verticalbox class="slate-list-shell" data-content gap="2" width="100%"></verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  --widget-padding: 4px;
+  --widget-radius: 8px;
+  --widget-background: transparent;
+  --widget-border: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  padding: var(--widget-padding);
+  border: var(--widget-border);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: inherit;
+  font: inherit;
+}
+
+self[kind="plain"] {
+  --widget-border: none;
+  --widget-padding: 0;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+.slate-list-sep {
+  --widget-padding: 6px 0;
+  height: 0; /* umc-layout-ok */
+  border: 0;
+  border-top: 1px solid var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  margin: 4px 8px; /* umc-layout-ok */
+}
+
+.slate-list-category {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  padding: 8px 12px 4px; /* umc-layout-ok */
+}
+
+--- script ---
+import { selectableOptions } from "./input/parse-options.js";
+
+/**
+ * Selectable list / list view.
+ *
+ *   <slate-list
+ *     options="inbox|Inbox|inbox, starred|Starred|star, ---, ada|Ada|user"
+ *     selected="inbox"
+ *   ></slate-list>
+ *
+ * Options: value|Label|icon (same grammar as select). Slotted slate-list-item also works.
+ * Attrs: options, selected, dense, kind ("" | plain), disabled
+ * Events: selectionchanged { value, label, index }, activated { value, label }
+ */
+
+function parseListEntries(spec) {
+  // Extend select grammar with optional 4th |secondary field.
+  return String(spec ?? "")
+    .split(/[,\n]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      if (/^-{2,}$/.test(entry)) {
+        return { type: "separator", value: "", label: "", icon: "", secondary: "" };
+      }
+      if (entry.startsWith("#")) {
+        return {
+          type: "category",
+          value: "",
+          label: entry.slice(1).trim() || entry,
+          icon: "",
+          secondary: "",
+        };
+      }
+      const parts = entry.split("|").map((p) => p.trim());
+      if (parts.length === 1) {
+        return {
+          type: "option",
+          value: parts[0],
+          label: parts[0],
+          icon: "",
+          secondary: "",
+        };
+      }
+      const [value, label, icon = "", secondary = ""] = parts;
+      return {
+        type: "option",
+        value,
+        label: label || value,
+        icon,
+        secondary,
+      };
+    });
+}
+
+function itemSpec(option, selected, dense) {
+  const on = option.value === selected;
+  return {
+    tag: "slate-list-item",
+    value: option.value,
+    text: option.label,
+    icon: option.icon || "",
+    secondary: option.secondary || "",
+    ...(on ? { selected: "" } : {}),
+    ...(dense ? { dense: "" } : {}),
+  };
+}
+
+function slottedItems(el) {
+  return [...el.querySelectorAll(":scope > slate-list-item, :scope > .slate-list-shell > slate-list-item")];
+}
+
+function select(el, api, value) {
+  if (el.hasAttribute("disabled")) return;
+  const entries = selectableOptions(parseListEntries(api.attr("options", "")));
+  const fromSlots = slottedItems(el);
+  let label = value;
+  let index = -1;
+  if (entries.length) {
+    index = entries.findIndex((o) => o.value === value);
+    if (index < 0) return;
+    label = entries[index].label;
+  } else {
+    index = fromSlots.findIndex(
+      (n) => (n.getAttribute("value") || n.getAttribute("text") || "") === value
+    );
+    if (index < 0) return;
+    label = fromSlots[index].getAttribute("text") || value;
+  }
+  if (value === api.attr("selected", "")) return;
+  el.setAttribute("selected", value);
+  api.emit("selectionchanged", { value, label, index });
+}
+
+export default defineUmc({
+  tag: "slate-list",
+  attrs: {
+    options: "",
+    selected: "",
+    dense: "",
+    kind: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "listbox");
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+
+    if (el._listBound) return;
+    el._listBound = true;
+
+    el.addEventListener("clicked", (event) => {
+      const item = event.target?.closest?.("slate-list-item");
+      if (!item || !el.contains(item) || item.hasAttribute("disabled")) return;
+      const value = item.getAttribute("value") || item.getAttribute("text") || "";
+      select(el, api, value);
+    });
+
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      const entries = selectableOptions(parseListEntries(api.attr("options", "")));
+      const items = entries.length
+        ? entries
+        : slottedItems(el).map((n) => ({
+            value: n.getAttribute("value") || n.getAttribute("text") || "",
+            label: n.getAttribute("text") || "",
+          }));
+      if (!items.length) return;
+      const current = items.findIndex((o) => o.value === api.attr("selected", ""));
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const next = current < 0 ? 0 : Math.min(items.length - 1, current + 1);
+        select(el, api, items[next].value);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const next = current < 0 ? items.length - 1 : Math.max(0, current - 1);
+        select(el, api, items[next].value);
+      } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        const value = api.attr("selected", "");
+        if (!value) return;
+        const hit = items.find((o) => o.value === value);
+        api.emit("activated", { value, label: hit?.label || value });
+      }
+    });
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const dense = el.hasAttribute("dense");
+    const selected = attr("selected", "");
+    const entries = parseListEntries(attr("options", ""));
+    const optionsKey =
+      entries.map((o) => `${o.type}:${o.value}:${o.label}:${o.icon}:${o.secondary}`).join("\u0001") +
+      `\u0002${selected}\u0003${dense ? 1 : 0}`;
+
+    if (entries.length && el._listKey !== optionsKey) {
+      el._listKey = optionsKey;
+      const kids = [];
+      for (const entry of entries) {
+        if (entry.type === "separator") {
+          kids.push({ tag: "border", class: "slate-list-sep", height: "1" });
+        } else if (entry.type === "category") {
+          kids.push({ tag: "textblock", class: "slate-list-category", text: entry.label });
+        } else {
+          kids.push(itemSpec(entry, selected, dense));
+        }
+      }
+      el.set(...kids);
+    } else if (!entries.length) {
+      // Sync selected onto slotted items.
+      for (const item of slottedItems(el)) {
+        const value = item.getAttribute("value") || item.getAttribute("text") || "";
+        item.toggleAttribute("selected", value === selected && selected !== "");
+        item.toggleAttribute("dense", dense);
+      }
+    }
+
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+    if (selected) el.setAttribute("aria-activedescendant", "");
+  },
+});
+
+--- preview ---
+<canvaspanel width="320" height="280" kind="stage">
+  <border kind="panel" padding="12" anchors="fill" top="12" left="12" right="12" bottom="12">
+    <slate-list
+      options="inbox|Inbox|inbox|3 new, starred|Starred|star, ---, # People, ada|Ada Lovelace|user|Admin, linus|Linus|user|Dev"
+      selected="inbox"
+    ></slate-list>
+  </border>
+</canvaspanel>

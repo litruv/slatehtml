@@ -33,6 +33,18 @@ self:not([open]) > .shadowbox-root {
   pointer-events: none !important;
 }
 
+/* Full viewport when open — works from nested triggers (shadowbox-button). */
+self[open] > .shadowbox-root {
+  position: fixed; /* umc-layout-ok, lightbox layer */
+  top: 0; /* umc-layout-ok */
+  left: 0; /* umc-layout-ok */
+  right: 0; /* umc-layout-ok */
+  bottom: 0; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+  z-index: var(--shadowbox-z, 200); /* umc-layout-ok */
+}
+
 .shadowbox-root[hidden] {
   display: none !important;
   pointer-events: none !important;
@@ -121,14 +133,31 @@ self:not([open]) > .shadowbox-root {
  * Fullscreen lightbox for image / video (mxc → blob like matrix-image).
  * Images: scroll-wheel zoom, click to zoom in / reset, drag to pan when zoomed.
  *
- *   <slate-shadowbox open src="mxc://…" kind="image" title="photo"></slate-shadowbox>
+ * Prefer a trigger that owns its box:
+ *   <shadowbox-button src="…" title="photo" text="Open"></shadowbox-button>
  *
+ * Or a shared host + invoker / attr open:
+ *   <slate-shadowbox id="lb" src="…" title="photo"></slate-shadowbox>
+ *   <button commandfor="lb" command="--open">Open</button>
+ *   any clickable with shadowbox="lb" (+ shadowbox-src / -kind / -title)
+ *
+ * Host settings: close-backdrop, close-escape (default on; "false"/"0"/"off" to disable).
  * Events: opened, closed
  */
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 5;
 const ZOOM_CLICK = 2.5;
 const DRAG_CLICK_SLOP = 6;
+
+function attrOn(el, name, fallback = true) {
+  if (!el.hasAttribute(name)) return fallback;
+  const v = String(el.getAttribute(name) ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "" || v === "true" || v === "1" || v === "on") return true;
+  if (v === "false" || v === "0" || v === "off") return false;
+  return fallback;
+}
 
 function imageViewportMax() {
   return {
@@ -336,6 +365,64 @@ function closeBox(el, api) {
   });
 }
 
+/** Apply optional shadowbox-* settings from a trigger, then open. */
+function openFromTrigger(el, api, trigger) {
+  if (trigger instanceof Element) {
+    const src = trigger.getAttribute("shadowbox-src");
+    const kind = trigger.getAttribute("shadowbox-kind");
+    const title = trigger.getAttribute("shadowbox-title");
+    if (src != null && src !== "") el.setAttribute("src", src);
+    if (kind != null && kind !== "") el.setAttribute("kind", kind);
+    if (title != null) el.setAttribute("title", title);
+  }
+  el.setAttribute("open", "");
+}
+
+function matchesShadowboxTarget(el, id) {
+  if (!id) return false;
+  return el.id === id || el.getAttribute("name") === id;
+}
+
+/** All connected shadowboxes — one document click listener opens by id. */
+const liveBoxes = new Set();
+let docClickBound = false;
+
+function findTrigger(event) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  for (const node of path) {
+    if (node instanceof Element && node.hasAttribute("shadowbox")) return node;
+  }
+  const t = event.target;
+  if (t instanceof Element) return t.closest("[shadowbox]");
+  return t?.parentElement?.closest?.("[shadowbox]") || null;
+}
+
+function onDocumentClick(event) {
+  const trigger = findTrigger(event);
+  if (!trigger) return;
+  const id = trigger.getAttribute("shadowbox");
+  if (!id) return;
+  for (const el of liveBoxes) {
+    if (!matchesShadowboxTarget(el, id)) continue;
+    if (el.contains(trigger)) return;
+    event.preventDefault();
+    openFromTrigger(el, el._shadowApi, trigger);
+    return;
+  }
+}
+
+function bindDocumentClick() {
+  if (docClickBound || typeof document === "undefined") return;
+  docClickBound = true;
+  document.addEventListener("click", onDocumentClick, true);
+}
+
+function unbindDocumentClick() {
+  if (!docClickBound || liveBoxes.size) return;
+  docClickBound = false;
+  document.removeEventListener("click", onDocumentClick, true);
+}
+
 export default defineUmc({
   tag: "slate-shadowbox",
   attrs: {
@@ -343,42 +430,70 @@ export default defineUmc({
     src: "",
     kind: "image",
     title: "",
+    "close-backdrop": "",
+    "close-escape": "",
   },
 
   Construct(el, api) {
-    if (el._bound) return;
-    el._bound = true;
+    el._shadowApi = api;
+    liveBoxes.add(el);
+    bindDocumentClick();
 
-    bindImageZoom(el);
+    if (!el._bound) {
+      el._bound = true;
+      bindImageZoom(el);
 
-    el.addEventListener("click", (event) => {
-      const close = event.target?.closest?.(".shadowbox-close");
-      if (close && el.contains(close)) {
-        event.preventDefault();
-        closeBox(el, api);
-        return;
-      }
-      const backdrop = event.target?.closest?.(".shadowbox-backdrop");
-      if (backdrop && el.contains(backdrop)) {
-        closeBox(el, api);
-      }
-    });
+      el.addEventListener("click", (event) => {
+        const close = event.target?.closest?.(".shadowbox-close");
+        if (close && el.contains(close)) {
+          event.preventDefault();
+          closeBox(el, api);
+          return;
+        }
+        const backdrop = event.target?.closest?.(".shadowbox-backdrop");
+        if (
+          backdrop &&
+          el.contains(backdrop) &&
+          attrOn(el, "close-backdrop", true)
+        ) {
+          closeBox(el, api);
+        }
+      });
 
-    el._onKey = (event) => {
-      if (!el.hasAttribute("open")) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeBox(el, api);
-      }
-    };
-    document.addEventListener("keydown", el._onKey);
+      el._onKey = (event) => {
+        if (!el.hasAttribute("open")) return;
+        if (event.key === "Escape" && attrOn(el, "close-escape", true)) {
+          event.preventDefault();
+          closeBox(el, api);
+        }
+      };
+      document.addEventListener("keydown", el._onKey);
+
+      // Invoker Commands: <button commandfor="my-id" command="--open">
+      el._onCommand = (event) => {
+        const cmd = String(event.command || "").toLowerCase();
+        if (cmd === "--open" || cmd === "--show") {
+          openFromTrigger(el, api, event.source);
+        } else if (cmd === "--close" || cmd === "--hide") {
+          closeBox(el, api);
+        }
+      };
+      el.addEventListener("command", el._onCommand);
+    }
   },
 
   Destroyed(el, api) {
+    liveBoxes.delete(el);
+    unbindDocumentClick();
     if (el._onKey) {
       document.removeEventListener("keydown", el._onKey);
       el._onKey = null;
     }
+    if (el._onCommand) {
+      el.removeEventListener("command", el._onCommand);
+      el._onCommand = null;
+    }
+    el._shadowApi = null;
     closeBox(el, api);
     el._bound = false;
   },

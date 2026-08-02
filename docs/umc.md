@@ -259,6 +259,32 @@ SynchronizeProperties(el, { attr }) {
 }
 ```
 
+### `api.self` — template refs (`ref`)
+
+Nodes in **this** widget's stamped HTML with `ref` are available as `api.self.<name>`. Use `ref` instead of HTML `id` so every instance can reuse names (`toast`, `show`) without document-wide uniqueness. Nested UserWidgets are a boundary: you only see your own tree.
+
+```umc
+--- html ---
+<slate-button ref="show" text="Show"></slate-button>
+<slate-snackbar ref="toast" text="Saved" duration="4000"></slate-snackbar>
+
+--- script ---
+export default defineUmc({
+  tag: "save-toast",
+  Construct(el, { self, on, bump, e }) {
+    on(self.show, e.clicked, () => bump(self.toast));
+  },
+});
+```
+
+| Helper | Meaning |
+|--------|---------|
+| `e.clicked` / `e.closed` / … | Published event name constants (also `import { e } from "slatehtml/umc"`) |
+| `on(target, type, fn)` | `addEventListener` + auto-remove on `Destroyed` |
+| `bump(target, attr="open")` | Rising-edge boolean attr (remove then set) — re-open toasts/dialogs |
+
+Prefer this over `document.getElementById` / `querySelector` for owned chrome. Keep real `id` for a11y / page anchors / invokers like `snackbar="…"`. Duplicate `ref`s: first match wins. Hyphenated names work as `self["foo-bar"]`.
+
 Reference: `example/widgets/message/user-message.umc`, `example/widgets/matrix/matrix-shell.umc`.
 
 ## Events

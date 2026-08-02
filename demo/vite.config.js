@@ -35,6 +35,14 @@ export default defineConfig({
         replacement: join(uiSrc, "configure.js"),
       },
       {
+        find: "slatehtml-ui/icons/fontawesome",
+        replacement: join(uiSrc, "fontawesome-icons.js"),
+      },
+      {
+        find: "slatehtml-ui/icons/lucide",
+        replacement: join(uiSrc, "lucide-icons.js"),
+      },
+      {
         find: "slatehtml-ui/icons",
         replacement: join(uiSrc, "lucide-icons.js"),
       },

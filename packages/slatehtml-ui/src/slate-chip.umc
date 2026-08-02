@@ -1,0 +1,183 @@
+--- html ---
+<horizontalbox class="slate-chip-row" gap="6" valign="center">
+  <slate-icon class="slate-chip-icon" name="" size="14" hidden></slate-icon>
+  <textblock class="slate-chip-label" data-umc="text"></textblock>
+  <slate-icon class="slate-chip-delete" name="x" size="14" hidden></slate-icon>
+</horizontalbox>
+
+--- style ---
+self {
+  display: inline-flex; /* umc-layout-ok, painted control host */
+  align-items: center; /* umc-layout-ok */
+  box-sizing: border-box;
+  --widget-padding: 4px 10px;
+  --widget-radius: 999px;
+  --widget-background: var(--accent-soft, color-mix(in srgb, currentColor 14%, transparent));
+  --widget-border: 1px solid color-mix(in srgb, var(--accent, currentColor) 28%, transparent);
+  padding: var(--widget-padding);
+  border: var(--widget-border);
+  border-radius: var(--widget-radius);
+  background: var(--widget-background);
+  color: var(--ink, inherit);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.2;
+  user-select: none;
+  -webkit-user-select: none;
+  flex: 0 0 auto; /* umc-layout-ok */
+  max-width: 100%; /* umc-layout-ok */
+}
+
+self[kind="outlined"] {
+  --widget-background: transparent;
+  --widget-border: 1px solid var(--line-strong, color-mix(in srgb, currentColor 28%, transparent));
+}
+
+self[kind="soft"] {
+  --widget-background: color-mix(in srgb, var(--accent, currentColor) 12%, transparent);
+  --widget-border: 1px solid transparent;
+}
+
+self[selected] {
+  --widget-background: var(--accent, currentColor);
+  --widget-border: 1px solid var(--accent, currentColor);
+  color: var(--hud-ink, #fff);
+}
+
+self[clickable],
+self[deletable] {
+  cursor: pointer;
+}
+
+self[clickable]:hover:not([disabled]),
+self[deletable]:hover:not([disabled]) {
+  filter: brightness(1.06);
+}
+
+self[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+self:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.slate-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slate-chip-icon[hidden],
+.slate-chip-delete[hidden] {
+  display: none !important;
+}
+
+.slate-chip-delete {
+  margin-inline-start: 2px; /* umc-layout-ok, tight delete hit target */
+  border-radius: 999px;
+  opacity: 0.75;
+}
+
+.slate-chip-delete:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+--- script ---
+/**
+ * Compact label chip (optional icon + delete).
+ *
+ *   <slate-chip text="Design"></slate-chip>
+ *   <slate-chip text="Docs" icon="book" clickable></slate-chip>
+ *   <slate-chip text="Draft" deletable></slate-chip>
+ *
+ * kind: "" | soft | outlined
+ * Events: clicked, deleted
+ */
+export default defineUmc({
+  tag: "slate-chip",
+  attrs: {
+    text: "Chip",
+    icon: "",
+    kind: "",
+    selected: "",
+    clickable: "",
+    deletable: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "listitem");
+    if (el._chipBound) return;
+    el._chipBound = true;
+
+    el.addEventListener(
+      "click",
+      (event) => {
+        if (el.hasAttribute("disabled")) return;
+        const del = event.target?.closest?.(".slate-chip-delete");
+        if (del && el.contains(del)) {
+          event.preventDefault();
+          event.stopPropagation();
+          api.emit("deleted", { text: el.getAttribute("text") || "" });
+          return;
+        }
+        if (el.hasAttribute("clickable") || el.hasAttribute("deletable")) {
+          api.emit("clicked", { text: el.getAttribute("text") || "" });
+        }
+      },
+      true
+    );
+
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (!el.hasAttribute("clickable") && !el.hasAttribute("deletable")) return;
+      event.preventDefault();
+      api.emit("clicked", { text: el.getAttribute("text") || "" });
+    });
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const iconName = (attr("icon", "") || "").trim();
+    const deletable = el.hasAttribute("deletable");
+    const disabled = el.hasAttribute("disabled");
+    const clickable = el.hasAttribute("clickable") || deletable;
+
+    const icon = el.querySelector(".slate-chip-icon");
+    const del = el.querySelector(".slate-chip-delete");
+    if (icon) {
+      if (iconName) {
+        icon.setAttribute("name", iconName);
+        icon.removeAttribute("hidden");
+      } else {
+        icon.setAttribute("hidden", "");
+      }
+    }
+    del?.toggleAttribute("hidden", !deletable);
+
+    el.setAttribute("aria-disabled", disabled ? "true" : "false");
+    if (clickable && !disabled) {
+      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    } else if (!clickable) {
+      el.removeAttribute("tabindex");
+    }
+  },
+});
+
+--- preview ---
+<horizontalbox gap="8" padding="16" valign="center">
+  <slate-chip text="Default"></slate-chip>
+  <slate-chip text="Soft" kind="soft"></slate-chip>
+  <slate-chip text="Outlined" kind="outlined"></slate-chip>
+  <slate-chip text="Selected" selected></slate-chip>
+  <slate-chip text="Docs" icon="book" clickable></slate-chip>
+  <slate-chip text="Draft" deletable></slate-chip>
+</horizontalbox>

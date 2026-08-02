@@ -1,0 +1,142 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Tooltip"></slate-text>
+          <slate-text kind="hint" text="Hover or focus. placement: top, bottom, left, right. offset 0–100 maps to 15%–85% on the near edge — moves the tail and shifts the bubble so the tip stays on the control. tail="off" hides the caret."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Basic"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-tooltip text="Save changes">
+                    <slate-button text="Save"></slate-button>
+                  </slate-tooltip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-tooltip text="Save changes">
+  <slate-button text="Save"></slate-button>
+</slate-tooltip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Placements"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-tooltip text="Top" placement="top">
+                    <slate-button text="Top"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="Bottom" placement="bottom">
+                    <slate-button text="Bottom"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="Left" placement="left">
+                    <slate-button text="Left"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="Right" placement="right">
+                    <slate-button text="Right"></slate-button>
+                  </slate-tooltip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-tooltip text="Top" placement="top">
+  <slate-button text="Top"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Bottom" placement="bottom">
+  <slate-button text="Bottom"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Left" placement="left">
+  <slate-button text="Left"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Right" placement="right">
+  <slate-button text="Right"></slate-button>
+</slate-tooltip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="Tail offset"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-tooltip text="Tail at start" offset="0">
+                    <slate-button text="0"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="Centered" offset="50">
+                    <slate-button text="50"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="Tail at end" offset="100">
+                    <slate-button text="100"></slate-button>
+                  </slate-tooltip>
+                  <slate-tooltip text="No caret" tail="off">
+                    <slate-button text="No tail"></slate-button>
+                  </slate-tooltip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-tooltip text="Tail at start" offset="0">
+  <slate-button text="0"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Centered" offset="50">
+  <slate-button text="50"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="Tail at end" offset="100">
+  <slate-button text="100"></slate-button>
+</slate-tooltip>
+<slate-tooltip text="No caret" tail="off">
+  <slate-button text="No tail"></slate-button>
+</slate-tooltip>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example>
+            <border kind="panel" fill padding="16" min-width="280">
+              <verticalbox gap="10" data-demo-stage>
+                <slate-text kind="label" text="On icon"></slate-text>
+                <horizontalbox gap="10" valign="center" data-demo-mount>
+                  <slate-tooltip text="Notifications">
+                    <slate-icon name="bell" size="18"></slate-icon>
+                  </slate-tooltip>
+                </horizontalbox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" fill padding="12" min-width="280">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-tooltip text="Notifications">
+  <slate-icon name="bell" size="18"></slate-icon>
+</slate-tooltip>
+            </script>
+          </wrapbox>
+        </verticalbox>
