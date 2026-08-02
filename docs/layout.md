@@ -127,7 +127,7 @@ From the gallery's **Horizontal / Vertical / Spacer / Fill** panel:
 </scrollbox>
 ```
 
-Set `orientation="horizontal"` for sideways scroll.
+Set `orientation="horizontal"`, `"vertical"`, or `"both"` (default is both axes when omitted).
 
 **Click-drag scroll** (mouse/pen, phone-like): enable globally with `configure({ dragScroll: true })`, or per box with `drag-scroll` / `drag-scroll="false"`. Touch keeps native panning. Works over buttons and list chrome; skips `user-select: text` / `pre` / `code` / `[selectable]` and pointer-owned controls (fields, sliders, menus).
 

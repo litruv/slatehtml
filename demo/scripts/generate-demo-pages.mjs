@@ -745,14 +745,14 @@ const pages = {
   }),
 
   "scrollbox.html": page({
-    title: "Scrollbox",
-    hint: "Clipped scrolling region, needs a bounded height. Drag to scroll when dragScroll is on.",
+    title: "Scroll Box",
+    hint: "Clipped scrolling region, needs a bounded size. orientation: vertical, horizontal, or both.",
     events: "",
     mount: "verticalbox",
     variants: [
       {
         name: "Vertical",
-        code: `<scrollbox kind="stage" height="160" max-height="160">
+        code: `<scrollbox orientation="vertical" kind="stage" height="160" max-height="160">
   <verticalbox gap="8">
     <border kind="chip"><textblock text="Inventory slot 01"></textblock></border>
     <border kind="chip"><textblock text="Inventory slot 02"></textblock></border>
@@ -760,12 +760,16 @@ const pages = {
     <border kind="chip"><textblock text="Inventory slot 04"></textblock></border>
     <border kind="chip"><textblock text="Inventory slot 05"></textblock></border>
     <border kind="chip"><textblock text="Inventory slot 06"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 07"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 08"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 09"></textblock></border>
+    <border kind="chip"><textblock text="Inventory slot 10"></textblock></border>
   </verticalbox>
 </scrollbox>`,
       },
       {
         name: "Horizontal",
-        code: `<scrollbox orientation="horizontal" height="64" width="100%">
+        code: `<scrollbox orientation="horizontal" kind="stage" height="64" width="100%" max-width="100%">
   <horizontalbox gap="8" padding="8">
     <border kind="chip"><textblock text="Alpha"></textblock></border>
     <border kind="chip"><textblock text="Bravo"></textblock></border>
@@ -773,7 +777,43 @@ const pages = {
     <border kind="chip"><textblock text="Delta"></textblock></border>
     <border kind="chip"><textblock text="Echo"></textblock></border>
     <border kind="chip"><textblock text="Foxtrot"></textblock></border>
+    <border kind="chip"><textblock text="Golf"></textblock></border>
+    <border kind="chip"><textblock text="Hotel"></textblock></border>
+    <border kind="chip"><textblock text="India"></textblock></border>
+    <border kind="chip"><textblock text="Juliet"></textblock></border>
+    <border kind="chip"><textblock text="Kilo"></textblock></border>
+    <horizontalbox gap="8">
+      <border kind="chip"><textblock text="Lima"></textblock></border>
+      <border kind="chip"><textblock text="Mike"></textblock></border>
+      <border kind="chip"><textblock text="November"></textblock></border>
+      <border kind="chip"><textblock text="Oscar"></textblock></border>
+      <border kind="chip"><textblock text="Papa"></textblock></border>
+      <border kind="chip"><textblock text="Quebec"></textblock></border>
+    </horizontalbox>
   </horizontalbox>
+</scrollbox>`,
+      },
+      {
+        name: "Both",
+        code: `<scrollbox orientation="both" kind="stage" height="160" width="100%" max-width="100%">
+  <gridpanel columns="4" gap="8" width="520" padding="8">
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="A1"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="A2"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="A3"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="A4"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="B1"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="B2"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="B3"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="B4"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="C1"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="C2"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="C3"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="C4"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="D1"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="D2"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="D3"></slate-text></border>
+    <border kind="slot" min-height="56"><slate-text kind="mono" text="D4"></slate-text></border>
+  </gridpanel>
 </scrollbox>`,
       },
     ],

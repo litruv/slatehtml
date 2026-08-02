@@ -142,7 +142,7 @@ const VALUES = {
     "fill",
     "stretch",
   ],
-  orientation: ["vertical", "horizontal"],
+  orientation: ["vertical", "horizontal", "both"],
   stretch: ["fit", "fill", "stretch"],
   type: ["button", "submit", "reset"],
 };

@@ -41,8 +41,9 @@
     {
       "name": "orientation",
       "values": [
-        { "name": "vertical" },
-        { "name": "horizontal" }
+        { "name": "vertical", "description": "Scroll vertically only." },
+        { "name": "horizontal", "description": "Scroll horizontally only." },
+        { "name": "both", "description": "Scroll on both axes (same as omitting orientation)." }
       ]
     },
     {

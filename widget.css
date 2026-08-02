@@ -312,6 +312,10 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
+:is(scrollbox, umc-scrollbox)[orientation="both"] {
+  overflow-x: auto;
+  overflow-y: auto;
+}
 
 /* Click-drag scroll (configure({ dragScroll: true }) or drag-scroll attr).
    No grab cursor when idle, text keeps the I-beam; grabbing only while dragging. */
