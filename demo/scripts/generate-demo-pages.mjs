@@ -782,14 +782,13 @@ const pages = {
     <border kind="chip"><textblock text="India"></textblock></border>
     <border kind="chip"><textblock text="Juliet"></textblock></border>
     <border kind="chip"><textblock text="Kilo"></textblock></border>
-    <horizontalbox gap="8">
-      <border kind="chip"><textblock text="Lima"></textblock></border>
-      <border kind="chip"><textblock text="Mike"></textblock></border>
-      <border kind="chip"><textblock text="November"></textblock></border>
-      <border kind="chip"><textblock text="Oscar"></textblock></border>
-      <border kind="chip"><textblock text="Papa"></textblock></border>
-      <border kind="chip"><textblock text="Quebec"></textblock></border>
-    </horizontalbox>
+    <border kind="chip"><textblock text="Lima"></textblock></border>
+    <border kind="chip"><textblock text="Mike"></textblock></border>
+    <border kind="chip"><textblock text="November"></textblock></border>
+    <border kind="chip"><textblock text="Oscar"></textblock></border>
+    <border kind="chip"><textblock text="Papa"></textblock></border>
+    <border kind="chip"><textblock text="Quebec"></textblock></border>
+    <border kind="chip"><textblock text="Romeo"></textblock></border>
   </horizontalbox>
 </scrollbox>`,
       },
