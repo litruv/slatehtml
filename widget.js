@@ -10,7 +10,6 @@
  * uniformgridpanel: same as gridpanel uniform (UMG alias tag)
  * Scalebox: scales the first child to fit
  * Widget switcher: active + child page / data-page
- * Safe zone: pad multiplies env(safe-area-inset-*)
  * Background blur: blur="12"
  *
  * Authors write bare tags (`verticalbox`); compiled output uses `umc-*`
@@ -104,7 +103,6 @@ const OBSERVED_ATTRS = [
   "orientation",
   "active",
   "blur",
-  "pad",
   "drag-scroll",
 ];
 
@@ -582,16 +580,6 @@ function applyWidgetSwitcher(el) {
   }
 }
 
-function applySafeZone(el) {
-  if (baseTag(el.localName) !== "safezone") return;
-  const pad = el.getAttribute("pad");
-  if (pad != null && pad !== "") {
-    el.style.setProperty("--widget-safe-pad", String(pad));
-  } else {
-    el.style.removeProperty("--widget-safe-pad");
-  }
-}
-
 function applyBackgroundBlur(el) {
   if (baseTag(el.localName) !== "backgroundblur") return;
   const blur = el.getAttribute("blur");
@@ -684,7 +672,6 @@ const SIZE_EVENT_TAGS = new Set([
   "uniformgridpanel",
   "scalebox",
   "border",
-  "safezone",
   "widgetswitcher",
   "namedslot",
   "retainerbox",
@@ -741,7 +728,6 @@ function enhance(el) {
   applyGrid(el);
   applyUniformGrid(el);
   applyWidgetSwitcher(el);
-  applySafeZone(el);
   applyBackgroundBlur(el);
   applyScaleBox(el);
   if (baseTag(el.localName) === "scrollbox") {

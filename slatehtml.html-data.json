@@ -306,17 +306,6 @@
       ]
     },
     {
-      "name": "safezone",
-      "description": "UMG Safe Zone, pads with `env(safe-area-inset-*)` for notches / home indicators.",
-      "attributes": [
-        {
-          "name": "pad",
-          "description": "Multiplier for safe-area insets (default 1)."
-        },
-        { "name": "fill" }
-      ]
-    },
-    {
       "name": "widgetswitcher",
       "description": "UMG Widget Switcher, shows the child whose `page` (or `data-page`) matches `active`.",
       "attributes": [

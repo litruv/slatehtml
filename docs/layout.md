@@ -37,7 +37,6 @@ Authors write **bare** tag names (`verticalbox`). The Vite `.umc` loader rewrite
 | `scalebox` | Scale first child to fit |
 | `border` / `spacer` / `sizebox` | Chrome / flex spacer / size clamp |
 | `widgetswitcher` | Show one child page at a time (`active` + `page`) |
-| `safezone` | Multiply `env(safe-area-inset-*)` by `pad` |
 | `backgroundblur` | Backdrop blur layer in an overlay |
 | `textblock` / `image` / `progressbar` / `checkbox` / `slider` / `editabletext` | Leaf widgets |
 
@@ -255,15 +254,13 @@ Show one page at a time:
 
 Change `active` to switch pages. Used in the Matrix login example for step flow.
 
-### Safezone & backgroundblur
+### Backgroundblur
 
 ```html
-<safezone pad="1">
-  <overlay height="80" fill>
-    <backgroundblur blur="10" halign="fill" valign="fill"></backgroundblur>
-    <border kind="slot" halign="center" valign="center">Card above blur</border>
-  </overlay>
-</safezone>
+<overlay height="80" fill>
+  <backgroundblur blur="10" halign="fill" valign="fill"></backgroundblur>
+  <border kind="slot" halign="center" valign="center">Card above blur</border>
+</overlay>
 ```
 
 ## Styling with `kind`

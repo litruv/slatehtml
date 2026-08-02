@@ -23,7 +23,6 @@ const BUILTIN_TAG_LIST = [
   "uniformgridpanel",
   "scalebox",
   "border",
-  "safezone",
   "widgetswitcher",
   "namedslot",
   "retainerbox",

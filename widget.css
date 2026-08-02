@@ -16,7 +16,6 @@
 :is(uniformgridpanel, umc-uniformgridpanel),
 :is(scalebox, umc-scalebox),
 :is(border, umc-border),
-:is(safezone, umc-safezone),
 :is(retainerbox, umc-retainerbox),
 :is(invalidationbox, umc-invalidationbox),
 :is(backgroundblur, umc-backgroundblur),
@@ -37,7 +36,7 @@
   overlay, umc-overlay, canvaspanel, umc-canvaspanel, scrollbox, umc-scrollbox,
   sizebox, umc-sizebox, spacer, umc-spacer, gridpanel, umc-gridpanel,
   uniformgridpanel, umc-uniformgridpanel, scalebox, umc-scalebox, border, umc-border,
-  safezone, umc-safezone, widgetswitcher, umc-widgetswitcher, retainerbox, umc-retainerbox,
+  widgetswitcher, umc-widgetswitcher, retainerbox, umc-retainerbox,
   invalidationbox, umc-invalidationbox, backgroundblur, umc-backgroundblur, textblock, umc-textblock,
   image, umc-image, progressbar, umc-progressbar, checkbox, umc-checkbox, slider, umc-slider,
   editabletext, umc-editabletext)[hidden] {
@@ -55,7 +54,6 @@
 :is(uniformgridpanel, umc-uniformgridpanel) > *,
 :is(scalebox, umc-scalebox) > *,
 :is(border, umc-border) > *,
-:is(safezone, umc-safezone) > *,
 :is(retainerbox, umc-retainerbox) > *,
 :is(invalidationbox, umc-invalidationbox) > *,
 :is(backgroundblur, umc-backgroundblur) > * {
@@ -74,7 +72,6 @@
 :is(uniformgridpanel, umc-uniformgridpanel),
 :is(scalebox, umc-scalebox),
 :is(border, umc-border),
-:is(safezone, umc-safezone),
 :is(retainerbox, umc-retainerbox),
 :is(invalidationbox, umc-invalidationbox),
 :is(backgroundblur, umc-backgroundblur) {
@@ -422,23 +419,6 @@
   height: auto;
   max-width: none;
   max-height: none;
-}
-
-/* --- Safe zone, display cutouts / notches --- */
-:is(safezone, umc-safezone) {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  box-sizing: border-box;
-  padding-top: calc(env(safe-area-inset-top, 0px) * var(--widget-safe-pad, 1));
-  padding-right: calc(env(safe-area-inset-right, 0px) * var(--widget-safe-pad, 1));
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) * var(--widget-safe-pad, 1));
-  padding-left: calc(env(safe-area-inset-left, 0px) * var(--widget-safe-pad, 1));
-}
-:is(safezone, umc-safezone) > [fill] {
-  flex: 1 1 0%;
-  min-width: 0;
-  min-height: 0;
 }
 
 /* --- Widget switcher, one child page at a time --- */

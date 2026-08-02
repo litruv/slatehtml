@@ -976,31 +976,6 @@ const pages = {
     ],
   }),
 
-  "safezone.html": page({
-    title: "Safezone",
-    hint: "Pads by env(safe-area-inset-*), useful on notched devices.",
-    events: "",
-    mount: "verticalbox",
-    variants: [
-      {
-        name: "Basic",
-        code: `<safezone pad="1">
-  <border kind="panel" padding="12">
-    <slate-text kind="body" text="Content inset by safe-area."></slate-text>
-  </border>
-</safezone>`,
-      },
-      {
-        name: "Double pad",
-        code: `<safezone pad="2">
-  <border kind="slot" padding="12">
-    <slate-text kind="mono" text="pad=&quot;2&quot;"></slate-text>
-  </border>
-</safezone>`,
-      },
-    ],
-  }),
-
   "sizebox.html": page({
     title: "Sizebox",
     hint: "Force child to an explicit width / height.",
