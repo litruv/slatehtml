@@ -36,6 +36,8 @@ self[layout="drawer"] {
 
 self[layout="drawer"][open] {
   pointer-events: auto;
+  /* Beat live demo chrome (select/dropdown ~100) in the shared page stacking context. */
+  z-index: var(--sidebar-z, 210); /* umc-layout-ok */
 }
 
 .slate-sidebar-root {
@@ -60,7 +62,7 @@ self[layout="drawer"][open] > .slate-sidebar-root {
   inset: 0 !important; /* umc-layout-ok */
   width: auto !important; /* umc-layout-ok */
   height: auto !important; /* umc-layout-ok */
-  z-index: var(--sidebar-z, 200); /* umc-layout-ok */
+  z-index: var(--sidebar-z, 210); /* umc-layout-ok */
   pointer-events: auto;
 }
 
