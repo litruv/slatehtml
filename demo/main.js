@@ -109,6 +109,7 @@ const NAV = [
           { id: "list", title: "List", icon: "list" },
           { id: "table", title: "Table", icon: "table" },
           { id: "accordion", title: "Accordion", icon: "chevrons-down-up" },
+          { id: "collapse", title: "Collapse", icon: "chevrons-down" },
           { id: "app-bar", title: "App Bar", icon: "panel-top" },
           { id: "title-bar", title: "Title Bar", icon: "app-window" },
           { id: "footer", title: "Footer", icon: "panel-bottom" },

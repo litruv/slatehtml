@@ -24,6 +24,10 @@ self {
   line-height: 1.4;
 }
 
+self[hidden] {
+  display: none !important;
+}
+
 self[kind="success"] {
   --widget-border: 1px solid color-mix(in srgb, #40a02b 40%, var(--line, transparent));
   --widget-background: color-mix(in srgb, #40a02b 14%, var(--panel, transparent));

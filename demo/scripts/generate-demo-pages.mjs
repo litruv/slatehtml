@@ -1018,6 +1018,39 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
     ],
   }),
 
+  "collapse.html": page({
+    title: "Collapse",
+    hint: "Single disclosure panel. open toggles body; optional icon. kind: plain | section. Events: toggled, opened, closed.",
+    events: "toggled,opened,closed",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Basic",
+        code: `<slate-collapse title="Release notes" open width="100%">
+  <slate-text kind="body" text="Ship notes for the latest build."></slate-text>
+</slate-collapse>
+<slate-collapse title="Breaking changes" width="100%">
+  <slate-text kind="body" text="API removals and migrations."></slate-text>
+</slate-collapse>`,
+      },
+      {
+        name: "With icon",
+        code: `<slate-collapse title="Advanced" icon="settings" kind="plain" width="100%">
+  <slate-text kind="hint" text="Tunables and debug flags."></slate-text>
+</slate-collapse>`,
+      },
+      {
+        name: "Section (slotted title)",
+        code: `<slate-collapse kind="section" open width="100%">
+  <slot-title>
+    <slate-text kind="section" text="Explore the Docs"></slate-text>
+  </slot-title>
+  <slate-text kind="body" text="Body stays under the heading chevron."></slate-text>
+</slate-collapse>`,
+      },
+    ],
+  }),
+
   "app-bar.html": page({
     title: "App Bar",
     hint: "Top bar with title / subtitle. Leading via slot-leading; bare children go trailing. kind: elevated, transparent. dense.",

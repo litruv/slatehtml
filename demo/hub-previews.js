@@ -135,6 +135,9 @@ export const HUB_PREVIEWS = {
     <textblock text="Push"></textblock>
   </slate-accordion-item>
 </slate-accordion>`,
+  collapse: `<slate-collapse title="Notes" open width="132">
+  <textblock text="Folded body."></textblock>
+</slate-collapse>`,
   "app-bar": `<slate-app-bar title="Inbox" dense kind="elevated" width="140">
   <slot-leading><slate-icon name="menu" size="16"></slate-icon></slot-leading>
   <slate-icon name="search" size="14"></slate-icon>

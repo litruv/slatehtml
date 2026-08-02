@@ -1,0 +1,222 @@
+--- html ---
+<verticalbox class="slate-collapse-shell" gap="0" width="100%">
+  <horizontalbox class="slate-collapse-header" gap="8" valign="center" width="100%">
+    <slate-icon class="slate-collapse-leading" name="" size="14" hidden></slate-icon>
+    <horizontalbox class="slate-collapse-title" data-slot="title" fill min-width="0" gap="0" valign="center">
+      <textblock class="slate-collapse-title-text" data-umc="title"></textblock>
+    </horizontalbox>
+    <slate-icon class="slate-collapse-chevron" name="chevron-down" size="14"></slate-icon>
+  </horizontalbox>
+  <verticalbox class="slate-collapse-body" data-content gap="0" width="100%"></verticalbox>
+</verticalbox>
+
+--- style ---
+self {
+  display: block; /* umc-layout-ok */
+  box-sizing: border-box;
+  width: 100%; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  --widget-padding: 0;
+  --widget-border: none;
+  --widget-background: transparent;
+}
+
+.slate-collapse-header {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  min-width: 0; /* umc-layout-ok */
+}
+
+.slate-collapse-title {
+  min-width: 0; /* umc-layout-ok */
+}
+
+.slate-collapse-title-text {
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+  min-width: 0; /* umc-layout-ok */
+}
+
+.slate-collapse-leading {
+  flex: 0 0 auto; /* umc-layout-ok */
+  opacity: 0.85;
+}
+
+.slate-collapse-chevron {
+  flex: 0 0 auto; /* umc-layout-ok */
+  opacity: 0.65;
+  transition: transform 160ms ease;
+}
+
+self:not([open]) .slate-collapse-chevron {
+  transform: rotate(-90deg);
+}
+
+self[open] .slate-collapse-chevron {
+  transform: rotate(0deg);
+}
+
+.slate-collapse-body {
+  min-width: 0; /* umc-layout-ok */
+}
+
+self:not([open]) .slate-collapse-body {
+  display: none !important;
+}
+
+self[kind="section"] .slate-collapse-header {
+  padding: 0; /* umc-layout-ok */
+  margin: 2.5rem 0 1rem; /* umc-layout-ok, OG .markdown-content h2 */
+  gap: 10px; /* umc-layout-ok */
+}
+
+self[kind="section"] .slate-collapse-title-text {
+  display: block; /* umc-layout-ok */
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  flex: 1 1 auto; /* umc-layout-ok */
+  min-width: 0; /* umc-layout-ok */
+}
+
+self[kind="section"] .slate-collapse-chevron {
+  align-self: center; /* umc-layout-ok */
+  opacity: 0.5;
+}
+
+self[kind="plain"] .slate-collapse-header {
+  padding: 6px 0; /* umc-layout-ok */
+}
+
+self[kind="plain"] .slate-collapse-header:hover {
+  opacity: 0.9;
+}
+
+self[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+self:focus-visible .slate-collapse-header,
+.slate-collapse-header:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 2px;
+}
+
+--- script ---
+/**
+ * Single collapsible block (docs sections, disclosure panels).
+ *
+ *   <slate-collapse title="Details" open>
+ *     <slate-text kind="body" text="Hidden until opened."></slate-text>
+ *   </slate-collapse>
+ *
+ *   <slate-collapse kind="section" open>
+ *     <slot-title>
+ *       <slate-text kind="section" text="Explore"></slate-text>
+ *     </slot-title>
+ *     …
+ *   </slate-collapse>
+ *
+ * Attrs: title, open, icon, kind ("" | plain | section), disabled
+ * Events: toggled { open }, opened, closed
+ */
+
+function headerOf(el) {
+  return el.querySelector(".slate-collapse-header");
+}
+
+function leadingOf(el) {
+  return el.querySelector(".slate-collapse-leading");
+}
+
+function setOpen(el, api, next) {
+  const on = !!next;
+  if (on === el.hasAttribute("open")) return;
+  if (on) el.setAttribute("open", "");
+  else el.removeAttribute("open");
+  headerOf(el)?.setAttribute("aria-expanded", on ? "true" : "false");
+  api.emit("toggled", { open: on });
+  api.emit(on ? "opened" : "closed", { open: on });
+}
+
+export default defineUmc({
+  tag: "slate-collapse",
+  attrs: {
+    title: "",
+    open: "",
+    icon: "",
+    kind: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "region");
+    const header = headerOf(el);
+    if (header) {
+      header.setAttribute("role", "button");
+      if (!header.hasAttribute("tabindex")) header.setAttribute("tabindex", "0");
+      header.setAttribute("aria-expanded", el.hasAttribute("open") ? "true" : "false");
+    }
+
+    el.addEventListener("click", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      const headerEl = headerOf(el);
+      if (!headerEl || !headerEl.contains(e.target)) return;
+      // Allow links / buttons inside the title slot to work without toggling.
+      if (e.target.closest("a, button, [data-no-toggle]")) return;
+      setOpen(el, api, !el.hasAttribute("open"));
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if (el.hasAttribute("disabled")) return;
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const headerEl = headerOf(el);
+      if (!headerEl || document.activeElement !== headerEl) return;
+      e.preventDefault();
+      setOpen(el, api, !el.hasAttribute("open"));
+    });
+
+    el.toggle = (force) => {
+      const next = force == null ? !el.hasAttribute("open") : !!force;
+      setOpen(el, api, next);
+    };
+  },
+
+  SynchronizeProperties(el, { attr, bind }) {
+    bind();
+    const header = headerOf(el);
+    header?.setAttribute("aria-expanded", el.hasAttribute("open") ? "true" : "false");
+
+    const icon = (attr("icon", "") || "").trim();
+    const leading = leadingOf(el);
+    if (leading) {
+      if (icon) {
+        leading.setAttribute("name", icon);
+        leading.removeAttribute("hidden");
+      } else {
+        leading.setAttribute("hidden", "");
+      }
+    }
+
+    const titleText = el.querySelector(".slate-collapse-title-text");
+    if (titleText) {
+      const plain = (attr("title", "") || "").trim();
+      titleText.toggleAttribute("hidden", !plain);
+    }
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="420">
+  <slate-collapse title="Release notes" open>
+    <slate-text kind="body" text="Ship notes for the latest build."></slate-text>
+  </slate-collapse>
+  <slate-collapse title="Advanced" kind="plain" icon="settings">
+    <slate-text kind="hint" text="Tunables and debug flags."></slate-text>
+  </slate-collapse>
+</verticalbox>

@@ -51,6 +51,7 @@
     "./column": "./src/slate-column.umc",
     "./accordion": "./src/slate-accordion.umc",
     "./accordion-item": "./src/slate-accordion-item.umc",
+    "./collapse": "./src/slate-collapse.umc",
     "./app-bar": "./src/slate-app-bar.umc",
     "./title-bar": "./src/slate-title-bar.umc",
     "./footer": "./src/slate-footer.umc",
