@@ -14,8 +14,8 @@ const PAGE_HTML = import.meta.glob("./pages/*.html", {
 });
 
 /**
- * Sidebar: section labels + links (Getting started, Components).
- * Component categories are hub pages with icon grids; one HTML file per widget.
+ * Sidebar: Getting started + UMG-style palette hubs (Panel, Common, Input, …).
+ * Hubs are icon grids; each tile opens one widget HTML page.
  */
 const NAV = [
   {
@@ -27,32 +27,32 @@ const NAV = [
     ],
   },
   {
-    label: "Components",
+    label: "Palette",
     items: [
       {
-        id: "foundation",
-        title: "Foundation",
-        blurb: "Typography and UMG layout panels.",
+        id: "panel",
+        title: "Panel",
+        blurb: "Layout containers, boxes, grids, overlays, and stages.",
         items: [
-          { id: "typography", title: "Typography", icon: "type" },
           { id: "box", title: "Box", icon: "box" },
           { id: "overlay", title: "Overlay", icon: "layers" },
-          { id: "scrollbox", title: "Scrollbox", icon: "scroll-text" },
-          { id: "canvaspanel", title: "Canvaspanel", icon: "frame" },
-          { id: "wrapbox", title: "Wrapbox", icon: "wrap-text" },
-          { id: "gridpanel", title: "Gridpanel", icon: "layout-grid" },
-          { id: "uniformgridpanel", title: "Uniformgridpanel", icon: "grid-2x2" },
-          { id: "widgetswitcher", title: "Widgetswitcher", icon: "panels-top-left" },
-          { id: "safezone", title: "Safezone", icon: "shield" },
-          { id: "sizebox", title: "Sizebox", icon: "scaling" },
-          { id: "scalebox", title: "Scalebox", icon: "zoom-in" },
+          { id: "scrollbox", title: "Scroll Box", icon: "scroll-text" },
+          { id: "canvaspanel", title: "Canvas Panel", icon: "frame" },
+          { id: "wrapbox", title: "Wrap Box", icon: "wrap-text" },
+          { id: "gridpanel", title: "Grid Panel", icon: "layout-grid" },
+          { id: "uniformgridpanel", title: "Uniform Grid Panel", icon: "grid-2x2" },
+          { id: "widgetswitcher", title: "Widget Switcher", icon: "panels-top-left" },
+          { id: "safezone", title: "Safe Zone", icon: "shield" },
+          { id: "sizebox", title: "Size Box", icon: "scaling" },
+          { id: "scalebox", title: "Scale Box", icon: "zoom-in" },
         ],
       },
       {
-        id: "leaf",
-        title: "Leaf widgets",
-        blurb: "Built-in panel leaf controls.",
+        id: "common",
+        title: "Common",
+        blurb: "Text and built-in leaf controls.",
         items: [
+          { id: "typography", title: "Text", icon: "type" },
           { id: "leaf-button", title: "Button", icon: "mouse-pointer-click" },
           { id: "leaf-checkbox", title: "Checkbox", icon: "square-check" },
           { id: "progressbar", title: "Progress Bar", icon: "loader" },
@@ -62,8 +62,8 @@ const NAV = [
         ],
       },
       {
-        id: "inputs",
-        title: "Inputs",
+        id: "input",
+        title: "Input",
         blurb: "Form controls from slatehtml-ui.",
         items: [
           { id: "button", title: "Button", icon: "rectangle-ellipsis" },
@@ -107,6 +107,13 @@ const NAV = [
   },
 ];
 
+/** Old hub ids → current palette hubs (bookmarks / external links). */
+const HUB_REDIRECTS = {
+  foundation: "panel",
+  leaf: "common",
+  inputs: "input",
+};
+
 const ROUTES = {};
 for (const section of NAV) {
   for (const entry of section.items) {
@@ -131,6 +138,9 @@ for (const section of NAV) {
       };
     }
   }
+}
+for (const [from, to] of Object.entries(HUB_REDIRECTS)) {
+  ROUTES[from] = { redirect: to };
 }
 
 const pageRoot = document.querySelector("[data-docs-page]");
@@ -180,7 +190,13 @@ function buildNav() {
 
 function routeFromHash() {
   const raw = (location.hash || "#/").replace(/^#\/?/, "").split(/[?#]/)[0];
-  const id = raw === "" ? "home" : raw;
+  let id = raw === "" ? "home" : raw;
+  const redirect = ROUTES[id]?.redirect;
+  if (redirect) {
+    id = redirect;
+    const next = `#/${redirect}`;
+    if (location.hash !== next) location.replace(next);
+  }
   return ROUTES[id] ? id : "home";
 }
 

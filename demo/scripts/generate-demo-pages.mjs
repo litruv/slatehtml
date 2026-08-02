@@ -504,7 +504,7 @@ const pages = {
     variants: [
       {
         name: "Basic",
-        code: `<slate-breadcrumb items="Overview|#/, Inputs|#/inputs, Button"></slate-breadcrumb>`,
+        code: `<slate-breadcrumb items="Overview|#/, Input|#/input, Button"></slate-breadcrumb>`,
       },
       {
         name: "Two levels",
@@ -514,7 +514,7 @@ const pages = {
         name: "Separator",
         code: `<slate-breadcrumb
   separator="chevrons-right"
-  items="Docs|#/, Layout|#/foundation, Box"
+  items="Docs|#/, Panel|#/panel, Box"
 ></slate-breadcrumb>`,
       },
     ],
