@@ -112,6 +112,7 @@ const HUB_REDIRECTS = {
   leaf: "common",
   inputs: "input",
   uniformgridpanel: "gridpanel",
+  canvaspanel: "overlay",
 };
 
 const ROUTES = {};
