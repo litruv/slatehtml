@@ -734,7 +734,7 @@ const pages = {
       {
         name: "Border · Padding",
         code: `<border kind="panel" padding="8 20">
-  <slate-text kind="body" text='padding="8 20" on the border' ></slate-text>
+  <slate-text kind="body" text='padding="8 20" on the border'></slate-text>
 </border>`,
       },
     ],
