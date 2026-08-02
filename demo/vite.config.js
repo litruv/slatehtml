@@ -28,9 +28,21 @@ export default defineConfig({
     emptyOutDir: true,
   },
   resolve: {
-    alias: {
-      slatehtml: repoRoot,
-      "slatehtml-ui": join(repoRoot, "packages/slatehtml-ui"),
-    },
+    alias: [
+      // Subpaths before the package root alias (folder alias breaks exports).
+      {
+        find: "slatehtml-ui/configure",
+        replacement: join(uiSrc, "configure.js"),
+      },
+      {
+        find: "slatehtml-ui/icons",
+        replacement: join(uiSrc, "lucide-icons.js"),
+      },
+      { find: "slatehtml", replacement: repoRoot },
+      {
+        find: "slatehtml-ui",
+        replacement: join(repoRoot, "packages/slatehtml-ui"),
+      },
+    ],
   },
 });
