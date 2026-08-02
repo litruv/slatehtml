@@ -32,8 +32,8 @@ Authors write **bare** tag names (`verticalbox`). The Vite `.umc` loader rewrite
 | `overlay` | Stack children in one cell |
 | `canvaspanel` | Absolutely positioned children with anchors |
 | `scrollbox` | Clipped scroll area |
-| `gridpanel` | CSS grid (`columns`, optional `rows`) |
-| `uniformgridpanel` | Equal `1fr` grid cells |
+| `gridpanel` | CSS grid (`columns`; `masonry` / `uniform` modes) |
+| `uniformgridpanel` | Alias for `<gridpanel uniform>` |
 | `scalebox` | Scale first child to fit |
 | `border` / `spacer` / `sizebox` | Chrome / flex spacer / size clamp |
 | `widgetswitcher` | Show one child page at a time (`active` + `page`) |
@@ -230,17 +230,17 @@ Chips that flow to the next line when space runs out:
 </wrapbox>
 ```
 
-### Gridpanel & uniformgridpanel
+### Gridpanel
 
 ```html
 <gridpanel columns="3" gap="8" width="200">…</gridpanel>
 
 <gridpanel masonry columns="3" gap="8" width="200">…</gridpanel>
 
-<uniformgridpanel columns="2" rows="2" gap="8" width="160" height="160">…</uniformgridpanel>
+<gridpanel uniform columns="2" rows="2" gap="8" width="160" height="160">…</gridpanel>
 ```
 
-`gridpanel` divides space into equal columns (and optional rows). With `masonry`, children pack into columns by height (multi-column flow; `rows` is ignored). `uniformgridpanel` forces equal `1fr` tracks.
+`gridpanel` divides space into equal columns (and optional rows). `masonry` packs uneven heights into columns (multi-column flow; `rows` ignored). `uniform` forces equal `1fr` row and column tracks (same as the UMG `uniformgridpanel` tag, still supported as an alias).
 
 ### Widgetswitcher
 

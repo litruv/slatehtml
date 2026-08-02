@@ -23,7 +23,7 @@ const TAGS = {
   scrollbox: ["orientation", "padding", "fill"],
   sizebox: ["width", "height", "fill"],
   scalebox: ["stretch", "fill", "fit", "down", "down-x", "scale-down", "scale-down-x"],
-  gridpanel: ["columns", "rows", "masonry", "gap", "padding", "fill"],
+  gridpanel: ["columns", "rows", "masonry", "uniform", "gap", "padding", "fill"],
   spacer: [],
   border: ["padding", "fill", "background", "border-color", "kind"],
   textblock: ["text", "kind"],

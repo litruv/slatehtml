@@ -80,7 +80,7 @@ Authors write **bare** tag names (`verticalbox`, `textblock`, …). With the Vit
 | `overlay` | Stack children in one cell (`halign` / `valign` on children) |
 | `canvaspanel` | Absolute children + `anchors` + offsets |
 | `scrollbox` | Clipped scroll area |
-| `gridpanel` | CSS grid (`columns`, optional `rows`) |
+| `gridpanel` | CSS grid (`columns`; optional `masonry` / `uniform`) |
 | `scalebox` | Scale first child to fit |
 | `border` / `spacer` / `sizebox` | Chrome / flex spacer / size clamp |
 | `textblock` / `image` / `progressbar` / `checkbox` / `slider` / `editabletext` | Leaf widgets |

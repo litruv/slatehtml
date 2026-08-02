@@ -852,8 +852,8 @@ const pages = {
   }),
 
   "gridpanel.html": page({
-    title: "Gridpanel",
-    hint: "CSS grid with equal columns. Add masonry for uneven heights.",
+    title: "Grid Panel",
+    hint: "Equal columns by default. Use masonry or uniform for other packing.",
     events: "",
     mount: "verticalbox",
     variants: [
@@ -888,31 +888,22 @@ const pages = {
   <border kind="slot" min-height="88"><slate-text kind="mono" text="6"></slate-text></border>
 </gridpanel>`,
       },
-    ],
-  }),
-
-  "uniformgridpanel.html": page({
-    title: "Uniformgridpanel",
-    hint: "Fixed rows × columns cells.",
-    events: "",
-    mount: "verticalbox",
-    variants: [
       {
-        name: "2×2",
-        code: `<uniformgridpanel columns="2" rows="2" gap="8" width="100%" height="140">
+        name: "Uniform 2×2",
+        code: `<gridpanel uniform columns="2" rows="2" gap="8" width="100%" height="140">
   <border kind="slot"><slate-text kind="mono" text="A"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="B"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="C"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="D"></slate-text></border>
-</uniformgridpanel>`,
+</gridpanel>`,
       },
       {
-        name: "3×1",
-        code: `<uniformgridpanel columns="3" rows="1" gap="8" width="100%" height="72">
+        name: "Uniform 3×1",
+        code: `<gridpanel uniform columns="3" rows="1" gap="8" width="100%" height="72">
   <border kind="slot"><slate-text kind="mono" text="1"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="2"></slate-text></border>
   <border kind="slot"><slate-text kind="mono" text="3"></slate-text></border>
-</uniformgridpanel>`,
+</gridpanel>`,
       },
     ],
   }),

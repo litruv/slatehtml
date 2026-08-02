@@ -248,7 +248,7 @@
     },
     {
       "name": "gridpanel",
-      "description": "UMG Grid Panel, CSS grid of evenly divided cells. With `masonry`, packs uneven heights into columns.",
+      "description": "UMG Grid Panel. Equal columns by default; `masonry` packs uneven heights; `uniform` equal `1fr` rows×columns.",
       "attributes": [
         {
           "name": "columns",
@@ -256,11 +256,15 @@
         },
         {
           "name": "rows",
-          "description": "Optional number of equal rows. Ignored when `masonry` is set."
+          "description": "Row count. Used with `uniform` (default 2); optional equal rows without `uniform`. Ignored for `masonry`."
         },
         {
           "name": "masonry",
           "description": "Boolean. Multi-column pack for uneven child heights (column-first flow)."
+        },
+        {
+          "name": "uniform",
+          "description": "Boolean. Equal `1fr` columns and rows (same as the `uniformgridpanel` tag)."
         },
         { "name": "gap" },
         { "name": "padding" },
@@ -269,7 +273,7 @@
     },
     {
       "name": "uniformgridpanel",
-      "description": "UMG Uniform Grid Panel, equal `1fr` columns and rows.",
+      "description": "UMG Uniform Grid Panel alias for `<gridpanel uniform>`. Equal `1fr` columns and rows.",
       "attributes": [
         {
           "name": "columns",

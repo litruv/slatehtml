@@ -6,8 +6,8 @@
  * Canvas children: top, left, right, bottom, anchors
  *   anchors: "top-left" | "left top" | "top left" | "fill" | "h-fill" | "v-fill"
  *            or "minX,minY,maxX,maxY" in 0-1 (UE style)
- * Grid: columns="3"; masonry packs uneven heights into columns
- * Uniform grid: columns + rows (equal 1fr tracks)
+ * Grid: columns="3"; masonry / uniform modes (equal 1fr rows×cols)
+ * uniformgridpanel: same as gridpanel uniform (UMG alias tag)
  * Scalebox: scales the first child to fit
  * Widget switcher: active + child page / data-page
  * Safe zone: pad multiplies env(safe-area-inset-*)
@@ -86,6 +86,7 @@ const OBSERVED_ATTRS = [
   "columns",
   "rows",
   "masonry",
+  "uniform",
   "stretch",
   "halign",
   "valign",
@@ -528,13 +529,26 @@ function applyCanvasChild(el) {
 
 function applyGrid(el) {
   if (baseTag(el.localName) !== "gridpanel") return;
-  if (el.hasAttribute("columns")) {
-    el.style.setProperty("--widget-columns", el.getAttribute("columns"));
-  }
   if (el.hasAttribute("masonry")) {
+    if (el.hasAttribute("columns")) {
+      el.style.setProperty("--widget-columns", el.getAttribute("columns"));
+    }
+    el.style.removeProperty("--widget-rows");
     el.style.gridTemplateRows = "";
     return;
   }
+  if (el.hasAttribute("uniform")) {
+    const columns = el.getAttribute("columns") || "2";
+    const rows = el.getAttribute("rows") || "2";
+    el.style.setProperty("--widget-columns", columns);
+    el.style.setProperty("--widget-rows", rows);
+    el.style.gridTemplateRows = "";
+    return;
+  }
+  if (el.hasAttribute("columns")) {
+    el.style.setProperty("--widget-columns", el.getAttribute("columns"));
+  }
+  el.style.removeProperty("--widget-rows");
   if (el.hasAttribute("rows")) {
     const rows = el.getAttribute("rows");
     el.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;

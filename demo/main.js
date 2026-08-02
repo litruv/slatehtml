@@ -40,7 +40,6 @@ const NAV = [
           { id: "canvaspanel", title: "Canvas Panel", icon: "frame" },
           { id: "wrapbox", title: "Wrap Box", icon: "wrap-text" },
           { id: "gridpanel", title: "Grid Panel", icon: "layout-grid" },
-          { id: "uniformgridpanel", title: "Uniform Grid Panel", icon: "grid-2x2" },
           { id: "widgetswitcher", title: "Widget Switcher", icon: "panels-top-left" },
           { id: "safezone", title: "Safe Zone", icon: "shield" },
           { id: "sizebox", title: "Size Box", icon: "scaling" },
@@ -107,11 +106,12 @@ const NAV = [
   },
 ];
 
-/** Old hub ids → current palette hubs (bookmarks / external links). */
+/** Old routes → current (hub renames, merged pages). */
 const HUB_REDIRECTS = {
   foundation: "panel",
   leaf: "common",
   inputs: "input",
+  uniformgridpanel: "gridpanel",
 };
 
 const ROUTES = {};

@@ -361,7 +361,8 @@
   margin-bottom: var(--widget-gap, 0px);
 }
 
-/* --- Uniform grid panel, equal 1fr rows and columns --- */
+/* Uniform: equal 1fr rows and columns (also the uniformgridpanel tag) */
+:is(gridpanel, umc-gridpanel)[uniform],
 :is(uniformgridpanel, umc-uniformgridpanel) {
   display: grid;
   gap: var(--widget-gap, 0px);
