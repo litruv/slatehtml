@@ -24,6 +24,7 @@ const NAV = [
       { id: "home", title: "Overview", file: "home.html" },
       { id: "installation", title: "Installation", file: "installation.html" },
       { id: "usage", title: "Usage", file: "usage.html" },
+      { id: "settings", title: "Settings", file: "settings.html" },
     ],
   },
   {
@@ -443,6 +444,10 @@ async function renderRoute(id) {
   setActiveNav(id);
   wirePageChrome(pageRoot);
   wireDemoExamples(pageRoot);
+  for (const code of pageRoot.querySelectorAll("pre > code[class*='language-']")) {
+    if (code.closest("[data-demo-example]")) continue;
+    Prism.highlightElement(code);
+  }
   document.querySelector(".docs-content")?.scrollTo?.(0, 0);
 }
 

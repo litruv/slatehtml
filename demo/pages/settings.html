@@ -1,0 +1,94 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Settings"></slate-text>
+          <slate-text kind="subtitle" text="Turn framework behaviors on or off in your own app with configure()."></slate-text>
+        </verticalbox>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="configure / getSettings"></slate-text>
+            <slate-text kind="body" text="Import from slatehtml after (or with) the default entry. configure merges into the active settings object and returns a shallow copy. getSettings returns the current values."></slate-text>
+            <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+              <pre><code class="language-js">import { configure, getSettings } from "slatehtml";
+
+configure({ dragScroll: true });
+console.log(getSettings()); // { dragScroll: true }</code></pre>
+            </scrollbox>
+            <slate-text kind="hint" text="Defaults are off unless you opt in. Call configure early in your app entry so scrollboxes pick up the flag when they enhance."></slate-text>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Options"></slate-text>
+            <verticalbox gap="10">
+              <verticalbox gap="4">
+                <slate-text kind="body" text="dragScroll (boolean, default false)"></slate-text>
+                <slate-text kind="hint" text="Click-drag to pan scrollboxes with mouse or pen (phone-like). Touch keeps native panning. Drag can start on buttons and list chrome; it skips selectable text and pointer-owned controls (fields, sliders, menus)."></slate-text>
+              </verticalbox>
+            </verticalbox>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Per-element overrides"></slate-text>
+            <slate-text kind="body" text="Global configure is the default for every scrollbox. Override one box with the drag-scroll attribute."></slate-text>
+            <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+              <pre><code class="language-html">&lt;!-- Force on, even if configure({ dragScroll: false }) --&gt;
+&lt;scrollbox drag-scroll height="160"&gt;…&lt;/scrollbox&gt;
+
+&lt;!-- Force off, even if dragScroll is enabled globally --&gt;
+&lt;scrollbox drag-scroll="false" height="160"&gt;…&lt;/scrollbox&gt;</code></pre>
+            </scrollbox>
+            <slate-text kind="hint" text='Accepted off values: false, 0, off. Bare drag-scroll (or any other value) means on.'></slate-text>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="12">
+            <slate-text kind="label" text="Try it"></slate-text>
+            <slate-text kind="hint" text="These demos ignore the gallery Options toggle and set drag-scroll on the element."></slate-text>
+            <horizontalbox gap="14" valign="stretch" width="100%">
+              <border kind="well" fill padding="12" min-width="200">
+                <verticalbox gap="8">
+                  <slate-text kind="label" text="drag-scroll on"></slate-text>
+                  <scrollbox kind="stage" drag-scroll height="120" max-height="120">
+                    <verticalbox gap="8">
+                      <border kind="chip"><textblock text="Drag me 1"></textblock></border>
+                      <border kind="chip"><textblock text="Drag me 2"></textblock></border>
+                      <border kind="chip"><textblock text="Drag me 3"></textblock></border>
+                      <border kind="chip"><textblock text="Drag me 4"></textblock></border>
+                      <border kind="chip"><textblock text="Drag me 5"></textblock></border>
+                      <border kind="chip"><textblock text="Drag me 6"></textblock></border>
+                    </verticalbox>
+                  </scrollbox>
+                </verticalbox>
+              </border>
+              <border kind="well" fill padding="12" min-width="200">
+                <verticalbox gap="8">
+                  <slate-text kind="label" text='drag-scroll="false"'></slate-text>
+                  <scrollbox kind="stage" drag-scroll="false" height="120" max-height="120">
+                    <verticalbox gap="8">
+                      <border kind="chip"><textblock text="Wheel only 1"></textblock></border>
+                      <border kind="chip"><textblock text="Wheel only 2"></textblock></border>
+                      <border kind="chip"><textblock text="Wheel only 3"></textblock></border>
+                      <border kind="chip"><textblock text="Wheel only 4"></textblock></border>
+                      <border kind="chip"><textblock text="Wheel only 5"></textblock></border>
+                      <border kind="chip"><textblock text="Wheel only 6"></textblock></border>
+                    </verticalbox>
+                  </scrollbox>
+                </verticalbox>
+              </border>
+            </horizontalbox>
+          </verticalbox>
+        </border>
+
+        <border kind="panel" padding="16">
+          <verticalbox gap="10">
+            <slate-text kind="label" text="Related"></slate-text>
+            <horizontalbox gap="14" valign="center">
+              <a class="docs-text-link" href="#/scrollbox">Scroll Box →</a>
+              <a class="docs-text-link" href="#/usage">Usage →</a>
+            </horizontalbox>
+          </verticalbox>
+        </border>
