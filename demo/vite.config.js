@@ -22,6 +22,8 @@ export default defineConfig({
     },
   },
   build: {
+    // slatehtml-ui barrel uses top-level await.
+    target: "es2022",
     outDir: "dist",
     emptyOutDir: true,
   },

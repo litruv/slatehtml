@@ -18,6 +18,8 @@ export default defineConfig({
     }),
   ],
   build: {
+    // Barrel uses top-level await; keep modern ESM targets only.
+    target: "es2022",
     lib: {
       entry: join(src, "index.js"),
       formats: ["es"],
