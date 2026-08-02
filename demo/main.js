@@ -6,6 +6,13 @@ import { Prism } from "./prism-umc.js";
 
 configure({ dragScroll: true });
 
+/** Bundled at build time so GitHub Pages (and `vite build`) do not need a fetch of loose HTML. */
+const PAGE_HTML = import.meta.glob("./pages/*.html", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
 /**
  * Sidebar: section labels + links (Getting started, Components).
  * Component categories are hub pages with icon grids; one HTML file per widget.
@@ -180,9 +187,8 @@ function routeFromHash() {
 async function loadPageHtml(id) {
   if (pageCache.has(id)) return pageCache.get(id);
   const file = ROUTES[id].file;
-  const res = await fetch(new URL(`./pages/${file}`, import.meta.url));
-  if (!res.ok) throw new Error(`Failed to load page ${file}: ${res.status}`);
-  const html = await res.text();
+  const html = PAGE_HTML[`./pages/${file}`];
+  if (typeof html !== "string") throw new Error(`Unknown page ${file}`);
   pageCache.set(id, html);
   return html;
 }
