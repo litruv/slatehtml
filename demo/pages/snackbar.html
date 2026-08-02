@@ -8,7 +8,7 @@
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="Show"></slate-text>
-                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                <scalebox class="demo-live-scale" stretch="down" width="100%">
                   <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
                     <slate-button snackbar="demo-snack" text="Show toast"></slate-button>
                     <slate-snackbar id="demo-snack" text="Copied to clipboard"></slate-snackbar>
@@ -37,7 +37,7 @@
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="Timed"></slate-text>
-                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                <scalebox class="demo-live-scale" stretch="down" width="100%">
                   <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
                     <slate-button ref="show" text="Show 6s toast"></slate-button>
                     <slate-snackbar ref="toast" text="This fades out with a countdown bar" duration="6000"></slate-snackbar>
@@ -69,7 +69,7 @@ on(self.show, e.clicked, () => bump(self.toast));
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="With action"></slate-text>
-                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                <scalebox class="demo-live-scale" stretch="down" width="100%">
                   <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
                     <slate-button ref="archive" text="Archive"></slate-button>
                     <slate-snackbar ref="toast" text="Message archived" action="Undo" duration="5000"></slate-snackbar>
@@ -101,7 +101,7 @@ on(self.archive, e.clicked, () => bump(self.toast));
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="Stack"></slate-text>
-                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                <scalebox class="demo-live-scale" stretch="down" width="100%">
                   <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
                     <slate-button ref="showA" text="Toast A"></slate-button>
                     <slate-button ref="showB" text="Toast B"></slate-button>

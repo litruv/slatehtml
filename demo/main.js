@@ -305,7 +305,7 @@ function renderHub(hub) {
       const bleed = item.id === "dialog" || item.id === "drawer";
       const face = hasPreview
         ? `<border class="docs-hub-preview${bleed ? " docs-hub-preview-bleed" : ""}" kind="well" height="88" padding="${bleed ? 0 : 10}">
-              <scalebox class="docs-hub-preview-scale" stretch="fit" width="100%" height="100%" fill>
+              <scalebox class="docs-hub-preview-scale" stretch="down" width="100%" height="100%" fill>
                 <horizontalbox class="docs-hub-preview-stage" data-hub-preview="${item.id}" gap="0" valign="center" halign="center"></horizontalbox>
               </scalebox>
             </border>`

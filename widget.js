@@ -612,12 +612,13 @@ function applyScaleBox(el) {
     const cw = el.clientWidth;
     const ch = el.clientHeight;
     // Prefer unscaled layout size (ignore prior transform).
+    // scroll* catches overflowing descendants when the child is width/height 100%.
     const bw =
-      child.offsetWidth ||
+      Math.max(child.scrollWidth || 0, child.offsetWidth || 0) ||
       Number.parseFloat(child.getAttribute("width")) ||
       0;
     const bh =
-      child.offsetHeight ||
+      Math.max(child.scrollHeight || 0, child.offsetHeight || 0) ||
       Number.parseFloat(child.getAttribute("height")) ||
       0;
     if (!cw || !bw || !bh) {
@@ -640,9 +641,9 @@ function applyScaleBox(el) {
       return;
     }
 
-    // Down-only to fit both axes.
+    // Down-only to fit both axes (or width when height is indefinite).
     if (mode === "down" || mode === "scale-down") {
-      const s = Math.min(1, sx, sy || sx);
+      const s = ch ? Math.min(1, sx, sy) : Math.min(1, sx);
       child.style.transformOrigin = "top left";
       child.style.transform = s === 1 ? "" : `scale(${s})`;
       el.style.height = `${Math.max(1, Math.round(bh * s))}px`;

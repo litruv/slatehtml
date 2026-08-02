@@ -33,7 +33,7 @@ ${js}
             <border kind="panel" class="demo-live" padding="16">
               <verticalbox gap="10" width="100%" data-demo-stage>
                 <slate-text kind="label" text="${title}"></slate-text>
-                <scalebox class="demo-live-scale" stretch="down-x" width="100%">
+                <scalebox class="demo-live-scale" stretch="down" width="100%">
                   <${mountTag} gap="${mountGap}" valign="center" width="100%" data-demo-mount>
 ${html.split("\n").map((l) => `                    ${l}`).join("\n")}
                   </${mountTag}>
