@@ -23,7 +23,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # Demo builds .umc from source via Vite aliases; skip workspace prepare/build scripts.
+      - run: npm ci --ignore-scripts
       - run: npm run build:docs
         env:
           GITHUB_PAGES: "true"
