@@ -681,13 +681,13 @@ const pages = {
   }),
 
   "box.html": page({
-    title: "Box",
-    hint: "horizontalbox, verticalbox, spacer, and fill weights.",
+    title: "Box & Border",
+    hint: "Boxes lay out children. Border is padding + optional kind chrome.",
     events: "",
     mount: "verticalbox",
     variants: [
       {
-        name: "Row",
+        name: "Box · Row",
         code: `<horizontalbox gap="8" valign="center">
   <border kind="chip"><textblock text="A"></textblock></border>
   <border kind="chip"><textblock text="B"></textblock></border>
@@ -696,7 +696,7 @@ const pages = {
 </horizontalbox>`,
       },
       {
-        name: "Fill",
+        name: "Box · Fill",
         code: `<horizontalbox gap="8" min-height="56">
   <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
   <border kind="slot" fill="2" min-height="40"><slate-text kind="mono" text="fill 2"></slate-text></border>
@@ -704,12 +704,38 @@ const pages = {
 </horizontalbox>`,
       },
       {
-        name: "Stack",
+        name: "Box · Stack",
         code: `<verticalbox gap="8">
   <border kind="chip"><textblock text="One"></textblock></border>
   <border kind="chip"><textblock text="Two"></textblock></border>
   <border kind="chip"><textblock text="Three"></textblock></border>
 </verticalbox>`,
+      },
+      {
+        name: "Border · Kinds",
+        code: `<verticalbox gap="10" width="100%">
+  <border kind="panel" padding="12">
+    <slate-text kind="body" text='kind="panel"'></slate-text>
+  </border>
+  <border kind="well" padding="12">
+    <slate-text kind="body" text='kind="well"'></slate-text>
+  </border>
+  <horizontalbox gap="8" valign="center">
+    <border kind="chip"><textblock text="chip"></textblock></border>
+    <border kind="slot" min-height="40" min-width="80">
+      <slate-text kind="mono" text="slot"></slate-text>
+    </border>
+    <border kind="hud" padding="8 12">
+      <slate-text kind="hud" text="hud"></slate-text>
+    </border>
+  </horizontalbox>
+</verticalbox>`,
+      },
+      {
+        name: "Border · Padding",
+        code: `<border kind="panel" padding="8 20">
+  <slate-text kind="body" text='padding="8 20" on the border' ></slate-text>
+</border>`,
       },
     ],
   }),
