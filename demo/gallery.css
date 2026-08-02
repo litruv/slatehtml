@@ -117,6 +117,13 @@ umc-border[kind="panel"] {
   --widget-border: 1px solid var(--line);
   --widget-radius: var(--radius);
 }
+/* Nested panel inside a panel — slightly deeper so chrome stays visible in demos */
+border[kind="panel"] border[kind="panel"],
+umc-border[kind="panel"] umc-border[kind="panel"],
+border[kind="panel"] umc-border[kind="panel"],
+umc-border[kind="panel"] border[kind="panel"] {
+  --widget-background: var(--panel-deep);
+}
 border[kind="well"],
 umc-border[kind="well"] {
   --widget-background: var(--stage);

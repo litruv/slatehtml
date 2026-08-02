@@ -9,7 +9,7 @@
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Box · Row"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
-                  <horizontalbox gap="8" valign="center">
+                  <horizontalbox gap="8" valign="center" width="100%">
                     <border kind="chip"><textblock text="A"></textblock></border>
                     <border kind="chip"><textblock text="B"></textblock></border>
                     <spacer></spacer>
@@ -30,7 +30,7 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<horizontalbox gap="8" valign="center">
+<horizontalbox gap="8" valign="center" width="100%">
   <border kind="chip"><textblock text="A"></textblock></border>
   <border kind="chip"><textblock text="B"></textblock></border>
   <spacer></spacer>
@@ -44,7 +44,7 @@
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Box · Fill"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
-                  <horizontalbox gap="8" min-height="56">
+                  <horizontalbox gap="8" min-height="56" width="100%">
                     <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
                     <border kind="slot" fill="2" min-height="40"><slate-text kind="mono" text="fill 2"></slate-text></border>
                     <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
@@ -64,7 +64,7 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<horizontalbox gap="8" min-height="56">
+<horizontalbox gap="8" min-height="56" width="100%">
   <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
   <border kind="slot" fill="2" min-height="40"><slate-text kind="mono" text="fill 2"></slate-text></border>
   <border kind="slot" fill="1" min-height="40"><slate-text kind="mono" text="fill 1"></slate-text></border>
@@ -77,7 +77,7 @@
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Box · Stack"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
-                  <verticalbox gap="8">
+                  <verticalbox gap="8" width="100%">
                     <border kind="chip"><textblock text="One"></textblock></border>
                     <border kind="chip"><textblock text="Two"></textblock></border>
                     <border kind="chip"><textblock text="Three"></textblock></border>
@@ -97,7 +97,7 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<verticalbox gap="8">
+<verticalbox gap="8" width="100%">
   <border kind="chip"><textblock text="One"></textblock></border>
   <border kind="chip"><textblock text="Two"></textblock></border>
   <border kind="chip"><textblock text="Three"></textblock></border>
@@ -110,23 +110,14 @@
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Border · Kinds"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
-                  <verticalbox gap="10" width="100%">
-                    <border kind="panel" padding="12">
-                      <slate-text kind="body" text='kind="panel"'></slate-text>
-                    </border>
-                    <border kind="well" padding="12">
-                      <slate-text kind="body" text='kind="well"'></slate-text>
-                    </border>
-                    <horizontalbox gap="8" valign="center">
-                      <border kind="chip"><textblock text="chip"></textblock></border>
-                      <border kind="slot" min-height="40" min-width="80">
-                        <slate-text kind="mono" text="slot"></slate-text>
-                      </border>
-                      <border kind="hud" padding="8 12">
-                        <slate-text kind="hud" text="hud"></slate-text>
-                      </border>
-                    </horizontalbox>
-                  </verticalbox>
+                  <wrapbox gap="8" width="100%">
+                    <border kind="panel" padding="12"><textblock text="panel"></textblock></border>
+                    <border kind="well" padding="12"><textblock text="well"></textblock></border>
+                    <border kind="chip"><textblock text="chip"></textblock></border>
+                    <border kind="slot" min-height="40" min-width="72"><textblock kind="mono" text="slot"></textblock></border>
+                    <border kind="hud" padding="8 12"><textblock text="hud"></textblock></border>
+                    <border kind="stretch" padding="8 12"><textblock text="stretch"></textblock></border>
+                  </wrapbox>
                 </verticalbox>
               </verticalbox>
             </border>
@@ -142,23 +133,14 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<verticalbox gap="10" width="100%">
-  <border kind="panel" padding="12">
-    <slate-text kind="body" text='kind="panel"'></slate-text>
-  </border>
-  <border kind="well" padding="12">
-    <slate-text kind="body" text='kind="well"'></slate-text>
-  </border>
-  <horizontalbox gap="8" valign="center">
-    <border kind="chip"><textblock text="chip"></textblock></border>
-    <border kind="slot" min-height="40" min-width="80">
-      <slate-text kind="mono" text="slot"></slate-text>
-    </border>
-    <border kind="hud" padding="8 12">
-      <slate-text kind="hud" text="hud"></slate-text>
-    </border>
-  </horizontalbox>
-</verticalbox>
+<wrapbox gap="8" width="100%">
+  <border kind="panel" padding="12"><textblock text="panel"></textblock></border>
+  <border kind="well" padding="12"><textblock text="well"></textblock></border>
+  <border kind="chip"><textblock text="chip"></textblock></border>
+  <border kind="slot" min-height="40" min-width="72"><textblock kind="mono" text="slot"></textblock></border>
+  <border kind="hud" padding="8 12"><textblock text="hud"></textblock></border>
+  <border kind="stretch" padding="8 12"><textblock text="stretch"></textblock></border>
+</wrapbox>
             </script>
           </wrapbox>
 
@@ -167,9 +149,11 @@
               <verticalbox gap="10" data-demo-stage>
                 <slate-text kind="label" text="Border · Padding"></slate-text>
                 <verticalbox gap="10" valign="center" data-demo-mount>
-                  <border kind="panel" padding="8 20">
-                    <slate-text kind="body" text='padding="8 20" on the border'></slate-text>
-                  </border>
+                  <horizontalbox gap="10" valign="center" width="100%">
+                    <border kind="chip" padding="4"><textblock text="4"></textblock></border>
+                    <border kind="chip" padding="8 16"><textblock text="8 16"></textblock></border>
+                    <border kind="chip" padding="16"><textblock text="16"></textblock></border>
+                  </horizontalbox>
                 </verticalbox>
               </verticalbox>
             </border>
@@ -185,9 +169,11 @@
               </verticalbox>
             </border>
             <script type="text/plain" data-demo-snippet>
-<border kind="panel" padding="8 20">
-  <slate-text kind="body" text='padding="8 20" on the border'></slate-text>
-</border>
+<horizontalbox gap="10" valign="center" width="100%">
+  <border kind="chip" padding="4"><textblock text="4"></textblock></border>
+  <border kind="chip" padding="8 16"><textblock text="8 16"></textblock></border>
+  <border kind="chip" padding="16"><textblock text="16"></textblock></border>
+</horizontalbox>
             </script>
           </wrapbox>
         </verticalbox>
