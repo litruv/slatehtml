@@ -235,10 +235,12 @@ Chips that flow to the next line when space runs out:
 ```html
 <gridpanel columns="3" gap="8" width="200">…</gridpanel>
 
+<gridpanel masonry columns="3" gap="8" width="200">…</gridpanel>
+
 <uniformgridpanel columns="2" rows="2" gap="8" width="160" height="160">…</uniformgridpanel>
 ```
 
-`gridpanel` divides space into equal columns (and optional rows). `uniformgridpanel` forces equal `1fr` tracks.
+`gridpanel` divides space into equal columns (and optional rows). With `masonry`, children pack into columns by height (multi-column flow; `rows` is ignored). `uniformgridpanel` forces equal `1fr` tracks.
 
 ### Widgetswitcher
 

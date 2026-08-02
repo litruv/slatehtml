@@ -248,7 +248,7 @@
     },
     {
       "name": "gridpanel",
-      "description": "UMG Grid Panel, CSS grid of evenly divided cells.",
+      "description": "UMG Grid Panel, CSS grid of evenly divided cells. With `masonry`, packs uneven heights into columns.",
       "attributes": [
         {
           "name": "columns",
@@ -256,7 +256,11 @@
         },
         {
           "name": "rows",
-          "description": "Optional number of equal rows."
+          "description": "Optional number of equal rows. Ignored when `masonry` is set."
+        },
+        {
+          "name": "masonry",
+          "description": "Boolean. Multi-column pack for uneven child heights (column-first flow)."
         },
         { "name": "gap" },
         { "name": "padding" },

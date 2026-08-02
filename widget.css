@@ -350,6 +350,17 @@
   grid-template-columns: repeat(var(--widget-columns, 2), minmax(0, 1fr));
 }
 
+/* Masonry: multi-column pack (uneven heights); rows attr ignored */
+:is(gridpanel, umc-gridpanel)[masonry] {
+  display: block;
+  column-count: var(--widget-columns, 2);
+  column-gap: var(--widget-gap, 0px);
+}
+:is(gridpanel, umc-gridpanel)[masonry] > * {
+  break-inside: avoid;
+  margin-bottom: var(--widget-gap, 0px);
+}
+
 /* --- Uniform grid panel, equal 1fr rows and columns --- */
 :is(uniformgridpanel, umc-uniformgridpanel) {
   display: grid;

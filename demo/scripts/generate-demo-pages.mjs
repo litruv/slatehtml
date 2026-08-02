@@ -853,7 +853,7 @@ const pages = {
 
   "gridpanel.html": page({
     title: "Gridpanel",
-    hint: "CSS grid with equal columns.",
+    hint: "CSS grid with equal columns. Add masonry for uneven heights.",
     events: "",
     mount: "verticalbox",
     variants: [
@@ -875,6 +875,17 @@ const pages = {
   <border kind="slot" min-height="56"><slate-text kind="mono" text="B"></slate-text></border>
   <border kind="slot" min-height="56"><slate-text kind="mono" text="C"></slate-text></border>
   <border kind="slot" min-height="56"><slate-text kind="mono" text="D"></slate-text></border>
+</gridpanel>`,
+      },
+      {
+        name: "Masonry",
+        code: `<gridpanel masonry columns="3" gap="8" width="100%">
+  <border kind="slot" min-height="40"><slate-text kind="mono" text="1"></slate-text></border>
+  <border kind="slot" min-height="96"><slate-text kind="mono" text="2"></slate-text></border>
+  <border kind="slot" min-height="56"><slate-text kind="mono" text="3"></slate-text></border>
+  <border kind="slot" min-height="72"><slate-text kind="mono" text="4"></slate-text></border>
+  <border kind="slot" min-height="40"><slate-text kind="mono" text="5"></slate-text></border>
+  <border kind="slot" min-height="88"><slate-text kind="mono" text="6"></slate-text></border>
 </gridpanel>`,
       },
     ],

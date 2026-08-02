@@ -6,7 +6,7 @@
  * Canvas children: top, left, right, bottom, anchors
  *   anchors: "top-left" | "left top" | "top left" | "fill" | "h-fill" | "v-fill"
  *            or "minX,minY,maxX,maxY" in 0-1 (UE style)
- * Grid: columns="3"
+ * Grid: columns="3"; masonry packs uneven heights into columns
  * Uniform grid: columns + rows (equal 1fr tracks)
  * Scalebox: scales the first child to fit
  * Widget switcher: active + child page / data-page
@@ -85,6 +85,7 @@ const OBSERVED_ATTRS = [
   "anchors",
   "columns",
   "rows",
+  "masonry",
   "stretch",
   "halign",
   "valign",
@@ -530,9 +531,15 @@ function applyGrid(el) {
   if (el.hasAttribute("columns")) {
     el.style.setProperty("--widget-columns", el.getAttribute("columns"));
   }
+  if (el.hasAttribute("masonry")) {
+    el.style.gridTemplateRows = "";
+    return;
+  }
   if (el.hasAttribute("rows")) {
     const rows = el.getAttribute("rows");
     el.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+  } else {
+    el.style.gridTemplateRows = "";
   }
 }
 
