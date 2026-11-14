@@ -67,11 +67,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
-const port = server.address().port;
-const base = `http://127.0.0.1:${port}`;
-
-async function buildPage(file, name) {
+async function buildPage(file, name, base) {
   const source = await readFile(file, "utf8");
   const html = buildPreviewHtml({
     file,
@@ -85,30 +81,34 @@ async function buildPage(file, name) {
   return `${base}${name}`;
 }
 
-const browser = await chromium.launch({
-  executablePath: await (async () => {
-    const candidates = [
-      process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
-      "/home/deck/.cache/ms-playwright/chromium-1148/chrome-linux/chrome",
-    ].filter(Boolean);
-    for (const p of candidates) {
-      try {
-        await access(p, constants.X_OK);
-        return p;
-      } catch {
-        /* try next */
-      }
-    }
-    return undefined;
-  })(),
-});
-
 // Needs the sibling matrix checkout and a browser; CI has neither by default.
+// Setup stays inside the test so a skip does not start a server or launch a browser.
 test("preview", { skip: !existsSync(matrixRoot) }, async (t) => {
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  const browser = await chromium.launch({
+    executablePath: await (async () => {
+      const candidates = [
+        process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+        "/home/deck/.cache/ms-playwright/chromium-1148/chrome-linux/chrome",
+      ].filter(Boolean);
+      for (const p of candidates) {
+        try {
+          await access(p, constants.X_OK);
+          return p;
+        } catch {
+          /* try next */
+        }
+      }
+      return undefined;
+    })(),
+  });
+
   const page = await browser.newPage();
 
   // --- title-bar: preview section markup + Tick animation + layout engine ---
-  await page.goto(await buildPage(join(matrixRoot, "widgets/app/title-bar.umc"), "/title-bar"));
+  await page.goto(await buildPage(join(matrixRoot, "widgets/app/title-bar.umc"), "/title-bar", base));
   await page.waitForSelector("title-bar .title-name");
 
   await t.test("stage renders the preview section markup", async () => {
@@ -149,7 +149,7 @@ test("preview", { skip: !existsSync(matrixRoot) }, async (t) => {
   });
 
   // --- user-message: sibling .umc components are registered too ---
-  await page.goto(await buildPage(join(matrixRoot, "widgets/message/user-message.umc"), "/user-message"));
+  await page.goto(await buildPage(join(matrixRoot, "widgets/message/user-message.umc"), "/user-message", base));
   await page.waitForSelector("user-message message-text");
 
   await t.test("composed sibling components render", async () => {
