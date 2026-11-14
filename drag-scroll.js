@@ -19,7 +19,8 @@ const SKIP_POINTER_OWNED =
   "editabletext,umc-editabletext," +
   "[role=slider],[role=scrollbar],[role=textbox]," +
   "slate-slider,slate-text-field,slate-select," +
-  "slate-dropdown,slate-combobox,slate-autocomplete";
+  "slate-dropdown,slate-combobox,slate-autocomplete," +
+  ".slate-dock-divider";
 
 /** Explicit selection surfaces (glyph hit-tested; not whole-box). */
 const SELECTABLE_MARK = "pre,code,[selectable],[data-selectable]";
@@ -345,8 +346,11 @@ function onUp(e) {
 
 function onDragStart(e) {
   // Native <a>/img drag steals the gesture, always kill it while we may scroll.
+  // An explicit draggable is the app asking for the drag (slate-dock tab rows), so leave it.
   if (!apiRef) return;
-  const scrollbox = findScrollbox(e.target, apiRef.enabled);
+  const node = e.target?.closest?.("a, img");
+  if (!node || node.getAttribute("draggable") === "true") return;
+  const scrollbox = findScrollbox(node, apiRef.enabled);
   if (scrollbox) e.preventDefault();
 }
 

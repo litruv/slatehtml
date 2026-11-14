@@ -1,0 +1,447 @@
+--- html ---
+
+--- style ---
+/* Dock is the flex box itself: light children are the cells. */
+self {
+  display: flex; /* umc-layout-ok */
+  flex-direction: row; /* umc-layout-ok */
+  align-items: stretch; /* umc-layout-ok */
+  color: inherit;
+  font: inherit;
+  min-width: 0;
+  min-height: 0;
+}
+
+self[orientation="vertical"] {
+  flex-direction: column; /* umc-layout-ok */
+}
+
+self > [fill] {
+  flex: 1 1 0; /* umc-layout-ok */
+}
+
+self .slate-tabs-list.dropping {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+self .slate-dock-line {
+  flex: 0 0 auto; /* umc-layout-ok */
+  align-self: stretch; /* umc-layout-ok */
+  min-height: 1em;
+  border-left: 2px solid currentColor;
+}
+
+/* A slot between two cells is already a divider: it becomes the indicator. */
+self .slate-dock-divider.dropping {
+  --line: currentColor;
+}
+
+self[orientation="vertical"] > .slate-dock-line {
+  min-width: 1em;
+  border-left: 0;
+  border-top: 2px solid currentColor;
+}
+
+/* A crossing edge nests, so its indicator is a rule inside the cell, under the pointer. */
+self slate-tabs > .slate-dock-line {
+  border-left: 0;
+  border-top: 2px solid currentColor;
+}
+
+/* The divider is a hairline, so the pseudo overlay is the grab area for resizing. */
+self .slate-dock-divider {
+  position: relative; /* umc-layout-ok, resize hit area */
+  cursor: col-resize;
+}
+
+self .slate-dock-divider::before {
+  content: "";
+  position: absolute; /* umc-layout-ok */
+  inset: -4px; /* umc-layout-ok, resize hit area */
+}
+
+self[orientation="vertical"] > .slate-dock-divider {
+  cursor: row-resize;
+}
+
+--- script ---
+import { create } from "slatehtml/umc";
+import { dropIndex, dropZone, splitOrientation } from "./dock-core.js";
+
+/**
+ * Dockable cells: light children are slate-tabs groups or nested slate-dock.
+ *
+ *   <slate-dock orientation="horizontal" gap="8">
+ *     <slate-tabs id="left" active="inbox">…</slate-tabs>
+ *     <slate-tabs id="right" active="notes">…</slate-tabs>
+ *   </slate-dock>
+ *
+ * Pointer drag only. A tab row dropped on another group's strip joins it at the
+ * pointer; dropped on the 20% edge band of a cell it becomes its own group at the
+ * indicator, nested in a dock oriented by that edge when the edge crosses the dock's axis.
+ * The band is floored at 24px so a narrow cell still has a usable edge. The strip always joins,
+ * so the left and right bands split only the panel body. A crossing edge nests, so its indicator
+ * is a rule inside the cell rather than a divider in the dock. Rects are read once at dragstart: the indicator changes the layout, and
+ * re-measuring would move the zone under the pointer. The cell comes from the pointer position
+ * rather than the element under it, so a point in the gap the indicator sits in still counts as
+ * that cell's edge band. The innermost dock decides, so a group inside a nested dock is its own
+ * cell. Empty cells are removed, and a dock left with a single cell
+ * collapses into that cell. Drag needs child pages: a group using the `tabs` attr is not
+ * draggable. Dividers between cells are draggable: the drag sets fill weights on the two
+ * neighbours, floored at 40px.
+ *
+ * Events: tabmoved { value, label, from, to, index }
+ *         tabsplit { value, label, from, orientation }
+ * `from`/`to` are the group's id, else its index in the dock.
+ */
+
+let drag = null;
+
+/** A cell a divider can be dragged to: below this the panel is not usable. */
+const MIN_CELL_PX = 40;
+
+function isCell(node) {
+  return node?.localName === "slate-tabs" || node?.localName === "slate-dock";
+}
+
+function cells(dock) {
+  return [...(dock?.children || [])].filter(isCell);
+}
+
+function pages(group) {
+  return [...group.children].filter((child) => (child.getAttribute("page") || "").trim());
+}
+
+function ref(group) {
+  return group.id || String(cells(group.parentElement).indexOf(group));
+}
+
+function isEmptyCell(cell) {
+  if (!isCell(cell)) return false;
+  if (cell.localName === "slate-tabs") {
+    return !cell.hasAttribute("tabs") && !pages(cell).length;
+  }
+  return !cells(cell).length;
+}
+
+function nextCell(node) {
+  let next = node.nextElementSibling;
+  while (next?.classList?.contains("slate-dock-line")) next = next.nextElementSibling;
+  return isCell(next) ? next : null;
+}
+
+/** Empty cells go away. Remaining cells get fill and dividers between them. */
+function syncCells(dock) {
+  if (!isCell(dock)) return;
+  for (const cell of cells(dock)) {
+    if (isEmptyCell(cell)) cell.remove();
+  }
+  const list = cells(dock);
+  if (!list.length) {
+    dock.remove();
+    return;
+  }
+  // A dock with a single cell is only that cell: collapse it back into its parent dock.
+  const parent = dock.parentElement;
+  if (list.length === 1 && isCell(parent)) {
+    parent.replaceChild(list[0], dock);
+    syncCells(parent);
+    return;
+  }
+  const orientation = dock.getAttribute("orientation") || "horizontal";
+  // The separator is perpendicular to the dock axis.
+  const cross = orientation === "horizontal" ? "vertical" : "horizontal";
+  for (const cell of list) {
+    if (!cell.hasAttribute("fill")) cell.setAttribute("fill", "1");
+  }
+  for (const child of [...dock.children]) {
+    if (child.classList?.contains("slate-dock-divider") && !(isCell(child.previousElementSibling) && nextCell(child))) {
+      child.remove();
+    }
+  }
+  for (let i = 1; i < list.length; i++) {
+    const prev = list[i].previousElementSibling;
+    if (prev?.classList?.contains("slate-dock-divider")) {
+      prev.setAttribute("orientation", cross);
+      continue;
+    }
+    dock.insertBefore(create({ tag: "slate-divider", class: "slate-dock-divider", orientation: cross }), list[i]);
+  }
+}
+
+function box(el) {
+  const outer = drag?.rects?.get(el) || el?.getBoundingClientRect();
+  const rect = outer?.width && outer.height ? outer : el?.firstElementChild?.getBoundingClientRect() || outer;
+  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height };
+}
+
+function inside(point, rect) {
+  return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function expand(rect, pad) {
+  return pad ? { left: rect.left - pad, top: rect.top - pad, right: rect.right + pad, bottom: rect.bottom + pad, width: rect.width + pad * 2, height: rect.height + pad * 2 } : rect;
+}
+
+/** Rects read once per drag: the indicator changes the layout, so re-measuring moves the zone under the pointer. */
+function snapshot(el) {
+  const rects = new Map();
+  const put = (node) => rects.set(node, node.getBoundingClientRect());
+  for (const dock of [el.closest("slate-dock") || el, ...el.querySelectorAll("slate-dock")]) {
+    for (const cell of cells(dock)) {
+      put(cell);
+      const strip = cell.querySelector(":scope > .slate-tabs-list");
+      if (!strip) continue;
+      put(strip);
+      for (const row of strip.children) {
+        if (row.classList?.contains("slate-tabs-tab")) put(row);
+      }
+    }
+  }
+  return rects;
+}
+
+/** The indicator line shifts the layout, so a point near an edge can land in the gap: fall back to the nearest cell. */
+function nearestCell(el, point) {
+  if (!inside(point, box(el))) return null;
+  let nearest = null;
+  let best = Infinity;
+  for (const cell of cells(el)) {
+    const rect = box(cell);
+    if (inside(point, rect)) return cell;
+    const dx = Math.max(rect.left - point.x, point.x - rect.right, 0);
+    const dy = Math.max(rect.top - point.y, point.y - rect.bottom, 0);
+    const d = dx * dx + dy * dy;
+    if (d < best) {
+      best = d;
+      nearest = cell;
+    }
+  }
+  return nearest;
+}
+
+/** Cell under the pointer, plus where the page would land in it. */
+function targetOf(el, event) {
+  const point = { x: event.clientX, y: event.clientY };
+  const pad = Number(el.getAttribute("gap")) || 0;
+  const closest = event.target?.closest?.("slate-tabs, slate-dock");
+  // The innermost dock owns a pointer inside it, so a nested dock's decision stands.
+  if (closest && closest !== el && el.contains(closest) && closest.parentElement !== el) return null;
+  const cell = isCell(closest) && closest.parentElement === el ? closest : nearestCell(el, point);
+  if (!cell) return null;
+  const zoneRect = expand(box(cell), pad);
+  if (!inside(point, zoneRect)) return null;
+  const strip = cell.localName === "slate-tabs" ? cell.querySelector(":scope > .slate-tabs-list") : null;
+  const rows = [...(strip?.children || [])].filter((row) => row.classList?.contains("slate-tabs-tab"));
+  const boxes = rows.map((row) => {
+    const rect = box(row);
+    return { left: rect.left, right: rect.right };
+  });
+  const zone = dropZone(point, zoneRect);
+  // A point on the strip always joins it; the left and right bands only split the panel body.
+  const onStrip = strip && (strip.contains(event.target) || inside(point, box(strip)));
+  return {
+    cell,
+    strip,
+    zone: onStrip ? { zone: "strip", edge: "" } : zone,
+    index: dropIndex(boxes, point),
+  };
+}
+
+/** Removes the marker the previous dragover left: a divider keeps its element, a span goes away. */
+function unmark(el) {
+  const marked = drag?.line;
+  if (marked?.classList?.contains("slate-dock-divider")) marked.classList.remove("dropping");
+  else marked?.remove();
+  for (const dock of new Set([drag?.dock, el])) {
+    for (const cell of cells(dock)) {
+      cell.querySelector(":scope > .slate-tabs-list")?.classList.remove("dropping");
+    }
+  }
+}
+
+/** Marks the slot the drop will use, and returns the element it marked. */
+function placeLine(line, target) {
+  if (target.zone.zone === "strip" && target.strip) {
+    const rows = [...target.strip.children].filter((row) => row.classList?.contains("slate-tabs-tab"));
+    target.strip.insertBefore(line, rows[target.index] || null);
+    return line;
+  }
+  const parent = target.cell.parentElement;
+  const before = target.zone.edge === "left" || target.zone.edge === "top";
+  // A crossing edge nests, so no divider in this dock can show it: put the rule inside the cell, under the pointer.
+  if (target.cell.localName === "slate-tabs" && splitOrientation(target.zone.edge) !== (parent.getAttribute("orientation") || "horizontal")) {
+    target.cell.insertBefore(line, target.zone.edge === "top" ? target.cell.children[1] || null : null);
+    return line;
+  }
+  const anchor = before ? target.cell : target.cell.nextSibling;
+  const divider = before ? target.cell.previousElementSibling : target.cell.nextElementSibling;
+  if (divider?.classList?.contains("slate-dock-divider")) {
+    divider.classList.add("dropping");
+    return divider;
+  }
+  parent.insertBefore(line, anchor);
+  return line;
+}
+
+function move(el, api, target) {
+  const source = drag.group;
+  const page = pages(source).find((child) => child.getAttribute("page") === drag.value);
+  if (!page) return;
+  const { value, label } = drag;
+  const from = ref(source);
+  let group;
+
+  if (target.zone.zone === "strip") {
+    group = target.cell;
+    group.insertBefore(page, pages(group)[target.index] || null);
+    group.setAttribute("active", value);
+    api.emit("tabmoved", { value, label, from, to: ref(group), index: target.index });
+  } else {
+    const orientation = splitOrientation(target.zone.edge);
+    group = create({ tag: "slate-tabs", active: value });
+    group.appendChild(page);
+    const parent = target.cell.parentElement;
+    const before = target.zone.edge === "left" || target.zone.edge === "top";
+    if (orientation === (parent.getAttribute("orientation") || "horizontal")) {
+      parent.insertBefore(group, before ? target.cell : target.cell.nextSibling);
+    } else {
+      // The edge crosses the dock's axis, so the new group needs its own dock. The dock takes
+      // the target cell's slot, so the slot has to be remembered before the cell moves into it.
+      const slot = target.cell.nextSibling;
+      const dock = create({ tag: "slate-dock", orientation, gap: parent.getAttribute("gap") });
+      if (before) {
+        dock.appendChild(group);
+        dock.appendChild(target.cell);
+      } else {
+        dock.appendChild(target.cell);
+        dock.appendChild(group);
+      }
+      if (slot) parent.insertBefore(dock, slot);
+      else parent.appendChild(dock);
+    }
+    api.emit("tabsplit", { value, label, from, orientation });
+  }
+
+  const home = source.parentElement;
+  // An emptied group has nothing left to render, so it goes away before anything is refreshed.
+  if (pages(source).length) source.refresh();
+  else source.remove();
+  group.refresh();
+  return home;
+}
+
+export default defineUmc({
+  tag: "slate-dock",
+  attrs: {
+    orientation: "horizontal",
+  },
+
+  Construct(el, api) {
+    if (el._dockBound) return;
+    el._dockBound = true;
+
+    const line = create({ tag: "span", class: "slate-dock-line" });
+
+    const clear = () => {
+      unmark(el);
+      drag?.row?.classList.remove("dragging");
+      drag = null;
+    };
+
+    el.addEventListener("dragstart", (event) => {
+      const row = event.target?.closest?.(".slate-tabs-tab");
+      const group = row?.closest?.("slate-tabs");
+      if (!group || group.hasAttribute("tabs") || !el.contains(group)) return;
+      drag = { value: row.getAttribute("data-value"), label: row.textContent.trim(), row, group, rects: snapshot(el) };
+      row.classList.add("dragging");
+      event.dataTransfer.setData("text/plain", drag.value);
+      event.dataTransfer.effectAllowed = "move";
+    });
+
+    el.addEventListener("dragover", (event) => {
+      if (!drag) return;
+      const target = targetOf(el, event);
+      if (!target) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      drag.target = target;
+      drag.dock = el;
+      drag.strip = target.strip;
+      unmark(el);
+      if (target.zone.zone === "strip" && target.strip) target.strip.classList.add("dropping");
+      drag.line = placeLine(line, target);
+    });
+
+    el.addEventListener("drop", (event) => {
+      if (!drag || drag.dock !== el) return;
+      const target = drag.target;
+      if (!target) return;
+      event.preventDefault();
+      const home = move(el, api, target);
+      clear();
+      syncCells(el);
+      syncCells(home);
+    });
+
+    el.addEventListener("dragend", clear);
+
+    // Dragging a divider sets fill weights on its two neighbours. Weights, not px:
+    // `fill` is the only size the dock gives a cell, and an inline `flex` stomps `width`.
+    el.addEventListener("pointerdown", (event) => {
+      const divider = event.target?.closest?.(".slate-dock-divider");
+      if (!divider || divider.parentElement !== el) return;
+      const a = divider.previousElementSibling;
+      const b = divider.nextElementSibling;
+      if (!isCell(a) || !isCell(b)) return;
+      const vertical = (el.getAttribute("orientation") || "horizontal") === "vertical";
+      const size = (node) => (vertical ? node.getBoundingClientRect().height : node.getBoundingClientRect().width);
+      const total = size(a) + size(b);
+      if (total < MIN_CELL_PX * 2) return;
+      const first = size(a);
+      const start = vertical ? event.clientY : event.clientX;
+      const weight = (px) => String(Math.round((px / total) * 200) / 100);
+      const set = (px) => {
+        a.setAttribute("fill", weight(px));
+        b.setAttribute("fill", weight(total - px));
+      };
+      event.preventDefault();
+      divider.setPointerCapture(event.pointerId);
+      const onMove = (event) => {
+        if (event.buttons !== 1) return;
+        const px = Math.min(Math.max(first + (vertical ? event.clientY : event.clientX) - start, MIN_CELL_PX), total - MIN_CELL_PX);
+        set(px);
+      };
+      const stop = () => {
+        divider.removeEventListener("pointermove", onMove);
+        divider.releasePointerCapture?.(event.pointerId);
+      };
+      divider.addEventListener("pointermove", onMove);
+      divider.addEventListener("pointerup", stop, { once: true });
+      divider.addEventListener("pointercancel", stop, { once: true });
+    });
+  },
+
+  SynchronizeProperties(el) {
+    syncCells(el);
+  },
+});
+
+--- preview ---
+<canvaspanel width="380" height="220" kind="stage">
+  <slate-dock gap="8" anchors="fill" top="12" left="12" right="12" bottom="12">
+    <slate-tabs active="inbox">
+      <border page="inbox" label="Inbox" kind="panel" padding="12">
+        <slate-text text="Inbox panel"></slate-text>
+      </border>
+      <border page="starred" label="Starred" kind="panel" padding="12">
+        <slate-text text="Starred panel"></slate-text>
+      </border>
+    </slate-tabs>
+    <slate-tabs active="notes">
+      <border page="notes" label="Notes" kind="panel" padding="12">
+        <slate-text text="Notes panel"></slate-text>
+      </border>
+    </slate-tabs>
+  </slate-dock>
+</canvaspanel>
