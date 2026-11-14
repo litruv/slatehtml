@@ -160,10 +160,12 @@ function stripDefineUmcImport(script) {
  * Registration imports are the preview's job, not the component's: every .umc
  * beside the focused file is already inlined below, and a browser can't load a
  * .umc as a module. Side-effect-only relative imports are therefore dropped;
- * value imports (`from "../data.js"`) are kept and rewritten.
+ * value imports (`from "../data.js"`) are kept and rewritten. Bare package
+ * registration imports (`import "slatehtml-ui/button"`) are dropped too: the
+ * browser can't load a .umc as a module, and the widget is already inlined.
  */
 function dropRegistrationImports(script) {
-  return script.replace(/^[ \t]*import\s*(["'])\.[^"']+\1\s*;?[ \t]*$/gm, "");
+  return script.replace(/^[ \t]*import\s*(["'])[^"']+\1\s*;?[ \t]*$/gm, "");
 }
 
 /** Point relative imports at URLs the preview document can fetch. */
@@ -203,11 +205,12 @@ function extractRelativeSpecifiers(script) {
 }
 
 /**
- * Walk the focused .umc (and relative .js / .umc script deps) for bare npm
- * imports the browser must resolve via import map.
+ * Walk every unit in the preview graph (and its relative .js / .umc script deps)
+ * for bare npm imports the browser must resolve via import map. Each specifier
+ * is mapped to the file that imports it, so package lookup starts there.
  */
-function collectBareNpmSpecifiers(file, source, readSource) {
-  const bare = new Set();
+function collectBareNpmSpecifiers(units, readSource) {
+  const bare = new Map();
   const seen = new Set();
 
   const visit = (absFile, text) => {
@@ -222,29 +225,22 @@ function collectBareNpmSpecifiers(file, source, readSource) {
       script = readSection(sections.script, dir);
     }
 
-    for (const spec of extractBareSpecifiers(script)) bare.add(spec);
+    for (const spec of extractBareSpecifiers(script)) {
+      if (!bare.has(spec)) bare.set(spec, key);
+    }
 
     for (const rel of extractRelativeSpecifiers(script)) {
       const child = path.resolve(dir, rel);
       if (!fs.existsSync(child)) continue;
-      let childSrc;
       try {
-        childSrc =
-          path.resolve(child) === path.resolve(file)
-            ? source
-            : readSource(child);
+        visit(child, readSource(child));
       } catch {
-        try {
-          childSrc = fs.readFileSync(child, "utf8");
-        } catch {
-          continue;
-        }
+        /* ignore broken deps */
       }
-      visit(child, childSrc);
     }
   };
 
-  visit(file, source);
+  for (const unit of units) visit(unit.file, unit.source);
   return bare;
 }
 
@@ -464,6 +460,8 @@ function collectUnits({ file, source, readSource, resolveUri, roots = [] }) {
 
     units.push({
       name: path.basename(absFile),
+      file: key,
+      source: raw,
       html: "",
       css: "",
       preview: "",
@@ -686,13 +684,13 @@ function buildPreviewHtml(options) {
     "slatehtml/umc": runtimeUri,
     "slatehtml/umc/runtime.js": runtimeUri,
   };
-  for (const spec of collectBareNpmSpecifiers(file, source, readSource)) {
+  for (const [spec, fromFile] of collectBareNpmSpecifiers(units, readSource)) {
     if (importMapImports[spec]) continue;
     if (shouldStubNpmPackage(spec)) {
       importMapImports[spec] = npmPackageStubDataUrl(spec);
       continue;
     }
-    const entry = resolvePackageEntry(spec, file);
+    const entry = resolvePackageEntry(spec, fromFile);
     if (entry) importMapImports[spec] = resolveUri(entry);
   }
 
