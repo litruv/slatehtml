@@ -74,8 +74,8 @@ function parseUmcSource(source) {
       continue;
     }
     if (current) {
-      if (currentStartLine === null) currentStartLine = lineNo;
-      currentEndLine = lineNo;
+      if (currentStartLine === null && line.trim()) currentStartLine = lineNo;
+      if (line.trim()) currentEndLine = lineNo;
       buf.push(line);
     }
   }

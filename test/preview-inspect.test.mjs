@@ -39,14 +39,14 @@ test("parseUmcSource records preview line range", () => {
   if (sections.preview.startLine !== 11) {
     throw new Error(`expected startLine 11, got ${sections.preview.startLine}`);
   }
-  if (sections.preview.endLine !== 15) {
-    throw new Error(`expected endLine 15, got ${sections.preview.endLine}`);
+  if (sections.preview.endLine !== 14) {
+    throw new Error(`expected endLine 14, got ${sections.preview.endLine}`);
   }
 });
 
 test("previewLineRange returns 1-based inclusive bounds", () => {
   const range = previewLineRange(sample);
-  if (!range || range.start !== 11 || range.end !== 15) {
+  if (!range || range.start !== 11 || range.end !== 14) {
     throw new Error(`unexpected range: ${JSON.stringify(range)}`);
   }
 });

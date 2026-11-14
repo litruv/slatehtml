@@ -49,11 +49,13 @@ const ALIASES = {
  * @param {string} source
  * @returns {{
  *   parent: string,
- *   html: { kind: 'inline'|'link', value: string },
- *   style: { kind: 'inline'|'link', value: string },
- *   script: { kind: 'inline'|'link', value: string },
- *   preview: { kind: 'inline'|'link', value: string },
+ *   html: { kind: 'inline'|'link', value: string, startLine?: number, endLine?: number },
+ *   style: { kind: 'inline'|'link', value: string, startLine?: number, endLine?: number },
+ *   script: { kind: 'inline'|'link', value: string, startLine?: number, endLine?: number },
+ *   preview: { kind: 'inline'|'link', value: string, startLine?: number, endLine?: number },
  * }}
+ * startLine/endLine are 1-based source lines of the first and last non-blank
+ * content line, so an editor can map a section back to the file.
  */
 export function parseUmc(source) {
   const sections = {
@@ -66,6 +68,8 @@ export function parseUmc(source) {
 
   const lines = String(source).replace(/^\uFEFF/, "").split(/\r?\n/);
   let current = null;
+  let currentStartLine = null;
+  let currentEndLine = null;
   const buf = [];
 
   const flush = () => {
@@ -76,11 +80,20 @@ export function parseUmc(source) {
     if (link && !raw.includes("\n")) {
       sections[current] = { kind: "link", value: link[1].trim() };
     } else {
-      sections[current] = { kind: "inline", value: raw };
+      sections[current] = {
+        kind: "inline",
+        value: raw,
+        startLine: currentStartLine,
+        endLine: currentEndLine,
+      };
     }
+    currentStartLine = null;
+    currentEndLine = null;
   };
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i += 1) {
+    const lineNo = i + 1;
+    const line = lines[i];
     const section = line.match(SECTION_RE);
     if (section) {
       flush();
@@ -98,7 +111,11 @@ export function parseUmc(source) {
       }
     }
 
-    if (current) buf.push(line);
+    if (current) {
+      if (currentStartLine === null && line.trim()) currentStartLine = lineNo;
+      if (line.trim()) currentEndLine = lineNo;
+      buf.push(line);
+    }
   }
   flush();
 

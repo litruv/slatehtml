@@ -55,4 +55,8 @@ test("parse", () => {
   assert.ok(parented.parent === "textblock");
   assert.ok(parented.style.value.includes("color: red"));
   assert.ok(parentAngle.parent === "border");
+  assert.ok(inline.html.startLine === 3);
+  assert.ok(inline.style.startLine === 6);
+  assert.ok(inline.script.startLine === 9);
+  assert.ok(inline.preview.startLine === 12);
 });
