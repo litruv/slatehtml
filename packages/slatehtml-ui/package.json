@@ -25,6 +25,7 @@
     "./transfer-list": "./src/input/slate-transfer-list.umc",
     "./toggle-button": "./src/input/slate-toggle-button.umc",
     "./tabs": "./src/slate-tabs.umc",
+    "./dock": "./src/slate-dock.umc",
     "./input/button": "./src/input/slate-button.umc",
     "./input/autocomplete": "./src/input/slate-autocomplete.umc",
     "./input/button-group": "./src/input/slate-button-group.umc",

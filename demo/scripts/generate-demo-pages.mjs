@@ -2200,6 +2200,44 @@ z yqoqej vb  <border kind="slot" fill="1" min-height="40"><slate-text kind="mono
     ],
   }),
 
+  "dock.html": page({
+    title: "Dock",
+    hint: "Cells are slate-tabs groups or nested docks. Drag a tab row onto a strip to move it, or onto a cell edge band to split it into a new group.",
+    events: "tabmoved,tabsplit",
+    mount: "verticalbox",
+    variants: [
+      {
+        name: "Two groups",
+        code: `<slate-dock gap="8" height="180">
+  <slate-tabs id="left" active="inbox" height="100%">
+    <border kind="slot" page="inbox" height="100"><slate-text kind="mono" text="inbox"></slate-text></border>
+    <border kind="slot" page="starred" height="100"><slate-text kind="mono" text="starred"></slate-text></border>
+  </slate-tabs>
+  <slate-tabs id="right" active="notes" height="100%">
+    <border kind="slot" page="notes" height="100"><slate-text kind="mono" text="notes"></slate-text></border>
+  </slate-tabs>
+</slate-dock>`,
+      },
+      {
+        name: "Split",
+        code: `<slate-dock gap="8" height="180">
+  <slate-tabs id="left" active="inbox" height="100%">
+    <border kind="slot" page="inbox" height="100"><slate-text kind="mono" text="inbox"></slate-text></border>
+    <border kind="slot" page="starred" height="100"><slate-text kind="mono" text="starred"></slate-text></border>
+  </slate-tabs>
+  <slate-dock orientation="vertical" gap="8" height="100%">
+    <slate-tabs active="notes" height="100%">
+      <border kind="slot" page="notes" height="100"><slate-text kind="mono" text="notes"></slate-text></border>
+    </slate-tabs>
+    <slate-tabs active="drafts" height="100%">
+      <border kind="slot" page="drafts" height="100"><slate-text kind="mono" text="drafts"></slate-text></border>
+    </slate-tabs>
+  </slate-dock>
+</slate-dock>`,
+      },
+    ],
+  }),
+
   "sizebox.html": page({
     title: "Sizebox",
     hint: "Force child to an explicit width / height.",

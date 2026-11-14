@@ -42,6 +42,10 @@ self .slate-tabs-tab:hover {
   opacity: 0.9;
 }
 
+self .slate-tabs-tab.dragging {
+  opacity: 0.35;
+}
+
 self .slate-tabs-tab[aria-selected="true"] {
   opacity: 1;
   border-bottom-color: currentColor;
@@ -70,6 +74,9 @@ import { parseOptions, selectableOptions } from "./input/parse-options.js";
  * `page="…"`. Selection is the host `active` attr (same as widgetswitcher).
  *
  * Events: selectionchanged { value, label, index }
+ *
+ * Rows are draggable for slate-dock, but only child-based pages can move: the
+ * `tabs` attr overrides host children, so a group using it is not draggable.
  */
 
 function pageChildren(el) {
@@ -103,6 +110,7 @@ function tabRow(option, selected) {
     "aria-selected": on ? "true" : "false",
     "data-value": option.value,
     tabindex: on ? "0" : "-1",
+    draggable: "true",
     padding: "8 12",
     valign: "center",
     children: [{ tag: "textblock", text: option.label }],
@@ -137,6 +145,39 @@ function select(el, api, value) {
   });
 }
 
+function renderStrip(el, api) {
+  const attr = api.attr;
+  const tabs = resolveTabs(el, attr);
+  let selected = attr("active", "");
+  // Active can point at a page that moved away (dock drop): fall back to the first page.
+  if (tabs.length && !tabs.some((t) => t.value === selected)) {
+    selected = tabs[0].value;
+    if (attr("active", "") !== selected) el.setAttribute("active", selected);
+  }
+
+  const list = el.querySelector(":scope > .slate-tabs-list");
+  if (list) {
+    list.setAttribute("role", "tablist");
+    // Keep the strip first among host children.
+    if (el.firstElementChild !== list) el.insertBefore(list, el.firstChild);
+    const key = tabs.map((t) => `${t.value}\u0000${t.label}`).join("\u0001");
+    if (el._tabsKey !== key) {
+      el._tabsKey = key;
+      list.replaceChildren(
+        ...tabs.map((option) => create(tabRow(option, selected))).filter(Boolean)
+      );
+    } else {
+      for (const tab of list.querySelectorAll(".slate-tabs-tab")) {
+        const on = tab.getAttribute("data-value") === selected;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        tab.setAttribute("tabindex", on ? "0" : "-1");
+      }
+    }
+  }
+
+  if (selected) applyActive(el, selected);
+}
+
 export default defineUmc({
   tag: "slate-tabs",
   attrs: {
@@ -145,6 +186,10 @@ export default defineUmc({
   },
 
   Construct(el, api) {
+    // Pages can move between hosts without an attr change, so the dock needs an
+    // explicit re-render (distributeSlots only runs on the first stamp).
+    el.refresh = () => renderStrip(el, api);
+
     if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
     el.setAttribute("role", "navigation");
 
@@ -180,35 +225,8 @@ export default defineUmc({
     });
   },
 
-  SynchronizeProperties(el, { attr }) {
-    const tabs = resolveTabs(el, attr);
-    let selected = attr("active", "");
-    if (!selected && tabs.length) {
-      selected = tabs[0].value;
-      if (attr("active", "") !== selected) el.setAttribute("active", selected);
-    }
-
-    const list = el.querySelector(":scope > .slate-tabs-list");
-    if (list) {
-      list.setAttribute("role", "tablist");
-      // Keep the strip first among host children.
-      if (el.firstElementChild !== list) el.insertBefore(list, el.firstChild);
-      const key = tabs.map((t) => `${t.value}\u0000${t.label}`).join("\u0001");
-      if (el._tabsKey !== key) {
-        el._tabsKey = key;
-        list.replaceChildren(
-          ...tabs.map((option) => create(tabRow(option, selected))).filter(Boolean)
-        );
-      } else {
-        for (const tab of list.querySelectorAll(".slate-tabs-tab")) {
-          const on = tab.getAttribute("data-value") === selected;
-          tab.setAttribute("aria-selected", on ? "true" : "false");
-          tab.setAttribute("tabindex", on ? "0" : "-1");
-        }
-      }
-    }
-
-    if (selected) applyActive(el, selected);
+  SynchronizeProperties(el, api) {
+    renderStrip(el, api);
   },
 });
 

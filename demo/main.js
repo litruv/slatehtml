@@ -56,6 +56,7 @@ const NAV = [
           { id: "wrapbox", title: "Wrap Box", icon: "wrap-text" },
           { id: "gridpanel", title: "Grid Panel", icon: "layout-grid" },
           { id: "widgetswitcher", title: "Widget Switcher", icon: "panels-top-left" },
+          { id: "dock", title: "Dock", icon: "layout-panel-left" },
           { id: "sizebox", title: "Size Box", icon: "scaling" },
           { id: "scalebox", title: "Scale Box", icon: "zoom-in" },
         ],

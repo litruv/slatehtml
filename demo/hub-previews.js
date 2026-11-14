@@ -55,6 +55,14 @@ export const HUB_PREVIEWS = {
     <textblock text="Scaled"></textblock>
   </border>
 </scalebox>`,
+  dock: `<slate-dock gap="4" width="140" height="72">
+  <slate-tabs active="a" height="100%">
+    <border kind="well" page="a" height="100%"><textblock text="A"></textblock></border>
+  </slate-tabs>
+  <slate-tabs active="b" height="100%">
+    <border kind="well" page="b" height="100%"><textblock text="B"></textblock></border>
+  </slate-tabs>
+</slate-dock>`,
 
   // Common
   typography: `<verticalbox gap="2">
