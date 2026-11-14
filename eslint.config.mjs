@@ -38,5 +38,10 @@ const globals = {
 export default [
   { ignores: ["demo/dist/", "demo/demo/dist/", "docs/", "packages/slatehtml-ui/dist/"] },
   js.configs.recommended,
-  { files: ["**/*.js", "**/*.mjs", "**/*.cjs"], languageOptions: { globals } },
+  {
+    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
+    languageOptions: { globals },
+    // `_` names are intentional omit-from-rest placeholders (demo/main.js:595).
+    rules: { "no-unused-vars": ["error", { varsIgnorePattern: "^_" }] },
+  },
 ];

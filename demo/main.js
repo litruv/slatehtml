@@ -592,7 +592,7 @@ function wireDemoExamples(root = document) {
     const push = (type, source, detail) => {
       let shown = detail;
       if (detail && typeof detail === "object") {
-        const { originalEvent, type: _t, ...rest } = detail;
+        const { originalEvent: _originalEvent, type: _t, ...rest } = detail;
         shown = Object.keys(rest).length ? rest : null;
       }
       const body = shown == null ? "" : ` ${JSON.stringify(shown)}`;
