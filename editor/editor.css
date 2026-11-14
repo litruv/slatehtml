@@ -1,0 +1,53 @@
+/* Editor chrome only. Layout and widget styles come from slatehtml. */
+
+:root {
+  --ink: #e6e6e6;
+  --line: #2c2e33;
+  --accent: #4a6b96;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  font: 14px/1.4 var(--slate-font, system-ui, sans-serif);
+  color: var(--ink);
+  background: #17181a;
+}
+
+/* Canvas wrapper the component's `self` style maps to. */
+.umc-self {
+  min-height: 200px;
+}
+
+.selected {
+  outline: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Outliner: leaves have no body to open, so no twisty. */
+.leaf .slate-accordion-item-chevron {
+  display: none;
+}
+
+/* Outliner rows: no separators, rows stack flush with only the left indent.
+   The widget sets body padding and gap as inline styles from its attrs,
+   so these have to win over the inline values. */
+#tree slate-accordion-item {
+  border-bottom: none;
+}
+
+#tree .slate-accordion-item-body {
+  padding: 0 0 0 12px !important;
+  gap: 0 !important;
+}
+
+slate-accordion-item.selected {
+  outline: none;
+  background: none;
+}
+
+slate-accordion-item.selected > .slate-accordion-item-header {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>UMC Editor</title>
+    <link rel="stylesheet" href="./editor.css" />
+    <style id="component-style"></style>
+  </head>
+  <body>
+    <verticalbox width="100%" height="100%" gap="0">
+      <slate-app-bar id="file-title" title="No file"></slate-app-bar>
+      <horizontalbox gap="0" fill width="100%" min-height="0">
+        <border kind="panel" width="280" padding="0">
+          <verticalbox fill gap="0">
+            <slate-app-bar kind="transparent" dense title="Hierarchy">
+              <slot-leading>
+                <slate-icon name="list" size="16"></slate-icon>
+              </slot-leading>
+            </slate-app-bar>
+            <verticalbox padding="8" gap="8">
+              <slate-text-field id="search" label="" placeholder="Search widgets"></slate-text-field>
+            </verticalbox>
+            <scrollbox fill padding="0 8 8" drag-scroll>
+              <slate-accordion id="tree" kind="plain" multiple></slate-accordion>
+            </scrollbox>
+          </verticalbox>
+        </border>
+        <border kind="panel" fill padding="0">
+          <scrollbox fill padding="16" drag-scroll>
+            <div class="umc-self" id="canvas"></div>
+          </scrollbox>
+        </border>
+        <border kind="panel" width="320" padding="0">
+          <scrollbox fill padding="12" drag-scroll>
+            <verticalbox gap="10">
+              <slate-text id="details-heading" kind="label"></slate-text>
+              <verticalbox gap="6" id="details"></verticalbox>
+            </verticalbox>
+          </scrollbox>
+        </border>
+      </horizontalbox>
+    </verticalbox>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

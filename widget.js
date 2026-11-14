@@ -897,4 +897,5 @@ export {
   parseAnchors,
   configure,
   getSettings,
+  OBSERVED_ATTRS,
 };

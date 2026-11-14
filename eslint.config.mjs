@@ -9,6 +9,7 @@ const globals = {
   console: "readonly",
   customElements: "readonly",
   CustomEvent: "readonly",
+  DOMParser: "readonly",
   document: "readonly",
   Element: "readonly",
   fetch: "readonly",
@@ -36,7 +37,7 @@ const globals = {
 };
 
 export default [
-  { ignores: ["demo/dist/", "demo/demo/dist/", "docs/", "packages/slatehtml-ui/dist/"] },
+  { ignores: ["demo/dist/", "demo/demo/dist/", "docs/", "packages/slatehtml-ui/dist/", "editor/dist/"] },
   js.configs.recommended,
   {
     files: ["**/*.js", "**/*.mjs", "**/*.cjs"],

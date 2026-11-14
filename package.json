@@ -46,6 +46,7 @@
     "build:ui": "npm run build -w slatehtml-ui",
     "umc:link-vscode": "node editors/vscode-umc/link.mjs",
     "umc:unlink-vscode": "node editors/vscode-umc/link.mjs --unlink",
+    "editor": "vite build --config editor/vite.config.js && electron electron/main.cjs",
     "test": "node --test --import ./test/dom-shim.mjs \"test/*.test.mjs\"",
     "lint": "eslint ."
   },
@@ -60,6 +61,7 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "electron": "^45.3.2",
     "eslint": "^10.15.0",
     "playwright": "^1.62.0",
     "prismjs": "^1.30.0",
