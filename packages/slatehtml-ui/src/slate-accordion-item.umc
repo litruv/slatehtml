@@ -1,5 +1,6 @@
 --- html ---
 <horizontalbox class="slate-accordion-item-header" gap="8" valign="center" width="100%" padding="10 12">
+  <slate-icon class="slate-accordion-item-icon" name="" size="16" hidden></slate-icon>
   <textblock class="slate-accordion-item-title" data-umc="title" fill min-width="0"></textblock>
   <slate-icon class="slate-accordion-item-chevron" name="chevron-down" size="16"></slate-icon>
 </horizontalbox>
@@ -32,6 +33,12 @@ self .slate-accordion-item-header:hover {
   background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
+self .slate-accordion-item-icon,
+self .slate-accordion-item-chevron {
+  flex: 0 0 auto; /* umc-layout-ok */
+  opacity: 0.7;
+}
+
 self .slate-accordion-item-title {
   font-size: 13px;
   font-weight: 600;
@@ -40,8 +47,6 @@ self .slate-accordion-item-title {
 }
 
 self .slate-accordion-item-chevron {
-  flex: 0 0 auto; /* umc-layout-ok */
-  opacity: 0.7;
   transition: transform 140ms ease;
 }
 
@@ -74,17 +79,18 @@ self .slate-accordion-item-header:focus-visible {
 /**
  * One expandable section in a slate-accordion.
  *
- *   <slate-accordion-item name="a" title="Account" open>
+ *   <slate-accordion-item name="a" title="Account" icon="user" open>
  *     <slate-text kind="body" text="Profile settings…"></slate-text>
  *   </slate-accordion-item>
  *
- * Attrs: name, title, open, disabled
+ * Attrs: name, title, icon, open, disabled
  */
 export default defineUmc({
   tag: "slate-accordion-item",
   attrs: {
     name: "",
     title: "",
+    icon: "",
     open: "",
     disabled: "",
   },
@@ -108,6 +114,13 @@ export default defineUmc({
     const header = el.querySelector(".slate-accordion-item-header");
     const body = el.querySelector(".slate-accordion-item-body");
 
+    const icon = el.querySelector(".slate-accordion-item-icon");
+    if (icon) {
+      const iconName = (attr("icon", "") || "").trim();
+      icon.toggleAttribute("hidden", !iconName);
+      if (iconName) icon.setAttribute("name", iconName);
+    }
+
     if (header) {
       header.setAttribute("aria-expanded", open ? "true" : "false");
       header.setAttribute("aria-disabled", disabled ? "true" : "false");
@@ -126,7 +139,7 @@ export default defineUmc({
 
 --- preview ---
 <verticalbox width="320" padding="12">
-  <slate-accordion-item name="one" title="Section one" open>
+  <slate-accordion-item name="one" title="Section one" icon="user" open>
     <textblock text="Expanded body copy."></textblock>
   </slate-accordion-item>
   <slate-accordion-item name="two" title="Section two">
