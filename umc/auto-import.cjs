@@ -263,7 +263,7 @@ function rewriteSelfSelectors(css, tag) {
     if (
       src.startsWith("self", i) &&
       (i === 0 || /[,>+~\s(;{]/.test(src[i - 1])) &&
-      (i + 4 >= src.length || /[\s.#:\[>+~,\])]/.test(src[i + 4]))
+      (i + 4 >= src.length || /[\s.#:>+~,\])]/.test(src[i + 4]))
     ) {
       result += tag;
       i += 4;
@@ -303,7 +303,7 @@ function matchBuiltinTypeSelector(src, i) {
   for (const tag of BARE_TAGS_SORTED) {
     if (!src.startsWith(tag, i)) continue;
     const end = i + tag.length;
-    if (end < src.length && !/[\s.#:\[>+~,\]){]/.test(src[end])) continue;
+    if (end < src.length && !/[\s.#:>+~,\]){]/.test(src[end])) continue;
     if (tag === "border" && src[end] === ":" && isBorderPropertyColon(src, end)) {
       return 0;
     }
@@ -499,7 +499,7 @@ function prefixBuiltinTagsInScript(script) {
       if (!/(^|[,\s>+~(])([a-z][a-z0-9]*)\b/.test(body)) return full;
       const hasBuiltin = BARE_TAGS_SORTED.some(
         (tag) =>
-          new RegExp(`(^|[,\s>+~(])${tag}(?=[\s.#:\\[>+~,\\])]|$)`).test(body)
+          new RegExp(`(^|[,\\s>+~(])${tag}(?=[\\s.#:\\[>+~,\\])]|$)`).test(body)
       );
       if (!hasBuiltin) return full;
       const rewritten = prefixBuiltinTagsInCss(body);
