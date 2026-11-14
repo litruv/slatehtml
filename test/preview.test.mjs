@@ -7,7 +7,7 @@
 
 import { createServer } from "node:http";
 import { readFile, access } from "node:fs/promises";
-import { constants } from "node:fs";
+import { constants, existsSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import { test } from "node:test";
 import { chromium } from "playwright";
@@ -103,7 +103,8 @@ const browser = await chromium.launch({
   })(),
 });
 
-test("preview", async (t) => {
+// Needs the sibling matrix checkout and a browser; CI has neither by default.
+test("preview", { skip: !existsSync(matrixRoot) }, async (t) => {
   const page = await browser.newPage();
 
   // --- title-bar: preview section markup + Tick animation + layout engine ---

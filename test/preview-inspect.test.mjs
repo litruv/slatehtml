@@ -2,7 +2,7 @@
  * Unit tests for preview source-line inspection helpers.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { test } from "node:test";
 import previewModule from "../editors/vscode-umc/preview.js";
@@ -79,7 +79,8 @@ test("buildPreviewHtml includes data-umc-line in stage markup", () => {
   }
 });
 
-test("buildComponentRegistry maps widget tags to source files", () => {
+// Needs the sibling matrix checkout; CI has only this repo.
+test("buildComponentRegistry maps widget tags to source files", { skip: !existsSync(matrixRoot) }, () => {
   const scopeFile = resolve(matrixRoot, "widgets/matrix/matrix-scope.umc");
   const source = readFileSync(scopeFile, "utf8");
   const html = buildPreviewHtml({
