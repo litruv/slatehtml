@@ -74,7 +74,7 @@ export const HUB_PREVIEWS = {
   progressbar: `<progressbar percent="62" width="120"></progressbar>`,
   "leaf-slider": `<slider value="0.55" width="120"></slider>`,
   editabletext: `<editabletext text="Edit me" width="120"></editabletext>`,
-  "leaf-image": `<image src="https://picsum.photos/seed/hub-leaf/96/56" width="96" height="56"></image>`,
+  "leaf-image": `<image src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='56'%3E%3Crect width='96' height='56' fill='%236b7280'/%3E%3Ccircle cx='34' cy='20' r='9' fill='%23a78bfa'/%3E%3Cpath d='M14 46 L36 28 L50 38 L66 22 L82 46 Z' fill='%235b6270'/%3E%3C/svg%3E" width="96" height="56"></image>`,
 
   // Input
   button: `<slate-button text="Button"></slate-button>`,
@@ -216,12 +216,12 @@ export const HUB_PREVIEWS = {
   site="example.com"
   compact
 ></slate-rich-link>`,
-  image: `<slate-image src="https://picsum.photos/seed/hub-img/96/56" width="96" height="56"></slate-image>`,
+  image: `<slate-image src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='56'%3E%3Crect width='96' height='56' fill='%233b3d44'/%3E%3Ccircle cx='34' cy='20' r='9' fill='%23a78bfa'/%3E%3Cpath d='M14 46 L36 28 L50 38 L66 22 L82 46 Z' fill='%236b7280'/%3E%3C/svg%3E" width="96" height="56"></slate-image>`,
   "image-list": `<slate-image-list variant="quilted" cols="4" row-height="28" gap="2" width="120">
-  <slate-image-list-item src="https://picsum.photos/seed/hub-il1/80/80" cols="2" rows="2"></slate-image-list-item>
-  <slate-image-list-item src="https://picsum.photos/seed/hub-il2/40/40"></slate-image-list-item>
-  <slate-image-list-item src="https://picsum.photos/seed/hub-il3/40/40"></slate-image-list-item>
-  <slate-image-list-item src="https://picsum.photos/seed/hub-il4/80/40" cols="2"></slate-image-list-item>
+  <slate-image-list-item src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23a78bfa'/%3E%3C/svg%3E" cols="2" rows="2"></slate-image-list-item>
+  <slate-image-list-item src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%236b7280'/%3E%3C/svg%3E"></slate-image-list-item>
+  <slate-image-list-item src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%235b6270'/%3E%3C/svg%3E"></slate-image-list-item>
+  <slate-image-list-item src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Crect width='80' height='40' fill='%238b7cf0'/%3E%3C/svg%3E" cols="2"></slate-image-list-item>
 </slate-image-list>`,
   media: `<border kind="panel" padding="0" width="96" height="56">
   <overlay fill>
@@ -239,7 +239,7 @@ export const HUB_PREVIEWS = {
 </popup-anchor>`,
   shadowbox: `<border kind="panel" padding="0" width="96" height="56">
   <overlay fill>
-    <slate-image src="https://picsum.photos/seed/hub-sb/96/56" width="96" height="56" anchors="fill"></slate-image>
+    <slate-image src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='56'%3E%3Crect width='96' height='56' fill='%235b6270'/%3E%3Cpath d='M14 46 L36 28 L50 38 L66 22 L82 46 Z' fill='%236b7280'/%3E%3C/svg%3E" width="96" height="56" anchors="fill"></slate-image>
     <slate-icon name="expand" size="20" halign="center" valign="center"></slate-icon>
   </overlay>
 </border>`,
