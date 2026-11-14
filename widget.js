@@ -669,7 +669,7 @@ function applyScaleBox(el) {
     }
 
     el.style.removeProperty("height");
-    let s = 1;
+    let s;
     if (mode === "fill") s = Math.max(sx, sy || sx);
     else if (mode === "stretch") {
       child.style.transformOrigin = "";

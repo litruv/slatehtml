@@ -629,7 +629,7 @@ function parseEventsMap(source) {
 function workspaceCatalog(document) {
   const catalog = {};
   const dir = path.dirname(document.fileName);
-  let files = [];
+  let files;
   try {
     files = fs.readdirSync(dir).filter((name) => name.endsWith(".umc"));
   } catch {

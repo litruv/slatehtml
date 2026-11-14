@@ -24,8 +24,6 @@
       .toLowerCase()
       .replace(/^umc-/, "");
 
-  const isWidgetTag = (tag) => Boolean(tag && COMPONENTS[tag]);
-
   const findComponent = (target) => {
     let el = target instanceof Element ? target : null;
     while (el && el !== stage) {
@@ -45,7 +43,7 @@
     if (face) return face;
     try {
       if (getComputedStyle(host).display !== "contents") return host;
-    } catch (_) {}
+    } catch { /* non-element host */ }
     return host.firstElementChild ?? host;
   };
 

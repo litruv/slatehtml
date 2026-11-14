@@ -314,7 +314,7 @@ export function resolveSlotTarget(host, name = "default") {
     const hasDataSlot = node.hasAttribute("data-slot");
     const hasContent = node.hasAttribute("data-content");
 
-    let slotName = "default";
+    let slotName;
     if (isNamed) {
       slotName = (node.getAttribute("name") || "default").toLowerCase() || "default";
     } else if (hasDataSlot) {

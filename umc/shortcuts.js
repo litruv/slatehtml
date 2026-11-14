@@ -97,7 +97,7 @@ export function parseShortcut(spec) {
     return out.key ? out : null;
   }
 
-  const parts = raw.split(/[+\-]/).map((p) => p.trim()).filter(Boolean);
+  const parts = raw.split(/[+-]/).map((p) => p.trim()).filter(Boolean);
   if (!parts.length) return null;
 
   for (const part of parts) {
@@ -148,7 +148,7 @@ export function formatShortcut(spec, mac = isMacHost()) {
       .replace(/\s+/g, "");
   }
 
-  const parts = raw.split(/[+\-]/).map((p) => p.trim()).filter(Boolean);
+  const parts = raw.split(/[+-]/).map((p) => p.trim()).filter(Boolean);
   if (!parts.length) return raw;
 
   const macMap = {

@@ -179,10 +179,6 @@ function offsetAt(state, items, key, index) {
   return buildPrefix(state, items, key)[index];
 }
 
-function totalHeight(state, items, key) {
-  return buildPrefix(state, items, key)[items.length];
-}
-
 /** Combined height of the first `count` items (prefix sum at index). */
 export function virtualPrefixHeight(state, items, key, count) {
   const list = items ?? [];

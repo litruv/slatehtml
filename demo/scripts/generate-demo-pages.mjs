@@ -53,7 +53,7 @@ ${html}
           </wrapbox>`;
 }
 
-function page({ title, hint, events = "", mount = "verticalbox", label, variants }) {
+function page({ title, hint, events = "", mount = "verticalbox", variants }) {
   const blocks = variants
     .map((v) =>
       exampleBlock({

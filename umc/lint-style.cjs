@@ -138,7 +138,6 @@ function lintUmcStyle(css, opts = {}) {
       if (inComment) {
         const end = line.indexOf("*/", j);
         if (end < 0) {
-          j = line.length;
           break;
         }
         inComment = false;
@@ -152,7 +151,6 @@ function lintUmcStyle(css, opts = {}) {
         if (OK_RE.test(block)) cleaned += " /* umc-layout-ok */ ";
         if (end < 0) {
           inComment = true;
-          j = line.length;
           break;
         }
         j = end + 2;
@@ -193,7 +191,7 @@ function lintUmcStyle(css, opts = {}) {
       if (prop.startsWith("--")) continue;
 
       const p = prop.toLowerCase();
-      let bad = false;
+      let bad;
       if (p === "display") bad = displayForbidden(value);
       else bad = isForbiddenProp(p);
 
