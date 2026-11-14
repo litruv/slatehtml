@@ -263,7 +263,7 @@ function rewriteSelfSelectors(css, tag) {
     if (
       src.startsWith("self", i) &&
       (i === 0 || /[,>+~\s(;{]/.test(src[i - 1])) &&
-      (i + 4 >= src.length || /[\s.#:>+~,\])]/.test(src[i + 4]))
+      (i + 4 >= src.length || /[\s.#:>+~,\])[]/.test(src[i + 4]))
     ) {
       result += tag;
       i += 4;
