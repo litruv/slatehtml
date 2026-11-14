@@ -1,5 +1,8 @@
 # SlateHTML
 
+[![Test](https://github.com/litruv/slatehtml/actions/workflows/test.yml/badge.svg)](https://github.com/litruv/slatehtml/actions/workflows/test.yml)
+[![Build docs](https://github.com/litruv/slatehtml/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/litruv/slatehtml/actions/workflows/deploy-docs.yml)
+
 UMG-style layout panels and UserWidgets for the web. Plain HTML tags for layout (`verticalbox`, `overlay`, `canvaspanel`, …), plus `.umc` single-file components with Unreal-like lifecycle, events, and a Vite plugin. No React/Vue required, custom elements in the light DOM.
 
 ## Documentation
