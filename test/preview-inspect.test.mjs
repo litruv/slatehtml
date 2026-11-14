@@ -4,6 +4,7 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { test } from "node:test";
 import previewModule from "../editors/vscode-umc/preview.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -16,18 +17,6 @@ const {
   annotateHtmlWithSourceLines,
   buildPreviewHtml,
 } = previewModule;
-
-const failures = [];
-
-function check(label, fn) {
-  try {
-    fn();
-    console.log(`  ok   ${label}`);
-  } catch (err) {
-    failures.push(`${label}: ${err.message}`);
-    console.log(`  FAIL ${label}`);
-  }
-}
 
 const sample = `--- html ---
 <verticalbox></verticalbox>
@@ -45,7 +34,7 @@ export default defineUmc({ tag: "demo-widget" });
 </verticalbox>
 `;
 
-check("parseUmcSource records preview line range", () => {
+test("parseUmcSource records preview line range", () => {
   const sections = parseUmcSource(sample);
   if (sections.preview.startLine !== 11) {
     throw new Error(`expected startLine 11, got ${sections.preview.startLine}`);
@@ -55,14 +44,14 @@ check("parseUmcSource records preview line range", () => {
   }
 });
 
-check("previewLineRange returns 1-based inclusive bounds", () => {
+test("previewLineRange returns 1-based inclusive bounds", () => {
   const range = previewLineRange(sample);
   if (!range || range.start !== 11 || range.end !== 15) {
     throw new Error(`unexpected range: ${JSON.stringify(range)}`);
   }
 });
 
-check("annotateHtmlWithSourceLines stamps opening tags", () => {
+test("annotateHtmlWithSourceLines stamps opening tags", () => {
   const html = `<verticalbox gap="8">
   <slate-button text="One"></slate-button>
 </verticalbox>`;
@@ -71,7 +60,7 @@ check("annotateHtmlWithSourceLines stamps opening tags", () => {
   if (!out.includes('data-umc-line="12"')) throw new Error("missing line 12 on slate-button");
 });
 
-check("buildPreviewHtml includes data-umc-line in stage markup", () => {
+test("buildPreviewHtml includes data-umc-line in stage markup", () => {
   const html = buildPreviewHtml({
     file: resolve(uiSrc, "slate-button.umc"),
     source: sample,
@@ -90,7 +79,7 @@ check("buildPreviewHtml includes data-umc-line in stage markup", () => {
   }
 });
 
-check("buildComponentRegistry maps widget tags to source files", () => {
+test("buildComponentRegistry maps widget tags to source files", () => {
   const scopeFile = resolve(matrixRoot, "widgets/matrix/matrix-scope.umc");
   const source = readFileSync(scopeFile, "utf8");
   const html = buildPreviewHtml({
@@ -118,11 +107,3 @@ check("buildComponentRegistry maps widget tags to source files", () => {
     throw new Error("expected matrix-encrypt-attachment preview stub in import map");
   }
 });
-
-if (failures.length) {
-  console.log("\nFAIL");
-  for (const f of failures) console.log(` - ${f}`);
-  process.exit(1);
-}
-
-console.log("\nPASS");

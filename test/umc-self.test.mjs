@@ -1,12 +1,9 @@
 /**
  * collectSelf / api.self: owned ref attrs only (nested UserWidgets opaque).
  */
+import { test } from "node:test";
+import assert from "node:assert";
 import { collectSelf, bump, e } from "../umc/runtime.js";
-
-function assert(cond, label) {
-  if (!cond) throw new Error(label);
-  console.log(`  ok   ${label}`);
-}
 
 /** Minimal tree for ownsNode + querySelectorAll("[ref]"). */
 function node(localName, { ref = "", text = "" } = {}, children = []) {
@@ -43,14 +40,16 @@ const dup1 = node("span", { ref: "dup", text: "first" });
 const dup2 = node("span", { ref: "dup", text: "second" });
 const host = node("self-host", {}, [show, toast, child, dup1, dup2]);
 
-const self = collectSelf(host);
-assert(self.show === show, "self.show");
-assert(self.toast === toast, "self.toast");
-assert(self.inner == null, "nested UserWidget refs stay private");
-assert(self.dup === dup1, "duplicate ref: first wins");
-assert(Object.keys(self).sort().join(",") === "dup,show,toast", "only owned refs");
+test("collectSelf", () => {
+  const self = collectSelf(host);
+  assert.ok(self.show === show, "self.show");
+  assert.ok(self.toast === toast, "self.toast");
+  assert.ok(self.inner == null, "nested UserWidget refs stay private");
+  assert.ok(self.dup === dup1, "duplicate ref: first wins");
+  assert.ok(Object.keys(self).sort().join(",") === "dup,show,toast", "only owned refs");
+});
 
-{
+test("bump", () => {
   const flags = new Set();
   const target = {
     hasAttribute: (n) => flags.has(n),
@@ -58,13 +57,13 @@ assert(Object.keys(self).sort().join(",") === "dup,show,toast", "only owned refs
     removeAttribute: (n) => flags.delete(n),
   };
   bump(target);
-  assert(flags.has("open"), "bump sets open");
+  assert.ok(flags.has("open"), "bump sets open");
   bump(target);
-  assert(flags.has("open"), "bump again still open (rising edge)");
-}
+  assert.ok(flags.has("open"), "bump again still open (rising edge)");
+});
 
-assert(e.clicked === "clicked", "e.clicked");
-assert(e.closed === "closed", "e.closed");
-assert(Object.isFrozen(e), "e is frozen");
-
-console.log("umc-self: all checks passed");
+test("e", () => {
+  assert.ok(e.clicked === "clicked", "e.clicked");
+  assert.ok(e.closed === "closed", "e.closed");
+  assert.ok(Object.isFrozen(e), "e is frozen");
+});

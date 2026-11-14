@@ -3,23 +3,12 @@
  */
 
 import { createRequire } from "node:module";
+import { test } from "node:test";
 
 const require = createRequire(import.meta.url);
 const { lintUmcStyle, assertUmcStyle } = require("../umc/lint-style.cjs");
 
-const failures = [];
-
-function check(label, fn) {
-  try {
-    fn();
-    console.log(`  ok   ${label}`);
-  } catch (err) {
-    failures.push(`${label}: ${err.message}`);
-    console.log(`  FAIL ${label}`);
-  }
-}
-
-check("allows appearance + display:contents/none/block", () => {
+test("allows appearance + display:contents/none/block", () => {
   const errors = lintUmcStyle(`
 self {
   display: contents;
@@ -32,7 +21,7 @@ self {
   if (errors.length) throw new Error(JSON.stringify(errors));
 });
 
-check("flags display:flex / inline-flex / grid", () => {
+test("flags display:flex / inline-flex / grid", () => {
   const errors = lintUmcStyle(`
 self { display: flex; }
 .a { display: inline-flex; }
@@ -41,7 +30,7 @@ self { display: flex; }
   if (errors.length !== 3) throw new Error(`expected 3 got ${errors.length}: ${JSON.stringify(errors)}`);
 });
 
-check("flags flex / align / position / z-index / inset edges", () => {
+test("flags flex / align / position / z-index / inset edges", () => {
   const errors = lintUmcStyle(`
 .x {
   flex: 1;
@@ -57,7 +46,7 @@ check("flags flex / align / position / z-index / inset edges", () => {
   if (errors.length < 8) throw new Error(`expected >=8 got ${errors.length}: ${JSON.stringify(errors)}`);
 });
 
-check("umc-layout-ok on the same line allows the declaration", () => {
+test("umc-layout-ok on the same line allows the declaration", () => {
   const errors = lintUmcStyle(`
 self {
   display: inline-flex; /* umc-layout-ok */
@@ -71,7 +60,7 @@ self {
   }
 });
 
-check("ignores custom properties and background-position", () => {
+test("ignores custom properties and background-position", () => {
   const errors = lintUmcStyle(`
 .x {
   --flex: 1;
@@ -82,7 +71,7 @@ check("ignores custom properties and background-position", () => {
   if (errors.length) throw new Error(JSON.stringify(errors));
 });
 
-check("assertUmcStyle throws a build-style error", () => {
+test("assertUmcStyle throws a build-style error", () => {
   let threw = false;
   try {
     assertUmcStyle(".x { position: fixed; }", { file: "widget.umc", lineOffset: 10 });
@@ -93,10 +82,3 @@ check("assertUmcStyle throws a build-style error", () => {
   }
   if (!threw) throw new Error("expected throw");
 });
-
-if (failures.length) {
-  console.error("\nUMC style lint tests failed:\n" + failures.map((f) => `  - ${f}`).join("\n"));
-  process.exit(1);
-}
-
-console.log("\nAll UMC style lint tests passed.");

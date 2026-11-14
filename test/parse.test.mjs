@@ -1,3 +1,5 @@
+import { test } from "node:test";
+import assert from "node:assert";
 import { parseUmc } from "../umc/parse.js";
 
 // Run with: npm test
@@ -39,20 +41,18 @@ export default defineUmc({ tag: "slate-text" });
 
 const parentAngle = parseUmc(`@parent <border>\n--- script ---\nexport default defineUmc({ tag: "x" });\n`);
 
-const ok =
-  inline.html.value.includes("<div>hi</div>") &&
-  inline.style.value.includes("color: red") &&
-  inline.script.value.includes("defineUmc") &&
-  inline.preview.value.includes('<x label="demo">') &&
-  inline.parent === "" &&
-  linked.preview.value === "" &&
-  linked.html.kind === "link" &&
-  linked.html.value === "./a.html" &&
-  linked.style.value === "./a.css" &&
-  linked.script.value === "./a.js" &&
-  parented.parent === "textblock" &&
-  parented.style.value.includes("color: red") &&
-  parentAngle.parent === "border";
-
-console.log(ok ? "parse PASS" : "parse FAIL");
-process.exit(ok ? 0 : 1);
+test("parse", () => {
+  assert.ok(inline.html.value.includes("<div>hi</div>"));
+  assert.ok(inline.style.value.includes("color: red"));
+  assert.ok(inline.script.value.includes("defineUmc"));
+  assert.ok(inline.preview.value.includes('<x label="demo">'));
+  assert.ok(inline.parent === "");
+  assert.ok(linked.preview.value === "");
+  assert.ok(linked.html.kind === "link");
+  assert.ok(linked.html.value === "./a.html");
+  assert.ok(linked.style.value === "./a.css");
+  assert.ok(linked.script.value === "./a.js");
+  assert.ok(parented.parent === "textblock");
+  assert.ok(parented.style.value.includes("color: red"));
+  assert.ok(parentAngle.parent === "border");
+});
