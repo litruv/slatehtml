@@ -652,12 +652,15 @@ function applyScaleBox(el) {
 
     // Down-only, centered in the box (docs live previews / hub tiles).
     if (mode === "down-center" || mode === "scale-down-center") {
-      const s = ch ? Math.min(1, sx, sy) : Math.min(1, sx);
-      child.style.transformOrigin = "center center";
-      child.style.transform = s === 1 ? "" : `scale(${s})`;
       // Auto-height boxes shrink-wrap the scaled visual; explicit height/fill
       // keeps the slot (hub tiles) so place-items:center can center in it.
-      if (!el.hasAttribute("height") && !el.hasAttribute("fill")) {
+      const contentSized = !el.hasAttribute("height") && !el.hasAttribute("fill");
+      // For a content-sized box, `ch` is this function's own previous output,
+      // so height scaling has no fixed point. Scale by width only.
+      const s = contentSized ? Math.min(1, sx) : ch ? Math.min(1, sx, sy) : Math.min(1, sx);
+      child.style.transformOrigin = "center center";
+      child.style.transform = s === 1 ? "" : `scale(${s})`;
+      if (contentSized) {
         el.style.height = `${Math.max(1, Math.round(bh * s))}px`;
       } else {
         el.style.removeProperty("height");
