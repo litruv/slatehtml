@@ -131,7 +131,7 @@ self[open] > .shadowbox-root {
 --- script ---
 /**
  * Fullscreen lightbox for image / video (mxc → blob like matrix-image).
- * Images: scroll-wheel zoom, click to zoom in / reset, drag to pan when zoomed.
+ * Images: scroll-wheel zoom, pinch zoom, click to zoom in / reset, drag to pan when zoomed.
  *
  * Prefer a trigger that owns its box:
  *   <shadowbox-button src="…" title="photo" text="Open"></shadowbox-button>
@@ -241,6 +241,8 @@ function applyImageZoom(el) {
 function resetImageZoom(el) {
   el._imgZoom = { scale: 1, tx: 0, ty: 0 };
   el._imgDrag = null;
+  el._imgPinch = null;
+  el._imgPointers?.clear?.();
   imageFrame(el)?.removeAttribute("dragging");
   applyImageZoom(el);
 }
@@ -258,6 +260,73 @@ function zoomAround(el, px, py, newScale) {
   z.tx = px - ix * z.scale;
   z.ty = py - iy * z.scale;
   applyImageZoom(el);
+}
+
+function pointerList(el) {
+  if (!el._imgPointers) el._imgPointers = new Map();
+  return el._imgPointers;
+}
+
+function beginPinch(el, frame) {
+  const pts = [...pointerList(el).values()];
+  if (pts.length < 2) return;
+  const [a, b] = pts;
+  const z = imageZoomState(el);
+  const dist = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  el._imgPinch = {
+    startDist: dist,
+    startScale: z.scale,
+    startTx: z.tx,
+    startTy: z.ty,
+    startMidX: (a.x + b.x) / 2,
+    startMidY: (a.y + b.y) / 2,
+  };
+  el._imgDrag = { moved: true };
+  frame.toggleAttribute("dragging", true);
+}
+
+function updatePinch(el, frame) {
+  const pinch = el._imgPinch;
+  const pts = [...pointerList(el).values()];
+  if (!pinch || pts.length < 2) return;
+  const [a, b] = pts;
+  const dist = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  const midX = (a.x + b.x) / 2;
+  const midY = (a.y + b.y) / 2;
+  const startMid = framePoint(frame, pinch.startMidX, pinch.startMidY);
+  const curMid = framePoint(frame, midX, midY);
+  const ix = (startMid.x - pinch.startTx) / pinch.startScale;
+  const iy = (startMid.y - pinch.startTy) / pinch.startScale;
+  const z = imageZoomState(el);
+  z.scale = Math.min(
+    ZOOM_MAX,
+    Math.max(ZOOM_MIN, pinch.startScale * (dist / pinch.startDist))
+  );
+  z.tx = curMid.x - ix * z.scale;
+  z.ty = curMid.y - iy * z.scale;
+  applyImageZoom(el);
+}
+
+function endPinch(el, frame) {
+  el._imgPinch = null;
+  const pts = [...pointerList(el).entries()];
+  if (pts.length === 1) {
+    const z = imageZoomState(el);
+    if (z.scale > 1.01) {
+      const [id, p] = pts[0];
+      el._imgDrag = {
+        id,
+        x: p.x,
+        y: p.y,
+        tx: z.tx,
+        ty: z.ty,
+        moved: true,
+      };
+      frame.toggleAttribute("dragging", true);
+      return;
+    }
+  }
+  if (!pts.length) frame.removeAttribute("dragging");
 }
 
 function bindImageFit(el) {
@@ -314,6 +383,18 @@ function bindImageZoom(el) {
   frame.addEventListener("pointerdown", (event) => {
     if (!el.hasAttribute("open") || el.getAttribute("kind") === "video") return;
     if (event.button !== 0) return;
+    const img = shadowImage(el);
+    if (!img?.src) return;
+
+    const pointers = pointerList(el);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    frame.setPointerCapture(event.pointerId);
+
+    if (pointers.size >= 2) {
+      beginPinch(el, frame);
+      return;
+    }
+
     const z = imageZoomState(el);
     if (z.scale <= 1.01) return;
     el._imgDrag = {
@@ -324,11 +405,20 @@ function bindImageZoom(el) {
       ty: z.ty,
       moved: false,
     };
-    frame.setPointerCapture(event.pointerId);
     frame.toggleAttribute("dragging", true);
   });
 
   frame.addEventListener("pointermove", (event) => {
+    const pointers = pointerList(el);
+    if (!pointers.has(event.pointerId)) return;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (el._imgPinch || pointers.size >= 2) {
+      if (!el._imgPinch) beginPinch(el, frame);
+      updatePinch(el, frame);
+      return;
+    }
+
     const drag = el._imgDrag;
     if (!drag || drag.id !== event.pointerId) return;
     const dx = event.clientX - drag.x;
@@ -340,16 +430,28 @@ function bindImageZoom(el) {
     applyImageZoom(el);
   });
 
-  const endDrag = (event) => {
-    const drag = el._imgDrag;
-    if (!drag || drag.id !== event.pointerId) return;
+  const endPointer = (event) => {
+    const pointers = pointerList(el);
+    if (!pointers.has(event.pointerId)) return;
+    pointers.delete(event.pointerId);
     frame.releasePointerCapture?.(event.pointerId);
+
+    if (el._imgPinch) {
+      endPinch(el, frame);
+      return;
+    }
+
+    const drag = el._imgDrag;
+    if (!drag || drag.id !== event.pointerId) {
+      if (!pointers.size) frame.removeAttribute("dragging");
+      return;
+    }
     frame.removeAttribute("dragging");
     if (!drag.moved) el._imgDrag = null;
     else el._imgDrag = { moved: true };
   };
-  frame.addEventListener("pointerup", endDrag);
-  frame.addEventListener("pointercancel", endDrag);
+  frame.addEventListener("pointerup", endPointer);
+  frame.addEventListener("pointercancel", endPointer);
 }
 
 function closeBox(el, api) {
