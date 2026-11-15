@@ -3,7 +3,7 @@
  */
 
 import { test } from "node:test";
-import { dropIndex, dropZone, splitOrientation } from "../packages/slatehtml-ui/src/dock-core.js";
+import { dropIndex, dropZone, splitOrientation, splitWeights } from "../packages/slatehtml-ui/src/dock-core.js";
 
 const cell = { left: 0, top: 0, right: 200, bottom: 100, width: 200, height: 100 };
 
@@ -43,6 +43,18 @@ test("splitOrientation: left/right are horizontal, top/bottom vertical", () => {
   if (splitOrientation("right") !== "horizontal") throw new Error("right");
   if (splitOrientation("top") !== "vertical") throw new Error("top");
   if (splitOrientation("bottom") !== "vertical") throw new Error("bottom");
+});
+
+test("splitWeights: the pair keeps its combined weight", () => {
+  const even = splitWeights(100, 200, 6);
+  if (even[0] !== 3 || even[1] !== 3) throw new Error(JSON.stringify(even));
+  // Cell floor at MIN_CELL_PX: a 40px cell in a 600px pair.
+  const floor = splitWeights(40, 600, 8.8);
+  if (floor[0] !== 0.59 || floor[1] !== 8.21) throw new Error(JSON.stringify(floor));
+  // Rounding on the first weight must not lose the pair total.
+  const odd = splitWeights(101, 300, 1);
+  if (Math.round((odd[0] + odd[1]) * 100) !== 100) throw new Error(JSON.stringify(odd));
+  if (splitWeights(0, 0, 2)[0] !== 1) throw new Error("zero total");
 });
 
 test("dropIndex: rows split at their midpoints", () => {

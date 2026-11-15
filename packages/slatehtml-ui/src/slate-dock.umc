@@ -66,7 +66,7 @@ self[orientation="vertical"] > .slate-dock-divider {
 
 --- script ---
 import { create } from "slatehtml/umc";
-import { dropIndex, dropZone, splitOrientation } from "./dock-core.js";
+import { dropIndex, dropZone, splitOrientation, splitWeights } from "./dock-core.js";
 
 /**
  * Dockable cells: light children are slate-tabs groups or nested slate-dock.
@@ -400,10 +400,11 @@ export default defineUmc({
       if (total < MIN_CELL_PX * 2) return;
       const first = size(a);
       const start = vertical ? event.clientY : event.clientX;
-      const weight = (px) => String(Math.round((px / total) * 200) / 100);
+      const pair = (Number(a.getAttribute("fill")) || 1) + (Number(b.getAttribute("fill")) || 1);
       const set = (px) => {
-        a.setAttribute("fill", weight(px));
-        b.setAttribute("fill", weight(total - px));
+        const [wa, wb] = splitWeights(px, total, pair);
+        a.setAttribute("fill", wa);
+        b.setAttribute("fill", wb);
       };
       event.preventDefault();
       divider.setPointerCapture(event.pointerId);

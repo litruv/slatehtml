@@ -32,6 +32,16 @@ export function splitOrientation(edge) {
   return edge === "left" || edge === "right" ? "horizontal" : "vertical";
 }
 
+/**
+ * Divider drag: the pair keeps its combined weight `pair`, split at `px` of `total`.
+ * Rounding is applied to the first weight so the two still sum to `pair`.
+ */
+export function splitWeights(px, total, pair) {
+  if (total <= 0) return [pair / 2, pair / 2];
+  const a = Math.round((px / total) * pair * 100) / 100;
+  return [a, Math.round((pair - a) * 100) / 100];
+}
+
 /** rows are { left, right } boxes: index is the count of rows whose midpoint is left of the point. */
 export function dropIndex(rows, point) {
   let index = 0;
