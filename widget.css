@@ -314,6 +314,45 @@
   overflow-y: auto;
 }
 
+/* Single-axis scrollboxes show no scrollbar: plain wheel drives the axis and the
+   edge shadow below is the affordance that content continues off-screen. */
+:is(scrollbox, umc-scrollbox)[orientation="horizontal"],
+:is(scrollbox, umc-scrollbox)[orientation="vertical"] {
+  scrollbar-width: none;
+}
+
+:is(scrollbox, umc-scrollbox)[orientation="horizontal"]::-webkit-scrollbar,
+:is(scrollbox, umc-scrollbox)[orientation="vertical"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* The gradient is a background layer, so background-attachment: scroll keeps it
+   pinned to the visible box while the content scrolls under it. */
+:is(scrollbox, umc-scrollbox).umc-scroll-shadow-start {
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.45), transparent);
+  background-position: left;
+  background-size: 24px 100%;
+  background-repeat: no-repeat;
+}
+
+:is(scrollbox, umc-scrollbox).umc-scroll-shadow-end {
+  background-image: linear-gradient(to left, rgba(0, 0, 0, 0.45), transparent);
+  background-position: right;
+  background-size: 24px 100%;
+  background-repeat: no-repeat;
+}
+
+/* Both edges need the two layers declared together: background-image is one
+   property, so separate rules would overwrite each other. */
+:is(scrollbox, umc-scrollbox).umc-scroll-shadow-start.umc-scroll-shadow-end {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.45), transparent),
+    linear-gradient(to left, rgba(0, 0, 0, 0.45), transparent);
+  background-position: left, right;
+  background-size: 24px 100%, 24px 100%;
+  background-repeat: no-repeat;
+}
+
 /* Click-drag scroll (configure({ dragScroll: true }) or drag-scroll attr).
    No grab cursor when idle, text keeps the I-beam; grabbing only while dragging. */
 :is(scrollbox, umc-scrollbox).umc-drag-scrolling {

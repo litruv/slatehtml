@@ -748,6 +748,46 @@ function bindPanelSize(el) {
   panelSizeObserver()?.observe(el);
 }
 
+/** Wheel notches read too small against native scrolling on a single-axis box. */
+const WHEEL_SCALE = 2;
+const LINE_PX = 16;
+
+/** Single-axis scrollboxes: plain wheel drives that axis (no shift), the
+ * scrollbar is hidden, and an edge shadow shows content past the visible edge. */
+function applyScrollbox(el) {
+  const axis = el.getAttribute("orientation");
+  if (axis !== "horizontal" && axis !== "vertical") return;
+  if (el._scrollboxBound) return;
+  el._scrollboxBound = true;
+
+  const pos = axis === "horizontal" ? "scrollLeft" : "scrollTop";
+  const extent = axis === "horizontal" ? "scrollWidth" : "scrollHeight";
+  const client = axis === "horizontal" ? "clientWidth" : "clientHeight";
+
+  const paint = () => {
+    const overflow = el[extent] - el[client];
+    el.classList.toggle("umc-scroll-shadow-start", el[pos] > 0);
+    el.classList.toggle("umc-scroll-shadow-end", el[pos] < overflow - 1);
+  };
+
+  el.addEventListener("scroll", paint);
+  // Layout changes move the visible edge, so re-check after a resize.
+  el.addEventListener("sizechanged", paint);
+  el.addEventListener(
+    "wheel",
+    (event) => {
+      if (el[extent] <= el[client] + 1) return;
+      const raw = axis === "horizontal" ? event.deltaX || event.deltaY : event.deltaY || event.deltaX;
+      if (!raw) return;
+      const unit = event.deltaMode === 1 ? LINE_PX : event.deltaMode === 2 ? el[client] : 1;
+      event.preventDefault();
+      el[pos] += raw * unit * WHEEL_SCALE;
+    },
+    { passive: false }
+  );
+  paint();
+}
+
 function enhance(el) {
   if (!(el instanceof Element)) return;
   applySizeAttrs(el);
@@ -762,6 +802,7 @@ function enhance(el) {
   applyBackgroundBlur(el);
   applyScaleBox(el);
   if (panelRole(el) === "scrollbox") {
+    applyScrollbox(el);
     bindDragScroll(el, { enabled: dragScrollEnabled });
   }
 }
