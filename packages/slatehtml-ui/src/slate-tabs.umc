@@ -57,6 +57,15 @@ self .slate-tabs-tab:focus-visible {
   outline-offset: 2px;
 }
 
+self .slate-tabs-close {
+  opacity: 0.6;
+}
+
+self .slate-tabs-tab:hover .slate-tabs-close,
+self .slate-tabs-tab[aria-selected="true"] .slate-tabs-close {
+  opacity: 1;
+}
+
 --- script ---
 import { create } from "slatehtml/umc";
 import { enhance } from "slatehtml/widget.js";
@@ -74,6 +83,8 @@ import { parseOptions, selectableOptions } from "./input/parse-options.js";
  * `page="…"`. Selection is the host `active` attr (same as widgetswitcher).
  *
  * Events: selectionchanged { value, label, index }
+ *         tabclosed { value, index } — only with the `closable` attr, which adds an
+ *         x button to each row. Closing is the host's job: the widget does not remove rows.
  *
  * Rows are draggable for slate-dock, but only child-based pages can move: the
  * `tabs` attr overrides host children, so a group using it is not draggable.
@@ -100,8 +111,10 @@ function resolveTabs(el, attr) {
   return pagesFromHost(el);
 }
 
-function tabRow(option, selected) {
+function tabRow(option, selected, closable, draggable) {
   const on = option.value === selected;
+  const children = [{ tag: "textblock", text: option.label }];
+  if (closable) children.push({ tag: "slate-icon", class: "slate-tabs-close", name: "x", size: "12" });
   return {
     tag: "horizontalbox",
     class: "slate-tabs-tab",
@@ -110,10 +123,11 @@ function tabRow(option, selected) {
     "aria-selected": on ? "true" : "false",
     "data-value": option.value,
     tabindex: on ? "0" : "-1",
-    draggable: "true",
+    draggable: draggable ? "true" : "false",
     padding: "8 12",
     valign: "center",
-    children: [{ tag: "textblock", text: option.label }],
+    gap: closable ? "6" : "0",
+    children,
   };
 }
 
@@ -164,7 +178,9 @@ function renderStrip(el, api) {
     if (el._tabsKey !== key) {
       el._tabsKey = key;
       list.replaceChildren(
-        ...tabs.map((option) => create(tabRow(option, selected))).filter(Boolean)
+        ...tabs.map((option) =>
+          create(tabRow(option, selected, el.hasAttribute("closable"), !attr("tabs")))
+        ).filter(Boolean)
       );
     } else {
       for (const tab of list.querySelectorAll(".slate-tabs-tab")) {
@@ -183,6 +199,7 @@ export default defineUmc({
   attrs: {
     tabs: "",
     active: "",
+    closable: "",
   },
 
   Construct(el, api) {
@@ -200,7 +217,12 @@ export default defineUmc({
       const tab = e.target?.closest?.(".slate-tabs-tab");
       if (!tab || !el.contains(tab)) return;
       const value = tab.getAttribute("data-value");
-      if (value != null) select(el, api, value);
+      if (value == null) return;
+      if (el.hasAttribute("closable") && e.target?.closest?.(".slate-tabs-close")) {
+        api.emit("tabclosed", { value, index: resolveTabs(el, api.attr).findIndex((t) => t.value === value) });
+        return;
+      }
+      select(el, api, value);
     });
 
     el.addEventListener("keydown", (e) => {
