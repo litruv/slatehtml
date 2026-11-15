@@ -8,7 +8,9 @@
   </head>
   <body>
     <verticalbox width="100%" height="100%" gap="0">
-      <slate-tabs id="file-tabs" width="100%" gap="0"></slate-tabs>
+      <scrollbox id="file-tabs-row" orientation="horizontal" padding="0" width="100%" drag-scroll>
+        <slate-tabs id="file-tabs" closable width="100%" gap="0"></slate-tabs>
+      </scrollbox>
       <horizontalbox id="menu-bar" gap="6" valign="center" padding="6 10" width="100%">
         <slate-menu id="menu-file" trigger="click" options="open|Open, save|Save">
           <textblock text="File"></textblock>
@@ -30,7 +32,7 @@
                   <slate-text-field id="search" label="" placeholder="Search widgets"></slate-text-field>
                 </verticalbox>
                 <scrollbox fill padding="0 8 8" drag-scroll>
-                  <slate-accordion id="tree" kind="plain" multiple></slate-accordion>
+                  <slate-accordion id="tree" class="tree" kind="plain" multiple></slate-accordion>
                 </scrollbox>
               </verticalbox>
             </border>
@@ -59,11 +61,23 @@
           </scrollbox>
         </border>
       </widgetswitcher>
-      <slate-tabs fill="1" width="100%" active="status">
+      <slate-divider class="resizable" id="bottom-divider"></slate-divider>
+      <slate-tabs id="bottom-panel" height="160" width="100%" tabs="status|Status, content|Content Browser" active="status">
         <border kind="panel" page="status" label="Status" height="100%" padding="0">
           <horizontalbox gap="12" valign="center" padding="8 12" width="100%">
             <textblock id="file-title" text="No file"></textblock>
             <textblock id="selection" fill halign="right"></textblock>
+          </horizontalbox>
+        </border>
+        <border kind="panel" page="content" label="Content Browser" height="100%" padding="0">
+          <horizontalbox id="content-browser" fill gap="0">
+            <scrollbox id="cb-tree-panel" width="250" padding="6" drag-scroll>
+              <slate-accordion id="cb-tree" class="tree" kind="plain" multiple width="100%"></slate-accordion>
+            </scrollbox>
+            <slate-divider orientation="vertical" id="cb-divider"></slate-divider>
+            <scrollbox id="cb-files-panel" fill padding="6" drag-scroll>
+              <slate-accordion id="cb-files" class="tree" kind="plain" width="100%"></slate-accordion>
+            </scrollbox>
           </horizontalbox>
         </border>
       </slate-tabs>

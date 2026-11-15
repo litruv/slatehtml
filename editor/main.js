@@ -7,6 +7,7 @@ import { patchAttr } from "./patch.mjs";
 
 // `self` in the style section maps to the canvas wrapper.
 const SELF_CLASS = "umc-self";
+const MIN_PX = 40;
 const TAG_RE = /<([A-Za-z][\w-]*)((?:\s[^>/]*)?)(\s*\/?)>/;
 const SELF_SELECTOR_RE = /(^|[,}])\s*self\b/gm;
 
@@ -40,15 +41,24 @@ const tree = document.getElementById("tree");
 const canvas = document.getElementById("canvas");
 const details = document.getElementById("details");
 const heading = document.getElementById("details-heading");
+const content = document.getElementById("content-browser");
+const cbTreePanel = document.getElementById("cb-tree-panel");
+const cbFilesPanel = document.getElementById("cb-files-panel");
+const cbDivider = document.getElementById("cb-divider");
+const bottomPanel = document.getElementById("bottom-panel");
+const bottomDivider = document.getElementById("bottom-divider");
+const cbTree = document.getElementById("cb-tree");
+const cbFiles = document.getElementById("cb-files");
 
 if (!api) {
   heading.setAttribute("text", "The editor only runs inside Electron: npm run editor.");
 } else {
   function show(path, content, files) {
-    if (content === state.source) return;
+    const list = files || [path];
+    if (path === state.path && content === state.source && list.length === state.files.length) return;
     state.path = path;
     state.source = content;
-    state.files = files || [path];
+    state.files = list;
     render();
   }
 
@@ -63,6 +73,11 @@ if (!api) {
     if (Number.isInteger(index)) api.switchFile(index);
   });
 
+  fileTabs.addEventListener("tabclosed", (event) => {
+    const index = event.detail?.index;
+    if (Number.isInteger(index)) api.closeFile(index);
+  });
+
   document.getElementById("menu-file").addEventListener("selectionchanged", (event) => {
     const value = event.detail?.value;
     if (value === "open") api.openFile();
@@ -70,9 +85,85 @@ if (!api) {
   });
 
   const switcher = document.getElementById("view-switcher");
+  // widgetswitcher is display: contents, so its size is the size of the page shown.
+  const activePage = () => switcher.querySelector(`[page="${switcher.getAttribute("active")}"]`);
   for (const [id, page] of [["view-editor", "editor"], ["view-source", "source"]]) {
     document.getElementById(id).addEventListener("click", () => switcher.setAttribute("active", page));
   }
+
+  // Content browser: folder tree on the left, entries of the selected folder on the right.
+  function entrySpec(entry) {
+    const spec = {
+      tag: "slate-accordion-item",
+      name: entry.path,
+      title: entry.name,
+      icon: entry.dir ? "folder" : "file",
+      class: entry.dir ? "branch" : "leaf",
+    };
+    if (entry.dir) {
+      spec.children = { tag: "slate-accordion", kind: "plain", multiple: true, class: "tree", children: [] };
+    }
+    return spec;
+  }
+
+  function showFolder(dir) {
+    api.listDir(dir).then((entries) => cbFiles.set(entries.map(entrySpec)));
+  }
+
+  // A folder fills its children the first time it opens.
+  content.addEventListener("selectionchanged", (event) => {
+    for (const name of event.detail?.open || []) {
+      const item = event.target.querySelector(`slate-accordion-item[name="${name}"]`);
+      if (!item || item._filled) continue;
+      item._filled = true;
+      api.listDir(name).then((entries) => {
+        const inner = item.querySelector("slate-accordion");
+        if (inner) inner.set(entries.filter((entry) => entry.dir).map(entrySpec));
+      });
+    }
+  });
+
+  content.addEventListener("click", (event) => {
+    const item = event.target?.closest?.("slate-accordion-item");
+    const path = item?.getAttribute("name");
+    if (!path) return;
+    for (const row of content.querySelectorAll(".selected")) row.classList.remove("selected");
+    item.classList.add("selected");
+    if (item.classList.contains("branch")) showFolder(path);
+  });
+
+  content.addEventListener("dblclick", (event) => {
+    const path = event.target?.closest?.("slate-accordion-item")?.getAttribute("name");
+    if (path?.endsWith(".umc")) api.openPath(path);
+  });
+
+  api.projectRoot().then((root) => {
+    api.listDir(root).then((entries) => cbTree.set(entries.filter((entry) => entry.dir).map(entrySpec)));
+    showFolder(root);
+  });
+
+  // Resizable dividers. These are not dock dividers: the sides are plain columns, not
+  // cells, so the drag only moves the boundary and nothing can be dropped onto it.
+  function resizable(divider, panel, other, key, sign) {
+    const axis = key === "width" ? "clientX" : "clientY";
+    divider.addEventListener("pointerdown", (event) => {
+      const start = event[axis];
+      const size = panel.getBoundingClientRect()[key];
+      const max = size + other().getBoundingClientRect()[key] - MIN_PX;
+      const onMove = (event) => {
+        const px = Math.min(Math.max(size + sign * (event[axis] - start), MIN_PX), max);
+        panel.setAttribute(key, String(px));
+      };
+      const stop = () => divider.removeEventListener("pointermove", onMove);
+      divider.setPointerCapture?.(event.pointerId);
+      divider.addEventListener("pointermove", onMove);
+      divider.addEventListener("pointerup", stop, { once: true });
+      divider.addEventListener("pointercancel", stop, { once: true });
+    });
+  }
+
+  resizable(cbDivider, cbTreePanel, () => cbFilesPanel, "width", 1);
+  resizable(bottomDivider, bottomPanel, activePage, "height", -1);
 
   search.addEventListener("valuechanged", (event) => {
     state.query = (event.detail?.value || "").trim().toLowerCase();

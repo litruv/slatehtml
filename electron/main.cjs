@@ -1,17 +1,17 @@
 const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
+const { list, projectRoot } = require("./fs-tree.cjs");
 
 const here = __dirname;
-const open = process.argv.slice(2).filter((arg) => arg.endsWith(".umc"));
+const open = process.argv.slice(2).filter((arg) => arg.endsWith(".umc")).map((arg) => path.resolve(arg));
 let file = open[0] || "";
 let last = "";
 let watcher;
 let contents;
 
 function send() {
-  if (!file) return;
-  last = fs.readFileSync(file, "utf8");
+  last = file ? fs.readFileSync(file, "utf8") : "";
   contents.send("umc:file", file, last, open);
 }
 
@@ -55,6 +55,23 @@ function openAt(index) {
   return file;
 }
 
+function closeAt(index) {
+  if (!open[index]) return "";
+  open.splice(index, 1);
+  file = open[Math.min(index, open.length - 1)] || "";
+  send();
+  watch();
+  return file;
+}
+
+function openPath(target) {
+  if (!open.includes(target)) open.push(target);
+  file = target;
+  send();
+  watch();
+  return file;
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -75,7 +92,11 @@ function createWindow() {
 
 ipcMain.handle("umc:current", () => current());
 ipcMain.handle("umc:open", () => pickFile());
+ipcMain.handle("umc:openpath", (_event, target) => openPath(target));
 ipcMain.handle("umc:switch", (_event, index) => openAt(index));
+ipcMain.handle("umc:close", (_event, index) => closeAt(index));
+ipcMain.handle("umc:root", () => projectRoot(file));
+ipcMain.handle("umc:ls", (_event, dir) => list(dir));
 ipcMain.handle("umc:read", (_event, target) => fs.readFileSync(target, "utf8"));
 ipcMain.handle("umc:write", (_event, target, content) => {
   fs.writeFileSync(target, content);
