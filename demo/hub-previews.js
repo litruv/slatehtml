@@ -56,16 +56,15 @@ export const HUB_PREVIEWS = {
   </border>
 </scalebox>`,
   dock: `<slate-dock gap="4" width="140" height="72">
-  <slate-tabs fill="1.4" active="inbox" height="100%">
-    <border kind="well" page="inbox" height="100%"><verticalbox gap="3"><border kind="well" padding="4" height="8" width="50"></border><border kind="well" padding="4" height="8" width="38"></border></verticalbox></border>
-    <border kind="well" page="star" height="100%"><verticalbox gap="3"><border kind="well" padding="4" height="8" width="44"></border></verticalbox></border>
+  <slate-tabs active="a" height="100%">
+    <border kind="well" page="a" label="A" padding="6" height="100%"></border>
   </slate-tabs>
-  <slate-dock orientation="vertical" gap="4" fill="0.6" height="100%">
-    <slate-tabs active="notes" height="100%">
-      <border kind="well" page="notes" height="100%"><verticalbox gap="3"><border kind="well" padding="4" height="8" width="26"></border></verticalbox></border>
+  <slate-dock orientation="vertical" gap="4" height="100%">
+    <slate-tabs active="b" height="100%">
+      <border kind="well" page="b" label="B" padding="6" height="100%"></border>
     </slate-tabs>
-    <slate-tabs active="star" height="100%">
-      <border kind="well" page="star" height="100%"><verticalbox gap="3"><border kind="well" padding="4" height="8" width="22"></border></verticalbox></border>
+    <slate-tabs active="c" height="100%">
+      <border kind="well" page="c" label="C" padding="6" height="100%"></border>
     </slate-tabs>
   </slate-dock>
 </slate-dock>`,
