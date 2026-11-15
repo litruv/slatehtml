@@ -19,6 +19,17 @@ body {
   min-height: 200px;
 }
 
+#menu-bar {
+  border-bottom: 1px solid var(--line);
+}
+
+#source-view {
+  margin: 0;
+  font: 13px/1.5 ui-monospace, monospace;
+  white-space: pre-wrap;
+  color: var(--ink);
+}
+
 .selected {
   outline: 1px solid var(--accent);
   background: color-mix(in srgb, var(--accent) 18%, transparent);

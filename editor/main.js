@@ -30,8 +30,11 @@ const ICONS = {
 };
 
 const api = window.umcApi;
-const state = { path: "", source: "", selected: null, query: "" };
+const state = { path: "", source: "", selected: null, query: "", files: [] };
 const bar = document.getElementById("file-title");
+const selection = document.getElementById("selection");
+const sourceView = document.getElementById("source-view");
+const fileTabs = document.getElementById("file-tabs");
 const search = document.getElementById("search");
 const tree = document.getElementById("tree");
 const canvas = document.getElementById("canvas");
@@ -41,12 +44,35 @@ const heading = document.getElementById("details-heading");
 if (!api) {
   heading.setAttribute("text", "The editor only runs inside Electron: npm run editor.");
 } else {
-  api.onFile((path, content) => {
+  function show(path, content, files) {
     if (content === state.source) return;
     state.path = path;
     state.source = content;
+    state.files = files || [path];
     render();
+  }
+
+  api.onFile(show);
+  // Pull the first file: main's push at load lands before this script runs.
+  api.currentFile().then((current) => {
+    if (current.file) show(current.file, current.content, current.files);
   });
+
+  fileTabs.addEventListener("selectionchanged", (event) => {
+    const index = Number(event.detail?.value);
+    if (Number.isInteger(index)) api.switchFile(index);
+  });
+
+  document.getElementById("menu-file").addEventListener("selectionchanged", (event) => {
+    const value = event.detail?.value;
+    if (value === "open") api.openFile();
+    else if (value === "save" && state.path) api.writeFile(state.path, state.source);
+  });
+
+  const switcher = document.getElementById("view-switcher");
+  for (const [id, page] of [["view-editor", "editor"], ["view-source", "source"]]) {
+    document.getElementById(id).addEventListener("click", () => switcher.setAttribute("active", page));
+  }
 
   search.addEventListener("valuechanged", (event) => {
     state.query = (event.detail?.value || "").trim().toLowerCase();
@@ -67,10 +93,23 @@ if (!api) {
   );
 }
 
+function base(path) {
+  return path.split(/[\\/]/).pop();
+}
+
+// The top strip lists open files: value is the index, label the file name.
+function renderFileTabs() {
+  fileTabs.setAttribute("tabs", state.files.map((path, index) => `${index}|${base(path)}`).join(", "));
+  const active = state.files.indexOf(state.path);
+  fileTabs.setAttribute("active", active < 0 ? "" : String(active));
+}
+
 function render() {
   const model = parseUmc(state.source);
   const html = model.html;
-  bar.setAttribute("title", state.path || "No file");
+  bar.textContent = state.path || "No file";
+  sourceView.textContent = state.source;
+  renderFileTabs();
   canvas.textContent = "";
   tree.clear();
 
@@ -149,6 +188,7 @@ function select(line) {
   node.classList.add("selected");
   tree.querySelector(`slate-accordion-item[name="${line}"]`)?.classList.add("selected");
   heading.setAttribute("text", `${node.tagName.toLowerCase()} — line ${node.dataset.umcLine}`);
+  selection.textContent = `${node.tagName.toLowerCase()} line ${node.dataset.umcLine}`;
   renderDetails(node);
 }
 

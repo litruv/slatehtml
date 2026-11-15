@@ -1,24 +1,58 @@
-const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
 
 const here = __dirname;
-let file = process.argv.slice(2).find((arg) => arg.endsWith(".umc")) || "";
+const open = process.argv.slice(2).filter((arg) => arg.endsWith(".umc"));
+let file = open[0] || "";
 let last = "";
 let watcher;
+let contents;
 
-function send(contents) {
+function send() {
   if (!file) return;
   last = fs.readFileSync(file, "utf8");
-  contents.send("umc:file", file, last);
+  contents.send("umc:file", file, last, open);
 }
 
-function watch(contents) {
+function current() {
+  return { file, content: file ? fs.readFileSync(file, "utf8") : "", files: open };
+}
+
+function watch() {
   watcher?.close();
   if (!file) return;
   watcher = fs.watch(file, () => {
-    if (fs.readFileSync(file, "utf8") !== last) send(contents);
+    if (fs.readFileSync(file, "utf8") !== last) send();
   });
+}
+
+function pickFile() {
+  return dialog
+    .showOpenDialog({
+      properties: ["openFile", "multiSelections"],
+      filters: [{ name: "UMC component", extensions: ["umc"] }],
+    })
+    .then(({ filePaths }) => {
+      for (const picked of filePaths) {
+        if (!open.includes(picked)) open.push(picked);
+      }
+      if (filePaths[0]) {
+        file = filePaths[0];
+        send();
+        watch();
+      }
+      return file;
+    });
+}
+
+function openAt(index) {
+  const target = open[index];
+  if (!target) return "";
+  file = target;
+  send();
+  watch();
+  return file;
 }
 
 function createWindow() {
@@ -28,27 +62,29 @@ function createWindow() {
     webPreferences: { preload: path.join(here, "preload.cjs") },
   });
 
-  const contents = win.webContents;
-  contents.on("did-finish-load", async () => {
-    if (!file) {
-      const { filePaths } = await dialog.showOpenDialog({
-        properties: ["openFile"],
-        filters: [{ name: "UMC component", extensions: ["umc"] }],
-      });
-      file = filePaths[0] || "";
-    }
-    send(contents);
-    watch(contents);
+  contents = win.webContents;
+  contents.on("did-finish-load", () => {
+    // The renderer pulls the first file: a push here lands before its module script
+    // has registered the listener, so the event is dropped.
+    watch();
+    if (!file) pickFile();
   });
 
   win.loadFile(path.join(here, "..", "editor", "dist", "index.html"));
 }
 
+ipcMain.handle("umc:current", () => current());
+ipcMain.handle("umc:open", () => pickFile());
+ipcMain.handle("umc:switch", (_event, index) => openAt(index));
 ipcMain.handle("umc:read", (_event, target) => fs.readFileSync(target, "utf8"));
 ipcMain.handle("umc:write", (_event, target, content) => {
   fs.writeFileSync(target, content);
   last = content;
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
+  createWindow();
+});
+
 app.on("window-all-closed", () => app.quit());

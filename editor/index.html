@@ -8,37 +8,65 @@
   </head>
   <body>
     <verticalbox width="100%" height="100%" gap="0">
-      <slate-app-bar id="file-title" title="No file"></slate-app-bar>
-      <horizontalbox gap="0" fill width="100%" min-height="0">
-        <border kind="panel" width="280" padding="0">
-          <verticalbox fill gap="0">
-            <slate-app-bar kind="transparent" dense title="Hierarchy">
-              <slot-leading>
-                <slate-icon name="list" size="16"></slate-icon>
-              </slot-leading>
-            </slate-app-bar>
-            <verticalbox padding="8" gap="8">
-              <slate-text-field id="search" label="" placeholder="Search widgets"></slate-text-field>
-            </verticalbox>
-            <scrollbox fill padding="0 8 8" drag-scroll>
-              <slate-accordion id="tree" kind="plain" multiple></slate-accordion>
-            </scrollbox>
-          </verticalbox>
-        </border>
-        <border kind="panel" fill padding="0">
-          <scrollbox fill padding="16" drag-scroll>
-            <div class="umc-self" id="canvas"></div>
-          </scrollbox>
-        </border>
-        <border kind="panel" width="320" padding="0">
-          <scrollbox fill padding="12" drag-scroll>
-            <verticalbox gap="10">
-              <slate-text id="details-heading" kind="label"></slate-text>
-              <verticalbox gap="6" id="details"></verticalbox>
-            </verticalbox>
-          </scrollbox>
-        </border>
+      <slate-tabs id="file-tabs" width="100%" gap="0"></slate-tabs>
+      <horizontalbox id="menu-bar" gap="6" valign="center" padding="6 10" width="100%">
+        <slate-menu id="menu-file" trigger="click" options="open|Open, save|Save">
+          <textblock text="File"></textblock>
+        </slate-menu>
       </horizontalbox>
+      <horizontalbox id="switcher-row" gap="6" valign="center" padding="6 10" width="100%">
+        <horizontalbox id="switcher-left" fill gap="6"></horizontalbox>
+        <horizontalbox gap="6">
+          <slate-button id="view-editor" text="Editor"></slate-button>
+          <slate-button id="view-source" text="Source"></slate-button>
+        </horizontalbox>
+      </horizontalbox>
+      <widgetswitcher id="view-switcher" active="editor">
+        <slate-dock page="editor" gap="0" fill="4">
+          <slate-tabs fill="2.8" height="100%" active="outliner">
+            <border kind="panel" page="outliner" label="Outliner" height="100%" padding="0">
+              <verticalbox fill gap="8">
+                <verticalbox padding="8 10" gap="0">
+                  <slate-text-field id="search" label="" placeholder="Search widgets"></slate-text-field>
+                </verticalbox>
+                <scrollbox fill padding="0 8 8" drag-scroll>
+                  <slate-accordion id="tree" kind="plain" multiple></slate-accordion>
+                </scrollbox>
+              </verticalbox>
+            </border>
+          </slate-tabs>
+          <slate-tabs fill="6" height="100%" active="viewport">
+            <border kind="panel" page="viewport" label="Viewport" height="100%" padding="0">
+              <scrollbox fill padding="16" drag-scroll>
+                <div class="umc-self" id="canvas"></div>
+              </scrollbox>
+            </border>
+          </slate-tabs>
+          <slate-tabs fill="3.2" height="100%" active="details">
+            <border kind="panel" page="details" label="Details" height="100%" padding="0">
+              <scrollbox fill padding="12" drag-scroll>
+                <verticalbox gap="10">
+                  <slate-text id="details-heading" kind="label"></slate-text>
+                  <verticalbox gap="6" id="details"></verticalbox>
+                </verticalbox>
+              </scrollbox>
+            </border>
+          </slate-tabs>
+        </slate-dock>
+        <border kind="panel" page="source" label="Source" fill="4" padding="0">
+          <scrollbox fill padding="12" drag-scroll>
+            <pre id="source-view"></pre>
+          </scrollbox>
+        </border>
+      </widgetswitcher>
+      <slate-tabs fill="1" width="100%" active="status">
+        <border kind="panel" page="status" label="Status" height="100%" padding="0">
+          <horizontalbox gap="12" valign="center" padding="8 12" width="100%">
+            <textblock id="file-title" text="No file"></textblock>
+            <textblock id="selection" fill halign="right"></textblock>
+          </horizontalbox>
+        </border>
+      </slate-tabs>
     </verticalbox>
     <script type="module" src="./main.js"></script>
   </body>
