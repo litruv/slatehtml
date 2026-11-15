@@ -1,0 +1,80 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Modal"></slate-text>
+          <slate-text kind="hint" text="Shared modal shell behind Dialog and Shadowbox. Trigger with the modal attribute, or ref + bump(self.modal). Escape and backdrop close it, focus is trapped while open and restored on close, and page scroll locks while any modal is open."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
+            <border kind="panel" class="demo-live" padding="16">
+              <verticalbox gap="10" width="100%" data-demo-stage>
+                <slate-text kind="label" text="Open"></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-center" width="100%">
+                  <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
+                    <slate-button modal="demo-modal" text="Open modal"></slate-button>
+                    <slate-modal id="demo-modal" title="Settings">
+                      <slate-text text="Focus stays inside while open."></slate-text>
+                      <slate-button data-modal-close text="Close"></slate-button>
+                    </slate-modal>
+                  </horizontalbox>
+                </scalebox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" padding="12">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button modal="demo-modal" text="Open modal"></slate-button>
+<slate-modal id="demo-modal" title="Settings">
+  <slate-text text="Focus stays inside while open."></slate-text>
+  <slate-button data-modal-close text="Close"></slate-button>
+</slate-modal>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="opened,closed">
+            <border kind="panel" class="demo-live" padding="16">
+              <verticalbox gap="10" width="100%" data-demo-stage>
+                <slate-text kind="label" text="From script"></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-center" width="100%">
+                  <horizontalbox gap="10" valign="center" width="100%" data-demo-mount>
+                    <slate-button ref="show" text="Open modal"></slate-button>
+                    <slate-modal ref="modal" title="Settings">
+                      <slate-text text="closed carries the reason: close, backdrop, escape, or destroy."></slate-text>
+                      <slate-button data-modal-close text="Close"></slate-button>
+                    </slate-modal>
+                  </horizontalbox>
+                </scalebox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" padding="12">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-button ref="show" text="Open modal"></slate-button>
+<slate-modal ref="modal" title="Settings">
+  <slate-text text="closed carries the reason: close, backdrop, escape, or destroy."></slate-text>
+  <slate-button data-modal-close text="Close"></slate-button>
+</slate-modal>
+            </script>
+            <script type="text/plain" data-demo-script>
+on(self.show, e.clicked, () => bump(self.modal));
+on(self.modal, e.closed, (ev) => console.log("closed", ev.detail?.reason));
+            </script>
+          </wrapbox>
+        </verticalbox>

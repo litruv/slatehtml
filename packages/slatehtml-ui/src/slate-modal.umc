@@ -1,0 +1,128 @@
+--- html ---
+<overlay class="slate-modal-root">
+  <border class="slate-modal-backdrop" data-modal-backdrop halign="fill" valign="fill"></border>
+  <border
+    class="slate-modal-card"
+    kind="panel"
+    halign="center"
+    valign="center"
+    padding="16"
+    min-width="280"
+    max-width="min(92vw, 420px)"
+  >
+    <verticalbox gap="12" width="100%">
+      <horizontalbox gap="8" valign="center" width="100%">
+        <textblock class="slate-modal-title" data-umc="title" fill min-width="0"></textblock>
+        <slate-icon class="slate-modal-close" data-modal-close role="button" tabindex="0" aria-label="Close" name="x" size="16"></slate-icon>
+      </horizontalbox>
+      <verticalbox class="slate-modal-content" data-slot="default" gap="10" width="100%"></verticalbox>
+    </verticalbox>
+  </border>
+</overlay>
+
+--- style ---
+self:not([open]) > .slate-modal-root {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+self[open] > .slate-modal-root {
+  position: fixed; /* umc-layout-ok, modal layer */
+  top: 0; /* umc-layout-ok */
+  left: 0; /* umc-layout-ok */
+  right: 0; /* umc-layout-ok */
+  bottom: 0; /* umc-layout-ok */
+  width: auto; /* umc-layout-ok */
+  height: auto; /* umc-layout-ok */
+  z-index: var(--modal-z, 240); /* umc-layout-ok */
+}
+
+.slate-modal-root[hidden] {
+  display: none !important;
+}
+
+.slate-modal-backdrop {
+  --widget-background: rgba(0, 0, 0, 0.55);
+  --widget-border: none;
+  --widget-radius: 0;
+  cursor: pointer;
+}
+
+.slate-modal-card {
+  --widget-background: var(--panel, #eff1f5);
+  --widget-border: 1px solid var(--line, #ccd0da);
+  --widget-radius: 10px;
+  color: var(--ink, inherit);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  pointer-events: auto;
+}
+
+.slate-modal-title {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.slate-modal-close {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.75;
+  flex: 0 0 auto; /* umc-layout-ok */
+}
+
+.slate-modal-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+
+--- script ---
+/**
+ * Modal shell. Behaviors live in modal-core.js (portal, scroll lock, focus trap,
+ * Escape, backdrop, trigger registry); this is the markup around them.
+ *
+ *   <slate-modal id="m" title="Settings">
+ *     <slate-text text="Body"></slate-text>
+ *     <slate-button data-modal-close text="Close"></slate-button>
+ *   </slate-modal>
+ *
+ * Attrs: open, title, close-backdrop, close-escape
+ * Trigger: modal="id" on any clickable
+ * Events: opened, closed ({ reason })
+ */
+import { mountModal, syncModal, closeModal, unmountModal } from "./modal-core.js";
+
+export default defineUmc({
+  tag: "slate-modal",
+  attrs: {
+    open: "",
+    title: "",
+    "close-backdrop": "",
+    "close-escape": "",
+  },
+
+  Construct(el, api) {
+    mountModal(el, api, "modal");
+  },
+
+  Destroyed(el, api) {
+    if (!unmountModal(el)) return;
+    closeModal(el, api, "destroy");
+  },
+
+  SynchronizeProperties(el, api) {
+    const { attr, bind } = api;
+    bind();
+    syncModal(el, api);
+    const titleEl = el.querySelector('[data-umc="title"]');
+    titleEl?.toggleAttribute("hidden", !(attr("title", "") || "").trim());
+  },
+});
+
+--- preview ---
+<canvaspanel width="520" height="320" kind="stage">
+  <slate-modal open title="Settings">
+    <slate-text text="Focus stays inside while open."></slate-text>
+    <slate-button data-modal-close text="Close"></slate-button>
+  </slate-modal>
+</canvaspanel>

@@ -139,6 +139,7 @@ const NAV = [
           { id: "alert", title: "Alert", icon: "info" },
           { id: "snackbar", title: "Snackbar", icon: "message-circle" },
           { id: "dialog", title: "Dialog", icon: "app-window" },
+          { id: "modal", title: "Modal", icon: "square" },
           { id: "skeleton", title: "Skeleton", icon: "rectangle-ellipsis" },
         ],
       },

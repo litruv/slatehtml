@@ -895,6 +895,33 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
     ],
   }),
 
+  "modal.html": page({
+    title: "Modal",
+    hint: "Shared modal shell behind Dialog and Shadowbox. Trigger with the modal attribute, or ref + bump(self.modal). Escape and backdrop close it, focus is trapped while open and restored on close, and page scroll locks while any modal is open.",
+    events: "opened,closed",
+    mount: "horizontalbox",
+    variants: [
+      {
+        name: "Open",
+        code: `<slate-button modal="demo-modal" text="Open modal"></slate-button>
+<slate-modal id="demo-modal" title="Settings">
+  <slate-text text="Focus stays inside while open."></slate-text>
+  <slate-button data-modal-close text="Close"></slate-button>
+</slate-modal>`,
+      },
+      {
+        name: "From script",
+        code: `<slate-button ref="show" text="Open modal"></slate-button>
+<slate-modal ref="modal" title="Settings">
+  <slate-text text="closed carries the reason: close, backdrop, escape, or destroy."></slate-text>
+  <slate-button data-modal-close text="Close"></slate-button>
+</slate-modal>`,
+        script: `on(self.show, e.clicked, () => bump(self.modal));
+on(self.modal, e.closed, (ev) => console.log("closed", ev.detail?.reason));`,
+      },
+    ],
+  }),
+
   "skeleton.html": page({
     title: "Skeleton",
     hint: "Loading placeholders. kind: circle, button. Optional width / height.",
@@ -972,7 +999,7 @@ on(self.dlg, e.cancelled, () => console.log("cancelled"));`,
 
   "accordion.html": page({
     title: "Accordion",
-    hint: "slate-accordion + slate-accordion-item. open selects panel(s); multiple allows several open. Events: selectionchanged.",
+    hint: "slate-accordion + slate-accordion-item. open selects panel(s); multiple allows several open. Item icon is optional. Events: selectionchanged.",
     events: "selectionchanged",
     mount: "verticalbox",
     variants: [

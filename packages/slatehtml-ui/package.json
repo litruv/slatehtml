@@ -64,6 +64,7 @@
     "./alert": "./src/slate-alert.umc",
     "./snackbar": "./src/slate-snackbar.umc",
     "./dialog": "./src/slate-dialog.umc",
+    "./modal": "./src/slate-modal.umc",
     "./skeleton": "./src/slate-skeleton.umc",
     "./breadcrumb": "./src/slate-breadcrumb.umc",
     "./image": "./src/slate-image.umc",

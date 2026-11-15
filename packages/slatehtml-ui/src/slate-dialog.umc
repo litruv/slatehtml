@@ -1,11 +1,11 @@
 --- html ---
 <overlay class="slate-dialog-root">
-  <border class="slate-dialog-backdrop" halign="fill" valign="fill"></border>
+  <border class="slate-dialog-backdrop" data-modal-backdrop halign="fill" valign="fill"></border>
   <border class="slate-dialog-card" kind="panel" halign="center" valign="center" padding="16" min-width="280" max-width="min(92vw, 420px)">
     <verticalbox gap="12" width="100%">
       <horizontalbox gap="8" valign="center" width="100%">
         <textblock class="slate-dialog-title" data-umc="title" fill min-width="0"></textblock>
-        <slate-icon class="slate-dialog-close" name="x" size="16"></slate-icon>
+        <slate-icon class="slate-dialog-close" data-modal-close role="button" tabindex="0" aria-label="Close" name="x" size="16"></slate-icon>
       </horizontalbox>
       <textblock class="slate-dialog-text" data-umc="text"></textblock>
       <horizontalbox class="slate-dialog-actions" data-slot="default" gap="8" halign="right" width="100%"></horizontalbox>
@@ -91,16 +91,10 @@ self[open] > .slate-dialog-root {
  * Attrs: open, title, text, close-backdrop, close-escape
  * Action buttons: dialog-action="cancel" | "confirm" | custom
  * Events: opened, closed, confirmed, cancelled
+ * Modal behaviors (portal, scroll lock, focus trap, Escape, backdrop, trigger
+ * registry) come from modal-core.js.
  */
-function attrOn(el, name, fallback = true) {
-  if (!el.hasAttribute(name)) return fallback;
-  const v = String(el.getAttribute(name) ?? "")
-    .trim()
-    .toLowerCase();
-  if (v === "" || v === "true" || v === "1" || v === "on") return true;
-  if (v === "false" || v === "0" || v === "off") return false;
-  return fallback;
-}
+import { mountModal, syncModal, closeModal, unmountModal } from "./modal-core.js";
 
 const CANCEL_LABELS = new Set(["cancel", "close", "stay", "no", "dismiss", "back"]);
 const CONFIRM_LABELS = new Set([
@@ -131,47 +125,10 @@ function resolveDialogAction(btn) {
 }
 
 function closeDialog(el, api, reason, detail = {}) {
-  if (!el.hasAttribute("open")) return;
-  el.removeAttribute("open");
-  const payload = { reason: reason || "dismiss", ...detail };
-  api.emit("closed", payload);
+  const payload = closeModal(el, api, reason, detail);
+  if (!payload) return;
   if (payload.reason === "confirm") api.emit("confirmed", payload);
   if (payload.reason === "cancel") api.emit("cancelled", payload);
-}
-
-const liveDialogs = new Set();
-let dialogDocBound = false;
-
-function onDialogDocClick(event) {
-  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
-  let trigger = null;
-  for (const node of path) {
-    if (node instanceof Element && node.hasAttribute("dialog")) {
-      trigger = node;
-      break;
-    }
-  }
-  if (!trigger) {
-    const t = event.target;
-    trigger =
-      t instanceof Element
-        ? t.closest("[dialog]")
-        : t?.parentElement?.closest?.("[dialog]") || null;
-  }
-  if (!trigger) return;
-  const id = trigger.getAttribute("dialog");
-  if (!id) return;
-  for (const el of liveDialogs) {
-    if (el.id !== id && el.getAttribute("name") !== id) continue;
-    if (el.contains(trigger)) return;
-    event.preventDefault();
-    const title = trigger.getAttribute("dialog-title");
-    const text = trigger.getAttribute("dialog-text");
-    if (title != null) el.setAttribute("title", title);
-    if (text != null) el.setAttribute("text", text);
-    el.setAttribute("open", "");
-    return;
-  }
 }
 
 export default defineUmc({
@@ -185,28 +142,9 @@ export default defineUmc({
   },
 
   Construct(el, api) {
-    el.setAttribute("role", "dialog");
-    el.setAttribute("aria-modal", "true");
-    liveDialogs.add(el);
-    if (!dialogDocBound) {
-      dialogDocBound = true;
-      document.addEventListener("click", onDialogDocClick, true);
-    }
-
+    mountModal(el, api, "dialog", closeDialog);
     if (el._dialogBound) return;
     el._dialogBound = true;
-
-    el.addEventListener("click", (event) => {
-      const close = event.target?.closest?.(".slate-dialog-close");
-      if (close && el.contains(close)) {
-        closeDialog(el, api, "close");
-        return;
-      }
-      const backdrop = event.target?.closest?.(".slate-dialog-backdrop");
-      if (backdrop && el.contains(backdrop) && attrOn(el, "close-backdrop", true)) {
-        closeDialog(el, api, "backdrop");
-      }
-    });
 
     el.addEventListener("clicked", (event) => {
       const actions = el.querySelector(".slate-dialog-actions");
@@ -235,27 +173,10 @@ export default defineUmc({
       const action = resolveDialogAction(btn);
       closeDialog(el, api, action, { action });
     });
-
-    el._onKey = (event) => {
-      if (!el.hasAttribute("open")) return;
-      if (event.key === "Escape" && attrOn(el, "close-escape", true)) {
-        event.preventDefault();
-        closeDialog(el, api, "escape");
-      }
-    };
-    document.addEventListener("keydown", el._onKey);
   },
 
   Destroyed(el, api) {
-    liveDialogs.delete(el);
-    if (!liveDialogs.size && dialogDocBound) {
-      dialogDocBound = false;
-      document.removeEventListener("click", onDialogDocClick, true);
-    }
-    if (el._onKey) {
-      document.removeEventListener("keydown", el._onKey);
-      el._onKey = null;
-    }
+    if (!unmountModal(el)) return;
     closeDialog(el, api, "destroy");
     el._dialogBound = false;
   },
@@ -263,22 +184,11 @@ export default defineUmc({
   SynchronizeProperties(el, api) {
     const { attr, bind } = api;
     bind();
-    const open = el.hasAttribute("open");
-    const root = el.querySelector(".slate-dialog-root");
+    syncModal(el, api);
     const textEl = el.querySelector(".slate-dialog-text");
     const titleEl = el.querySelector(".slate-dialog-title");
-    root?.toggleAttribute("hidden", !open);
-    if (root) root.inert = !open;
-    el.setAttribute("aria-hidden", open ? "false" : "true");
     textEl?.toggleAttribute("hidden", !(attr("text", "") || "").trim());
     titleEl?.toggleAttribute("hidden", !(attr("title", "") || "").trim());
-
-    if (open && !el._wasOpen) {
-      el._wasOpen = true;
-      api.emit("opened", {});
-    } else if (!open) {
-      el._wasOpen = false;
-    }
   },
 });
 

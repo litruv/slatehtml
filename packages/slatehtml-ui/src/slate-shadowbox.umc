@@ -2,6 +2,7 @@
 <overlay class="shadowbox-root">
   <backgroundblur
     class="shadowbox-backdrop"
+    data-modal-backdrop
     blur="18"
     halign="fill"
     valign="fill"
@@ -17,7 +18,7 @@
   >
     <horizontalbox class="shadowbox-chrome" gap="8" valign="center" width="100%" min-width="0">
       <textblock class="shadowbox-title" data-title text="" fill min-width="0"></textblock>
-      <slate-icon class="shadowbox-close" name="x" size="18"></slate-icon>
+      <slate-icon class="shadowbox-close" data-modal-close role="button" tabindex="0" aria-label="Close" name="x" size="18"></slate-icon>
     </horizontalbox>
     <border class="shadowbox-image-frame" padding="0" max-width="min(96vw, 1100px)" max-height="min(80vh, 820px)" hidden>
       <img class="shadowbox-image" alt="" draggable="false" />
@@ -143,21 +144,15 @@ self[open] > .shadowbox-root {
  *
  * Host settings: close-backdrop, close-escape (default on; "false"/"0"/"off" to disable).
  * Events: opened, closed
+ * Modal behaviors (portal, scroll lock, focus trap, Escape, backdrop, trigger
+ * registry) come from modal-core.js.
  */
+import { mountModal, syncModal, closeModal, unmountModal, applyTriggerAttrs } from "./modal-core.js";
+
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 5;
 const ZOOM_CLICK = 2.5;
 const DRAG_CLICK_SLOP = 6;
-
-function attrOn(el, name, fallback = true) {
-  if (!el.hasAttribute(name)) return fallback;
-  const v = String(el.getAttribute(name) ?? "")
-    .trim()
-    .toLowerCase();
-  if (v === "" || v === "true" || v === "1" || v === "on") return true;
-  if (v === "false" || v === "0" || v === "off") return false;
-  return fallback;
-}
 
 function imageViewportMax() {
   return {
@@ -454,75 +449,15 @@ function bindImageZoom(el) {
   frame.addEventListener("pointercancel", endPointer);
 }
 
-function closeBox(el, api) {
+function closeBox(el, api, reason = "dismiss") {
   if (!el.hasAttribute("open")) return;
-  el.removeAttribute("open");
   resetImageZoom(el);
-  const video = el.querySelector("slate-media.shadowbox-video");
-  const native = video?.querySelector("video");
+  const native = el.querySelector("slate-media.shadowbox-video video");
   native?.pause?.();
-  api.emit("closed", {
+  closeModal(el, api, reason, {
     src: el.getAttribute("src") || "",
     kind: el.getAttribute("kind") || "image",
   });
-}
-
-/** Apply optional shadowbox-* settings from a trigger, then open. */
-function openFromTrigger(el, api, trigger) {
-  if (trigger instanceof Element) {
-    const src = trigger.getAttribute("shadowbox-src");
-    const kind = trigger.getAttribute("shadowbox-kind");
-    const title = trigger.getAttribute("shadowbox-title");
-    if (src != null && src !== "") el.setAttribute("src", src);
-    if (kind != null && kind !== "") el.setAttribute("kind", kind);
-    if (title != null) el.setAttribute("title", title);
-  }
-  el.setAttribute("open", "");
-}
-
-function matchesShadowboxTarget(el, id) {
-  if (!id) return false;
-  return el.id === id || el.getAttribute("name") === id;
-}
-
-/** All connected shadowboxes — one document click listener opens by id. */
-const liveBoxes = new Set();
-let docClickBound = false;
-
-function findTrigger(event) {
-  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
-  for (const node of path) {
-    if (node instanceof Element && node.hasAttribute("shadowbox")) return node;
-  }
-  const t = event.target;
-  if (t instanceof Element) return t.closest("[shadowbox]");
-  return t?.parentElement?.closest?.("[shadowbox]") || null;
-}
-
-function onDocumentClick(event) {
-  const trigger = findTrigger(event);
-  if (!trigger) return;
-  const id = trigger.getAttribute("shadowbox");
-  if (!id) return;
-  for (const el of liveBoxes) {
-    if (!matchesShadowboxTarget(el, id)) continue;
-    if (el.contains(trigger)) return;
-    event.preventDefault();
-    openFromTrigger(el, el._shadowApi, trigger);
-    return;
-  }
-}
-
-function bindDocumentClick() {
-  if (docClickBound || typeof document === "undefined") return;
-  docClickBound = true;
-  document.addEventListener("click", onDocumentClick, true);
-}
-
-function unbindDocumentClick() {
-  if (!docClickBound || liveBoxes.size) return;
-  docClickBound = false;
-  document.removeEventListener("click", onDocumentClick, true);
 }
 
 export default defineUmc({
@@ -537,83 +472,40 @@ export default defineUmc({
   },
 
   Construct(el, api) {
-    el._shadowApi = api;
-    liveBoxes.add(el);
-    bindDocumentClick();
+    mountModal(el, api, "shadowbox", closeBox);
+    if (el._bound) return;
+    el._bound = true;
+    bindImageZoom(el);
 
-    if (!el._bound) {
-      el._bound = true;
-      bindImageZoom(el);
-
-      el.addEventListener("click", (event) => {
-        const close = event.target?.closest?.(".shadowbox-close");
-        if (close && el.contains(close)) {
-          event.preventDefault();
-          closeBox(el, api);
-          return;
-        }
-        const backdrop = event.target?.closest?.(".shadowbox-backdrop");
-        if (
-          backdrop &&
-          el.contains(backdrop) &&
-          attrOn(el, "close-backdrop", true)
-        ) {
-          closeBox(el, api);
-        }
-      });
-
-      el._onKey = (event) => {
-        if (!el.hasAttribute("open")) return;
-        if (event.key === "Escape" && attrOn(el, "close-escape", true)) {
-          event.preventDefault();
-          closeBox(el, api);
-        }
-      };
-      document.addEventListener("keydown", el._onKey);
-
-      // Invoker Commands: <button commandfor="my-id" command="--open">
-      el._onCommand = (event) => {
-        const cmd = String(event.command || "").toLowerCase();
-        if (cmd === "--open" || cmd === "--show") {
-          openFromTrigger(el, api, event.source);
-        } else if (cmd === "--close" || cmd === "--hide") {
-          closeBox(el, api);
-        }
-      };
-      el.addEventListener("command", el._onCommand);
-    }
+    // Invoker Commands: <button commandfor="my-id" command="--open">
+    el._onCommand = (event) => {
+      const cmd = String(event.command || "").toLowerCase();
+      if (cmd === "--open" || cmd === "--show") {
+        applyTriggerAttrs(el, event.source);
+        el.setAttribute("open", "");
+      } else if (cmd === "--close" || cmd === "--hide") {
+        closeBox(el, api, "command");
+      }
+    };
+    el.addEventListener("command", el._onCommand);
   },
 
   Destroyed(el, api) {
-    liveBoxes.delete(el);
-    unbindDocumentClick();
-    if (el._onKey) {
-      document.removeEventListener("keydown", el._onKey);
-      el._onKey = null;
-    }
+    if (!unmountModal(el)) return;
     if (el._onCommand) {
       el.removeEventListener("command", el._onCommand);
       el._onCommand = null;
     }
-    el._shadowApi = null;
-    closeBox(el, api);
+    closeBox(el, api, "destroy");
     el._bound = false;
   },
 
   async SynchronizeProperties(el, api) {
     const { attr } = api;
-    const open = el.hasAttribute("open");
-    const root =
-      el.querySelector(":scope > .shadowbox-root") || el.firstElementChild;
-    root?.toggleAttribute("hidden", !open);
-    if (root) root.inert = !open;
-    el.setAttribute("aria-hidden", open ? "false" : "true");
-    el.setAttribute("role", "dialog");
-    el.setAttribute("aria-modal", "true");
-
     const kind = attr("kind", "image") === "video" ? "video" : "image";
     const src = (attr("src", "") || "").trim();
     const title = attr("title", "") || "";
+    const open = syncModal(el, api, { src, kind });
     const frame = imageFrame(el);
     const img = shadowImage(el);
     const video = el.querySelector("slate-media.shadowbox-video");
@@ -626,7 +518,6 @@ export default defineUmc({
     video?.toggleAttribute("hidden", kind !== "video");
 
     if (!open) {
-      el._wasOpen = false;
       resetImageZoom(el);
       return;
     }
@@ -634,11 +525,6 @@ export default defineUmc({
     if (el._zoomMediaKey !== mediaKey) {
       el._zoomMediaKey = mediaKey;
       resetImageZoom(el);
-    }
-
-    if (!el._wasOpen) {
-      el._wasOpen = true;
-      api.emit("opened", { src, kind });
     }
 
     if (!src) {
