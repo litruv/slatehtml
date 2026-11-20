@@ -38,7 +38,8 @@ self .slate-radio-dot {
   text-align: center;
 }
 
-self:focus-visible {
+self:focus-visible,
+self .slate-radio-option:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
@@ -51,9 +52,13 @@ import { parseOptions, selectableOptions } from "./parse-options.js";
  *
  *   <slate-radio-group label="Priority" options="low, med, high" selected="med"></slate-radio-group>
  *
+ * The checked option holds the tab stop; arrows move selection and focus with it.
+ * Enter is not consumed here, so a `slate-form` around the group submits on it.
+ *
  * Events: selectionchanged { value, label, index }
  */
-function optionRow(option, selected) {
+/** Roving tabindex: only `focused` (the checked option) is in the tab order. */
+function optionRow(option, selected, focused) {
   const on = option.value === selected;
   return {
     tag: "horizontalbox",
@@ -61,7 +66,7 @@ function optionRow(option, selected) {
     role: "radio",
     "aria-checked": on ? "true" : "false",
     "data-value": option.value,
-    tabindex: "-1",
+    tabindex: option.value === focused ? "0" : "-1",
     gap: "8",
     valign: "center",
     children: [
@@ -82,7 +87,8 @@ export default defineUmc({
 
   Construct(el, api) {
     el.setAttribute("role", "radiogroup");
-    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    // The checked option carries the tab stop, not the group.
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
 
     if (el._bound) return;
     el._bound = true;
@@ -115,10 +121,13 @@ export default defineUmc({
   SynchronizeProperties(el, { attr }) {
     const options = selectableOptions(parseOptions(attr("options", "")));
     const selected = attr("selected", "");
-    const key = options.map((o) => `${o.value}\u0000${o.label}`).join("\u0001") + `\u0002${selected}`;
+    const focused = el.hasAttribute("disabled") ? "" : selected || options[0]?.value || "";
+    const key =
+      options.map((o) => `${o.value}\u0000${o.label}`).join("\u0001") +
+      `\u0002${selected}\u0003${focused}`;
     if (el._optionsKey !== key) {
       el._optionsKey = key;
-      el.set(...options.map((o) => optionRow(o, selected)));
+      el.set(...options.map((o) => optionRow(o, selected, focused)));
     }
     const legend = el.querySelector(".slate-radio-legend");
     if (legend) legend.hidden = !attr("label", "");
@@ -130,8 +139,12 @@ function select(el, api, value) {
   const options = selectableOptions(parseOptions(api.attr("options", "")));
   const index = options.findIndex((o) => o.value === value);
   if (index < 0 || value === api.attr("selected", "")) return;
-  el.setAttribute("selected", value);
+  el.setAttribute("selected", value); // re-renders rows, moving the tab stop
   api.emit("selectionchanged", { value, label: options[index].label, index });
+  const row = [...el.querySelectorAll(".slate-radio-option")].find(
+    (r) => r.getAttribute("data-value") === value
+  );
+  row?.focus();
 }
 
 --- preview ---

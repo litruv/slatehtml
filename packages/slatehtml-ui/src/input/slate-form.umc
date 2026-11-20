@@ -1,0 +1,111 @@
+--- html ---
+<verticalbox class="slate-form" data-content gap="10"></verticalbox>
+
+--- style ---
+self {
+  color: inherit;
+  font: inherit;
+}
+
+--- script ---
+/**
+ * Form container over named fields.
+ *
+ *   <slate-form label="Profile">
+ *     <slate-text-field name="name" label="Name" required></slate-text-field>
+ *     <slate-checkbox name="updates" label="Email updates"></slate-checkbox>
+ *   </slate-form>
+ *
+ * Enter moves to the next named field on a text field and submits at the last
+ * one; on any other field it submits. Shift+Enter moves back. Menu controls
+ * (select, combobox, autocomplete, dropdown) keep Enter for their own use, and
+ * Space still activates controls inside the form.
+ *
+ * Fields contribute a value through `form-fields.js`; a field without `name`
+ * is not part of the submission.
+ *
+ * Events: submit { values }, invalid { names }
+ * Methods: checkValidity(), submit()
+ */
+import {
+  ENTER_THEIRS,
+  focusTarget,
+  focusableFields,
+  formValues,
+  invalidFields,
+  isFormField,
+} from "./form-fields.js";
+
+function submit(el, api) {
+  const invalid = invalidFields(el);
+  if (invalid.length) {
+    focusTarget(invalid[0])?.focus();
+    api.emit("invalid", { names: invalid.map((field) => field.getAttribute("name")) });
+    return;
+  }
+  api.emit("submit", { values: formValues(el) });
+}
+
+export default defineUmc({
+  tag: "slate-form",
+  attrs: {
+    label: "",
+    disabled: "",
+  },
+
+  Construct(el, api) {
+    el.setAttribute("role", "form");
+    if (el._formBound) return;
+    el._formBound = true;
+
+    // Capture phase: Enter belongs to the form, so a text field advances
+    // instead of committing and blurring, and stopPropagation keeps the
+    // control's own Enter handler from running too.
+    el.addEventListener("keydown", (event) => {
+      if (el.hasAttribute("disabled") || event.key !== "Enter" || event.repeat) return;
+      const field = event.target?.closest?.("[name]");
+      if (!field || !el.contains(field) || !isFormField(field)) return;
+
+      const tag = field.localName;
+      if (ENTER_THEIRS.has(tag)) return;
+      const multiline =
+        tag === "slate-text-field" &&
+        field.hasAttribute("multiline") &&
+        !(event.metaKey || event.ctrlKey);
+      if (multiline) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (tag === "slate-text-field") {
+        const order = focusableFields(el);
+        const index = order.indexOf(field);
+        const next = event.shiftKey ? order[index - 1] : order[index + 1];
+        if (next) {
+          focusTarget(next).focus();
+          return;
+        }
+      }
+      submit(el, api);
+    }, true);
+
+    el.checkValidity = () => invalidFields(el).length === 0;
+    el.submit = () => submit(el, api);
+  },
+
+  SynchronizeProperties(el, { attr }) {
+    const label = attr("label", "");
+    if (label) el.setAttribute("aria-label", label);
+    else el.removeAttribute("aria-label");
+    el.setAttribute("aria-disabled", el.hasAttribute("disabled") ? "true" : "false");
+  },
+});
+
+--- preview ---
+<verticalbox gap="12" padding="16" width="300">
+  <slate-form label="Profile">
+    <slate-text-field name="name" label="Name" value="Ada" required></slate-text-field>
+    <slate-text-field name="email" label="Email" type="email" required></slate-text-field>
+    <slate-checkbox name="updates" label="Email updates" checked></slate-checkbox>
+  </slate-form>
+</verticalbox>

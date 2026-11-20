@@ -67,6 +67,9 @@ self[error] .slate-text-field-helper {
  *   <slate-text-field label="Code" pattern="^[A-Z]{3}-\\d{3}$" minlength="7" maxlength="7"></slate-text-field>
  *   <slate-text-field label="Name" required errormessage="Name is required"></slate-text-field>
  *
+ * Enter commits (single line) or inserts a newline (`multiline`). Inside `slate-form`
+ * it moves to the next field instead; `enterkeyhint` sets the mobile key label.
+ *
  * Validation attrs: required, type (text|email|url|number), pattern, minlength, maxlength.
  * `validate`: commit (default when any rule is set), change, or manual.
  * Manual `error` still forces the error chrome (e.g. server-side messages).
@@ -219,6 +222,7 @@ export default defineUmc({
     minlength: "",
     maxlength: "",
     validate: "",
+    enterkeyhint: "",
   },
 
   Construct(el, api) {
@@ -279,6 +283,11 @@ export default defineUmc({
     // widget.js syncs contentEditable from `readonly`, but set it here too so
     // disabled fields stay non-editable even before the next enhance pass.
     input.contentEditable = locked ? "false" : "true";
+    const hint =
+      attr("enterkeyhint", "") ||
+      (!el.hasAttribute("multiline") && el.closest("slate-form") ? "next" : "");
+    if (hint) input.setAttribute("enterkeyhint", hint);
+    else input.removeAttribute("enterkeyhint");
     if (attr("placeholder", "") && !attr("value", "")) {
       input.setAttribute("placeholder", attr("placeholder", ""));
     }

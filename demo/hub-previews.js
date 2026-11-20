@@ -94,6 +94,10 @@ export const HUB_PREVIEWS = {
   rating: `<slate-rating value="3"></slate-rating>`,
   slider: `<slate-slider value="0.6" width="120"></slate-slider>`,
   "text-field": `<slate-text-field label="Email" value="hi@x.dev" width="140"></slate-text-field>`,
+  form: `<slate-form label="Profile" gap="6">
+  <slate-text-field label="Email" value="hi@x.dev" width="140"></slate-text-field>
+  <slate-checkbox label="Updates" checked></slate-checkbox>
+</slate-form>`,
   select: `<slate-select options="a|Alpha, b|Beta" selected="a" width="120"></slate-select>`,
   dropdown: `<slate-dropdown options="a|Alpha, b|Beta" selected="a" width="120"></slate-dropdown>`,
   combobox: `<slate-combobox options="Red, Green, Blue" value="Green" width="120"></slate-combobox>`,

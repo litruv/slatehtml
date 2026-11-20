@@ -1,0 +1,112 @@
+        <verticalbox gap="8">
+          <slate-text kind="section" text="Form"></slate-text>
+          <slate-text kind="hint" text="Edit the UMC on the right, blur or Ctrl+Enter applies it."></slate-text>
+        </verticalbox>
+
+        <verticalbox gap="22" data-demo-examples>
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="submit,invalid,committed">
+            <border kind="panel" class="demo-live" padding="16">
+              <verticalbox gap="10" width="100%" data-demo-stage>
+                <slate-text kind="label" text="Enter advances, submits at the last field"></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-center" width="100%">
+                  <verticalbox gap="10" valign="center" width="100%" data-demo-mount>
+                    <slate-form label="Profile">
+                      <slate-text-field name="name" label="Name" value="Ada" required></slate-text-field>
+                      <slate-text-field name="email" label="Email" type="email" required></slate-text-field>
+                      <slate-checkbox name="updates" label="Email updates" checked></slate-checkbox>
+                    </slate-form>
+                  </verticalbox>
+                </scalebox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" padding="12">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-form label="Profile">
+  <slate-text-field name="name" label="Name" value="Ada" required></slate-text-field>
+  <slate-text-field name="email" label="Email" type="email" required></slate-text-field>
+  <slate-checkbox name="updates" label="Email updates" checked></slate-checkbox>
+</slate-form>
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="submit,invalid,committed">
+            <border kind="panel" class="demo-live" padding="16">
+              <verticalbox gap="10" width="100%" data-demo-stage>
+                <slate-text kind="label" text="Submit button"></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-center" width="100%">
+                  <verticalbox gap="10" valign="center" width="100%" data-demo-mount>
+                    <slate-form ref="form" label="Sign in">
+                      <slate-text-field name="email" label="Email" type="email" required></slate-text-field>
+                      <slate-radio-group name="role" label="Role" options="user|User, admin|Admin" selected="user"></slate-radio-group>
+                      <slate-button ref="save" text="Sign in"></slate-button>
+                    </slate-form>
+                  </verticalbox>
+                </scalebox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" padding="12">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-form ref="form" label="Sign in">
+  <slate-text-field name="email" label="Email" type="email" required></slate-text-field>
+  <slate-radio-group name="role" label="Role" options="user|User, admin|Admin" selected="user"></slate-radio-group>
+  <slate-button ref="save" text="Sign in"></slate-button>
+</slate-form>
+            </script>
+            <script type="text/plain" data-demo-script>
+on(self.save, e.clicked, () => self.form.submit());
+            </script>
+          </wrapbox>
+
+          <wrapbox class="demo-example" width="100%" max-width="100%" gap="14" valign="stretch" data-demo-example data-events="submit,invalid,validitychanged">
+            <border kind="panel" class="demo-live" padding="16">
+              <verticalbox gap="10" width="100%" data-demo-stage>
+                <slate-text kind="label" text="Invalid blocks submit"></slate-text>
+                <scalebox class="demo-live-scale" stretch="down-center" width="100%">
+                  <verticalbox gap="10" valign="center" width="100%" data-demo-mount>
+                    <slate-form label="Code">
+                      <slate-text-field name="code" label="Code" required minlength="3" errormessage="3 characters or more"></slate-text-field>
+                      <slate-text-field name="note" label="Note" enterkeyhint="go"></slate-text-field>
+                    </slate-form>
+                  </verticalbox>
+                </scalebox>
+              </verticalbox>
+            </border>
+            <border kind="well" class="demo-meta" padding="12">
+              <verticalbox gap="10" fill>
+                <scrollbox class="demo-code-box" max-height="220" padding="10 12">
+                  <pre><code class="language-umc" data-demo-code></code></pre>
+                </scrollbox>
+                <slate-text kind="label" text="Events"></slate-text>
+                <scrollbox class="demo-events-scroll" max-height="140">
+                  <textblock class="demo-events" kind="mono" data-demo-events text="Interact to see events…"></textblock>
+                </scrollbox>
+              </verticalbox>
+            </border>
+            <script type="text/plain" data-demo-snippet>
+<slate-form label="Code">
+  <slate-text-field name="code" label="Code" required minlength="3" errormessage="3 characters or more"></slate-text-field>
+  <slate-text-field name="note" label="Note" enterkeyhint="go"></slate-text-field>
+</slate-form>
+            </script>
+          </wrapbox>
+        </verticalbox>

@@ -89,6 +89,7 @@ const NAV = [
           { id: "rating", title: "Rating", icon: "star" },
           { id: "slider", title: "Slider", icon: "sliders-horizontal" },
           { id: "text-field", title: "Text Field", icon: "text-cursor-input" },
+          { id: "form", title: "Form", icon: "square-pen" },
           { id: "select", title: "Select", icon: "list-filter" },
           { id: "dropdown", title: "Dropdown", icon: "chevron-down" },
           { id: "combobox", title: "Combobox", icon: "chevrons-up-down" },
